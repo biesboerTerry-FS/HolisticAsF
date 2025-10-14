@@ -35,7 +35,7 @@ For each Milestone #2-4, you should use all 4 icons.
 For this milestone you will have created a wireframe prototype in Figma.  
 Post your link here, so you have easy access to it.
 
--   https://www.figma.com/proto/4eZwaVNcTfdDBjxuY2H1Zo/holisticAf?node-id=2-2&t=7YGxkIoThtqQZaFC-1
+-   Figma Link
 
 <br>
 
