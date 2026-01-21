@@ -93,16 +93,16 @@ const Navbar = () => {
 							className="w-10 cursor-pointer"
 							alt="profile"
 						/>
-						<ul className="hidden group-hover:block absolute top-10 right-0 bg-primary-sage-green shadow border border-primary-cream py-2.5 w-30 rounded-md text-sm z-40">
+						<ul className="hidden group-hover:block absolute top-10 right-0 bg-secondary-soft-beige shadow border border-primary-forest-green py-2.5 w-30 rounded-md text-sm z-40">
 							<li
 								onClick={() => navigate("/my-orders")}
-								className="p-1.5 pl-3 hover:bg-secondary-golden-honey cursor-pointer"
+								className="p-1.5 pl-3 hover:bg-primary-sage-green/20 hover:text-primary-forest-green cursor-pointer"
 							>
 								my orders
 							</li>
 							<li
 								onClick={logout}
-								className="p-1.5 pl-3 hover:bg-secondary-golden-honey cursor-pointer"
+								className="p-1.5 pl-3 hover:bg-primary-sage-green/20 hover:text-primary-forest-green cursor-pointer"
 							>
 								logout
 							</li>

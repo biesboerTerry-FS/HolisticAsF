@@ -194,7 +194,7 @@ export const footerLinks = [
 		title: "quick links",
 		links: [
 			{ text: "home", url: "/" },
-			{ text: "top sellers", url: "/top-sellers" },
+			// { text: "top sellers", url: "/top-sellers" },
 			{ text: "products", url: "/products" },
 			{ text: "contact us", url: "/contact" },
 		],

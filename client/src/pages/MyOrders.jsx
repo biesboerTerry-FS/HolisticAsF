@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useAppContext } from "../context/AppContext";
 import { dummyOrders } from "../assets/assets.js";
-import toast from "react-hot-toast";
 
 const MyOrders = () => {
 	const [myOrders, setMyOrders] = useState([]);
@@ -30,20 +29,20 @@ const MyOrders = () => {
 	}, [user]);
 
 	return (
-		<div className="mt-16 pb-16">
-			<div className="flex flex-col items-end w-max mb-8">
+		<div className="mt-16 pb-16 ">
+			<div className="flex flex-col items-end w-max mb-">
 				<p className="text-2xl font-medium text-primary-forest-green">
 					my{" "}
 					<span className="text-secondary-golden-honey">
 						orders
 					</span>{" "}
 				</p>
-				<div className="w-16 h-0.5 bg-primary-forest-green rounded-full"></div>
+				<div className="w-16 h-0.5 rounded-full"></div>
 			</div>
 			{myOrders.map((order, index) => (
 				<div
 					key={index}
-					className="border border-secondary-golden-honey rounded-lg mb-10 p-4 py-5 max-w-4xl"
+					className="border border-secondary-golden-honey bg-primary-cream rounded-lg mb-10 p-4 py-5 max-w-4xl"
 				>
 					<p className="flex justify-between md:items-center text-primary-forest-green md:font-medium max-md:flex-col">
 						<span>order ID: {order._id}</span>
@@ -56,12 +55,12 @@ const MyOrders = () => {
 					{order.items.map((item, index) => (
 						<div
 							key={index}
-							className={`relative bg-primary-sage-green text-primary-forest-green/70 ${
+							className={`relative text-primary-forest-green/70 ${
 								order.items.length !== index + 1 && "border-b"
 							} border-secondary-golden-honey flex flex-col md:flex-row md:items-center justify-between p-4 py-5 md:gap-16 w-full max-w-4xl`}
 						>
 							<div className="flex items-center mb-4 md:mb-0">
-								<div className="bg-primary-forest-green p-4 rounded-lg">
+								<div className=" p-4 rounded-lg">
 									<img
 										className="w-16 h-16"
 										src={item.product.image[0]}
