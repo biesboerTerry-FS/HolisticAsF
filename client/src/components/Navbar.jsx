@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from "react";
-import logo from "../assets/holisticAfLogo.png";
-import search from "../assets/search.svg";
-import cart from "../assets/cart.svg";
-import profile from "../assets/profile.svg";
+import { assets } from "../assets/assets";
 import toast from "react-hot-toast";
 import { NavLink } from "react-router-dom";
 import { useAppContext } from "../context/AppContext";
@@ -10,8 +7,16 @@ import { useAppContext } from "../context/AppContext";
 const Navbar = () => {
 	const [open, setOpen] = useState(false);
 
-	const { axios, navigate, user, setUser, setShowUserLogin, setSearchQuery } =
-		useAppContext();
+	const {
+		axios,
+		navigate,
+		user,
+		setUser,
+		setShowUserLogin,
+		setSearchQuery,
+		searchQuery,
+		getCartCount,
+	} = useAppContext();
 
 	const logout = async () => {
 		try {
@@ -28,25 +33,31 @@ const Navbar = () => {
 		}
 	};
 
+	useEffect(() => {
+		if (searchQuery.length > 0) {
+			navigate("/products");
+		}
+	}, [searchQuery]);
+
 	return (
-		<nav className="flex items-center justify-between px-16 md:px-16 lg:px-24 xl:px-32 py-4 border-b border-[]] bg-[#f5f5dc] text-[#2d5b3e] transition-all">
+		<nav className="flex items-center justify-between px-16 md:px-16 lg:px-24 xl:px-32 py-4 border-b border-primary-forest-green bg-secondary-soft-beige text-primary-forest-green transition-all">
 			<NavLink onClick={() => setOpen(false)} to={"/"}>
-				<img className="h-10" src={logo} alt="logo" />
+				<img className="h-10" src={assets.holisticAfLogo} alt="logo" />
 			</NavLink>
 
 			{/* //^ Desktop Menu */}
 			<div className="hidden sm:flex items-center gap-8">
-				<div className="hidden lg:flex items-center text-sm gap-2 border border-[#1b3b28] px-3 rounded-full bg-[#fefefe]">
+				<div className="hidden lg:flex items-center text-sm gap-2 border border-secondary-deep-forest px-3 rounded-full bg-primary-warm-white">
 					<input
-						onChange={(event) => setSearchQuery(event.target.value)}
-						className="py-1.5 w-full bg-transparent outline-none placeholder-[#2d5b3e]"
+						onChange={(e) => setSearchQuery(e.target.value)}
+						className="py-1.5 w-full bg-transparent outline-none placeholder-primary-forest-green"
 						type="text"
-						placeholder="Search products"
+						placeholder="search products"
 					/>
 					<img
-						src={search}
+						src={assets.search}
 						alt="search"
-						className="w-4 h-4 text-[#1b3b28]"
+						className="w-4 h-4 text-secondary-deep-forest"
 					/>
 				</div>
 
@@ -59,37 +70,39 @@ const Navbar = () => {
 					className="relative cursor-pointer"
 				>
 					<img
-						src={cart}
+						src={assets.cart}
 						alt="cart"
-						className="w-6 opacity-80 text-[#8cae8c]"
+						className="w-6 opacity-80 text-primary-sage-green"
 					/>
-					<button className="absolute -top-2 -right-3 text-xs text-[#1b3b28] bg-[#8cae8c] w-[18px] h-[18px] rounded-full"></button>
+					<button className="absolute -top-2 -right-3 text-xs text-primary-cream bg-primary-sage-green w-[18px] h-[18px] rounded-full hover:secondary-golden-honey">
+						{getCartCount()}
+					</button>
 				</div>
 
 				{!user ? (
 					<button
 						onClick={() => setShowUserLogin(true)}
-						className="cursor-pointer px-8 py-2 bg-[#daa520)] text-[#1b3b28] border border-[#2d5b3e] hover:bg-[#daa520] hover:text-[#1b3b28] transition rounded-full"
+						className="cursor-pointer px-8 py-2 bg-[#daa520)] text-secondary-deep-forest border border-primary-forest-green hover:bg-secondary-golden-honey hover:text-secondary-deep-forest transition rounded-full"
 					>
 						login
 					</button>
 				) : (
 					<div className="relative group">
 						<img
-							src={profile}
+							src={assets.profile}
 							className="w-10 cursor-pointer"
 							alt="profile"
 						/>
-						<ul className="hidden group-hover:block absolute top-10 right-0 bg-[#8cae8c] shadow border border-[#f7f5f2] py-2.5 w-30 rounded-md text-sm z-40">
+						<ul className="hidden group-hover:block absolute top-10 right-0 bg-primary-sage-green shadow border border-primary-cream py-2.5 w-30 rounded-md text-sm z-40">
 							<li
 								onClick={() => navigate("/my-orders")}
-								className="p-1.5 pl-3 hover:bg-[#daa520] cursor-pointer"
+								className="p-1.5 pl-3 hover:bg-secondary-golden-honey cursor-pointer"
 							>
 								my orders
 							</li>
 							<li
 								onClick={logout}
-								className="p-1.5 pl-3 hover:bg-[#daa520] cursor-pointer"
+								className="p-1.5 pl-3 hover:bg-secondary-golden-honey cursor-pointer"
 							>
 								logout
 							</li>
@@ -104,49 +117,43 @@ const Navbar = () => {
 					onClick={() => navigate("/cart")}
 					className="relative cursor-pointer"
 				>
-					<img src={cart} alt="cart" className="w-6 opacity-80" />
-					<button className="absolute -top-2 -right-3 text-xs text-[#1b3b28] bg-[#8cae8c] w-[18px] h-[18px] rounded-full"></button>
+					<img
+						src={assets.cart}
+						alt="cart"
+						className="w-6 opacity-80"
+					/>
+					<button className="absolute -top-2 -right-3 text-xs text-secondary-deep-forest bg-primary-sage-green w-[18px] h-[18px] rounded-full">
+						{getCartCount()}
+					</button>
 				</div>
 
 				<button
-					onClick={() => setOpen(!open)}
+					onClick={() => (open ? setOpen(false) : setOpen(true))}
 					aria-label="Menu"
 					className="bg-transparent border-none cursor-pointer p-0"
 				>
-					<svg
-						className="w-6 h-6"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-					>
-						<path
-							strokeLinecap="round"
-							strokeLinejoin="round"
-							strokeWidth={2}
-							d="M4 6h16M4 12h16M4 18h16"
-						/>
-					</svg>
+					<img src={assets.menuGreen} alt="menu" />
 				</button>
 			</div>
 
 			{/* Mobile Menu */}
 			{open && (
-				<div className="flex sm:hidden absolute top-[60px] left-0 w-full bg-[#8cae8c] shadow-md py-4 flex-col items-center gap-2 px-5 text-sm">
+				<div className="flex sm:hidden absolute top-[60px] left-0 w-full h-full bg-primary-sage-green shadow-md py-8 flex-col items-center gap-2 px-5 text-3xl z-50">
 					<NavLink to={"/"} onClick={() => setOpen(false)}>
-						Home
+						home
 					</NavLink>
 					<NavLink to={"/products"} onClick={() => setOpen(false)}>
-						Products
+						products
 					</NavLink>
 					<NavLink to={"/contact"} onClick={() => setOpen(false)}>
-						Contact
+						contact
 					</NavLink>
 					{user && (
 						<NavLink
 							to={"/my-orders"}
 							onClick={() => setOpen(false)}
 						>
-							My Orders
+							my orders
 						</NavLink>
 					)}
 
@@ -156,9 +163,9 @@ const Navbar = () => {
 								setOpen(false);
 								setShowUserLogin(true);
 							}}
-							className="cursor-pointer px-6 py-2 mt-2 bg-[#2d5b3e] text-[#daa520] rounded-full text-sm border-none transition hover:bg-[#8cae8c]"
+							className="cursor-pointer px-6 py-2 mt-10 bg-primary-forest-green text-secondary-golden-honey rounded-full text-xl border-none transition hover:bg-primary-sage-green"
 						>
-							Login
+							login
 						</button>
 					) : (
 						<button
@@ -166,9 +173,9 @@ const Navbar = () => {
 								setOpen(false);
 								logout();
 							}}
-							className="cursor-pointer px-6 py-2 mt-2 bg-[#2d5b3e] text-[#daa520] rounded-full text-sm border-none transition hover:bg-[#8cae8c]"
+							className="cursor-pointer px-6 py-2 mt-2 bg-primary-forest-green text-secondary-golden-honey rounded-full text-sm border-none transition hover:bg-primary-sage-green"
 						>
-							Logout
+							logout
 						</button>
 					)}
 				</div>

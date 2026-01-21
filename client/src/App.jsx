@@ -13,7 +13,7 @@ import Cart from "./pages/Cart";
 import AddAddress from "./pages/AddAddress";
 import AddInventory from "./pages/admin/AddInventory";
 import MyOrders from "./pages/MyOrders";
-import Loading from "./components/Loading";
+// import Loading from "./components/Loading";
 import AdminLayout from "./pages/admin/AdminLayout";
 import AdminLogin from "./components/admin/AdminLogin";
 import Inventory from "./pages/admin/Inventory";
@@ -24,7 +24,7 @@ const App = () => {
 	const { showUserLogin, isAdmin } = useAppContext();
 
 	return (
-		<div className="text-default flex flex-col min-h-screen bg-[#f5f5dc]">
+		<div className="text-default flex flex-col min-h-screen bg-secondary-soft-beige">
 			{isAdminPath ? null : <Navbar />}
 			{showUserLogin ? <Login /> : null}
 			<Toaster />
@@ -46,17 +46,18 @@ const App = () => {
 						element={<ProductDetails />}
 					/>
 					<Route path="/cart" element={<Cart />} />
-					{/* <Route path="/add-address" element={<AddAddress />} /> */}
-					{/* <Route path="/my-orders" element={<MyOrders />} /> */}
+					<Route path="/add-address" element={<AddAddress />} />
+					<Route path="/my-orders" element={<MyOrders />} />
 					{/* <Route path="/loading" element={<Loading />} /> */}
+
 					{/* //^ Admin routes */}
-					{/* <Route
+					<Route
 						path="/admin"
 						element={isAdmin ? <AdminLayout /> : <AdminLogin />}
-					/> */}
+					/>
 					{/* <Route index element={isAdmin ? <AddInventory /> : null} /> */}
-					{/* <Route path="products-list" element={<Inventory />} /> */}
-					{/* <Route path="orders" element={<Orders />} /> */}
+					<Route path="products-list" element={<Inventory />} />
+					<Route path="orders" element={<Orders />} />
 				</Routes>
 			</div>
 			{!isAdminPath && <Footer />}

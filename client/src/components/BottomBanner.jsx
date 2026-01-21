@@ -1,34 +1,30 @@
 import React from "react";
 import { assets } from "../assets/assets";
-import deliveryTruck from "../assets/deliveryTruck.svg";
-import leaf from "../assets/leaf.svg";
-import coin from "../assets/coin.svg";
-import trust from "../assets/trust.svg";
 
 const BottomBanner = () => {
 	const features = [
 		{
-			icon: deliveryTruck,
-			title: "Farm-to-Table Freshness",
+			icon: assets.deliveryTruck,
+			title: "farm-to-table freshness",
 			description:
-				"Nourishing whole foods delivered with care and intention.",
+				"nourishing whole foods delivered with care and intention.",
 		},
 		{
-			icon: leaf,
-			title: "Mindfully Sourced",
+			icon: assets.leaf,
+			title: "mindfully sourced",
 			description:
-				"Organic, sustainable ingredients chosen for your wellness journey.",
+				"organic, sustainable ingredients chosen for your wellness journey",
 		},
 		{
-			icon: coin,
-			title: "Wholesome & Accessible",
-			description: "Premium quality nutrition that honors your budget.",
+			icon: assets.coinIcon,
+			title: "wholesome & accessible",
+			description: "premium quality nutrition that honors your budget.",
 		},
 		{
-			icon: trust,
-			title: "Community Trusted",
+			icon: assets.trust,
+			title: "community trusted",
 			description:
-				"Empowering 10,000+ families on their path to holistic health.",
+				"empowering 10,000+ families on their path to holistic health.",
 		},
 	];
 
@@ -37,32 +33,35 @@ const BottomBanner = () => {
 			<img
 				src={assets.bottomBanner}
 				alt="banner"
-				className="w-full max-h-140 hidden md:block object-cover object-right bg-gradient-to-r from-[#2d5b3e] to-[#8cae8c]"
+				className="w-full max-h-140 hidden lg:block object-cover object-right bg-gradient-to-r from-primary-forest-green to-primary-sage-green"
 			/>
 
 			<img
 				src={assets.bottomBannerSmall}
 				alt="banner"
-				className="w-full md:hidden object-cover object-bottom  bg-gradient-to-b from-[#2d5b3e] to-[#8cae8c]"
+				className="w-full hidden md:block lg:hidden object-cover object-bottom bg-gradient-to-b from-primary-forest-green to-primary-sage-green"
 			/>
 
-			<div className="absolute inset-0 flex items-end md:items-center justify-start px-4 md:px-8 lg:px-16 pb-8 md:pb-0">
-				<div className="flex flex-col gap-4 md:gap-8 w-full md:max-w-[40%]">
+			<div className="md:absolute md:inset-0 md:flex md:items-end lg:items-center md:justify-start bg-gradient-to-b from-primary-forest-green to-primary-sage-green md:bg-none px-4 md:px-8 lg:px-16 py-8 md:pb-8 lg:pb-0">
+				<div className="flex flex-col gap-3 sm:gap-4 md:gap-6 lg:gap-8 w-full md:max-w-[40%]">
 					{features.map((feature, index) => (
-						<div key={index} className="flex items-start gap-4">
+						<div
+							key={index}
+							className="flex items-start gap-2 sm:gap-3 md:gap-4"
+						>
 							<img
 								src={feature.icon}
 								alt={feature.title}
-								className="w-12 h-12 md:w-16 md:h-16 flex-shrink-0"
+								className="w-8 h-8 sm:w-10 sm:h-10 md:w-14 md:h-14 lg:w-16 lg:h-16 flex-shrink-0 mt-0.5"
 							/>
 
 							<div className="flex flex-col">
-								<h1 className="text-lg md:text-xl lg:text-2xl font-bold text-[#daa520] mb-1">
+								<h3 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-secondary-golden-honey mb-0.5 md:mb-1">
 									{feature.title}
-								</h1>
-								<h3 className="text-sm md:text-base lg:text-lg text-[#f5f5dc]">
-									{feature.description}
 								</h3>
+								<p className="text-xs sm:text-sm md:text-base lg:text-lg text-secondary-soft-beige leading-snug">
+									{feature.description}
+								</p>
 							</div>
 						</div>
 					))}
