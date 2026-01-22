@@ -1,4 +1,5 @@
 import addAddressImage from "./addAddressImage.svg";
+import addIcon from "./addIcon.svg";
 import blackArrowIcon from "./blackArrowIcon.svg";
 import bottomBanner from "./bottomBanner.png";
 import bottomBannerSmall from "./bottomBannerSmall.png";
@@ -10,6 +11,7 @@ import delivery from "./delivery.svg";
 import deliveryTruck from "./deliveryTruck.svg";
 import fileUpload from "./fileUpload.svg";
 import holisticAfLogo from "./holisticAfLogo.png";
+import holisticAfLogoNoBg from "./holisticAfLogo-noBg.png";
 import leaf from "./leaf.svg";
 import list from "./list.svg";
 import mainBannerBg from "./mainBannerBg.png";
@@ -75,6 +77,7 @@ import bakery_image from "./bakery_image.png";
 
 export const assets = {
 	addAddressImage,
+	addIcon,
 	blackArrowIcon,
 	bottomBanner,
 	bottomBannerSmall,
@@ -86,6 +89,7 @@ export const assets = {
 	deliveryTruck,
 	fileUpload,
 	holisticAfLogo,
+	holisticAfLogoNoBg,
 	leaf,
 	list,
 	mainBannerBg,
