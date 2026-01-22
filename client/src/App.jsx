@@ -13,7 +13,6 @@ import Cart from "./pages/Cart";
 import AddAddress from "./pages/AddAddress";
 import AddInventory from "./pages/admin/AddInventory";
 import MyOrders from "./pages/MyOrders";
-// import Loading from "./components/Loading";
 import AdminLayout from "./pages/admin/AdminLayout";
 import AdminLogin from "./components/admin/AdminLogin";
 import Inventory from "./pages/admin/Inventory";
@@ -50,16 +49,23 @@ const App = () => {
 					<Route path="/add-address" element={<AddAddress />} />
 					<Route path="/my-orders" element={<MyOrders />} />
 					<Route path="/contact" element={<Contact />} />
-					{/* <Route path="/loading" element={<Loading />} /> */}
 
 					{/* //^ Admin routes */}
 					<Route
 						path="/admin"
 						element={isAdmin ? <AdminLayout /> : <AdminLogin />}
-					/>
-					{/* <Route index element={isAdmin ? <AddInventory /> : null} /> */}
-					<Route path="products-list" element={<Inventory />} />
-					<Route path="orders" element={<Orders />} />
+					>
+						{/* <Route
+							index
+							element={isAdmin ? <AddInventory /> : null}
+						/> */}
+						<Route
+							path="add-inventory"
+							element={<AddInventory />}
+						/>
+						<Route path="inventory" element={<Inventory />} />
+						<Route path="orders" element={<Orders />} />
+					</Route>
 				</Routes>
 			</div>
 			{!isAdminPath && <Footer />}

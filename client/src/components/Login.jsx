@@ -29,8 +29,10 @@ const Login = () => {
 				className="flex flex-col gap-4 m-auto items-start p-8 py-12 w-80 sm:w-[352px] rounded-lg shadow-xl bg-primary-forest-green/50 "
 			>
 				<p className="text-2xl font-medium m-auto text-[##f7f5f2]">
-					User
-					{state === "login" ? "Login" : "Sign Up"}
+					user{" "}
+					<span className="text-secondary-golden-honey">
+						{state === "login" ? "login" : "sign up"}
+					</span>
 				</p>
 				{state === "register" && (
 					<div className="w-full">
@@ -89,7 +91,7 @@ const Login = () => {
 					</p>
 				)}
 				<button className="bg-secondary-golden-honey transition-all text-primary-warm-white w-full py-2 rounded-md cursor-pointer">
-					{state === "register" ? "Create Account" : "Login"}
+					{state === "register" ? "createa account" : "login"}
 				</button>
 			</form>
 		</div>
