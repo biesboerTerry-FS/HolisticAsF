@@ -19,26 +19,36 @@ const Cart = () => {
 	} = useAppContext();
 
 	const [cartArray, setCartArray] = useState([]);
-	const [addresses, setAddresses] = useState(dummyAddress);
+	const [addresses, setAddresses] = useState([dummyAddress]);
 	const [showAddress, setShowAddress] = useState(false);
 	const [selectedAddress, setSelectedAddress] = useState(
-		dummyAddress.length > 0 ? dummyAddress[0] : null
+		// dummyAddress.length > 0 ? dummyAddress[ 0 ] :
+		null,
 	);
-	const [paymentOption, setPaymentOption] = useState("cash");
+	const [paymentOption, setPaymentOption] = useState("cod");
 
 	const getCart = () => {
 		let tempArray = [];
 		for (const key in cartItems) {
 			const product = products.find((item) => item._id === key);
-			product.quantity = cartItems[key];
-			tempArray.push(product);
+			if (product) {
+				product.quantity = cartItems[key];
+				tempArray.push(product);
+			}
 		}
 		setCartArray(tempArray);
 	};
 
 	const getUserAddress = async () => {
 		try {
-			const { data } = await axios.get("/api/address/get");
+			const { data } = await axios.get("/api/address/get-addresses", {
+				// userId: user._id,
+			});
+			if (!data.addresses || !Array.isArray(data.addresses)) {
+				setAddresses([]);
+				setSelectedAddress(null);
+				return;
+			}
 			if (data.success) {
 				setAddresses(data.addresses);
 				if (data.addresses.length > 0) {
@@ -56,7 +66,7 @@ const Cart = () => {
 			// Network error - use dummyAddress for dev
 			console.log(
 				"Network error, using dummyAddress for development:",
-				error.message
+				error.message,
 			);
 			setAddresses(dummyAddress);
 			if (dummyAddress.length > 0) {
@@ -71,9 +81,27 @@ const Cart = () => {
 			if (!selectedAddress) {
 				return toast.error("Please choose an address");
 			}
+			if (!selectedAddress._id) {
+				return toast.error("Invalid address selected");
+			}
+			const { data } = await axios.post("/api/order/cod", {
+				userId: user._id,
+				items: cartArray.map((item) => ({
+					product: item._id,
+					quantity: item.quantity,
+				})),
+				address: selectedAddress._id,
+			});
 
+			if (data.success) {
+				toast.success(data.message);
+				setCartItems({});
+				navigate("/my-orders");
+			} else {
+				toast.error(error.message);
+			}
 			if (paymentOption === "cash") {
-				const { data } = await axios.post("/api/order/cash", {
+				const { data } = await axios.post("/api/order/cod", {
 					userId: user._id,
 					items: cartArray.map((item) => ({
 						product: item._id,
@@ -116,7 +144,7 @@ const Cart = () => {
 	console.log("selected address in cart:", selectedAddress);
 
 	return products.length > 0 && cartItems ? (
-		<div className="flex flex-col md:flex-row py-16 mt-16">
+		<div className="flex flex-col md:flex-row py-16 mt-16 ">
 			<div className="flex-1 max-w-4xl">
 				{" "}
 				<h1 className="text-3xl font-medium mb-6 text-primary-forest-green">
@@ -143,9 +171,9 @@ const Cart = () => {
 							<div
 								onClick={() => {
 									navigate(
-										`/products/${product.category.toLowerCase()}/${
+										`/products/${product.category}/${
 											product._id
-										}`
+										}`,
 									);
 									scrollTo(0, 0);
 								}}
@@ -170,7 +198,7 @@ const Cart = () => {
 											onChange={(e) =>
 												updateCartItems(
 													product._id,
-													Number(e.target.value)
+													Number(e.target.value),
 												)
 											}
 											value={cartItems[product._id]}
@@ -179,7 +207,7 @@ const Cart = () => {
 											{Array(
 												cartItems[product._id] > 9
 													? cartItems[product._id]
-													: 9
+													: 9,
 											)
 												.fill("")
 												.map((_, index) => (
@@ -227,7 +255,7 @@ const Cart = () => {
 				</button>
 			</div>
 
-			<div className="max-w-[360px] w-full bg-primary-sage-green/40 p-5 max-md:mt-16 border border-primary-sage-green/70">
+			<div className="max-w-[360px] w-full bg-primary-sage-green/40 p-5 max-md:mt-16 border border-primary-sage-green/70 h-fit">
 				<h2 className="text-xl md:text-xl font-medium">
 					order summary
 				</h2>
@@ -238,9 +266,14 @@ const Cart = () => {
 					<div className="relative flex justify-between items-start mt-2">
 						<p className="text-primary-forest-green/70 whitespace-pre-wrap text-xs">
 							{selectedAddress
-								? `${selectedAddress.street},
+								? `${selectedAddress.firstName} ${selectedAddress.lastName}, 
+								${selectedAddress.streetLine1}${
+									selectedAddress.streetLine2
+										? ", " + selectedAddress.streetLine2
+										: ""
+								},
 									${selectedAddress.city},
-									${selectedAddress.state}, ${selectedAddress.zipcode}
+									${selectedAddress.state} ${selectedAddress.zipCode}
 									`
 								: "no address found"}
 						</p>
@@ -251,7 +284,7 @@ const Cart = () => {
 							change
 						</button>
 						{showAddress && (
-							<div className="absolute top-12 py-1 bg-primary-cream border border-primary-forest-green text-sm w-full md:w-56 z-50 shadow-lg">
+							<div className="absolute top-12 py-1 bg-primary-cream border border-primary-forest-green text-sm w-full md:w-56 z-50 shadow-lg max-h-48">
 								{addresses.map((address, index) => (
 									<p
 										key={index}
@@ -261,8 +294,14 @@ const Cart = () => {
 										}}
 										className="text-primary-sage-green p-2 hover:bg-primary-forest-green"
 									>
-										{address.street},{address.city},
-										{address.state}, {address.zipcode}
+										{address.firstName} {address.lastName}
+										<br />
+										{address.streetLine1}
+										{address.streetLine2 &&
+											`, ${address.streetLine2}`}
+										<br />
+										{address.city}, {address.state}{" "}
+										{address.zipCode}
 									</p>
 								))}
 								<button
@@ -286,9 +325,6 @@ const Cart = () => {
 					>
 						<option value="cash">cash</option>
 						<option value="Credit/Debit">credit/debit</option>
-						<option value="ApplePay">ApplePay</option>
-						<option value="Paypal">Paypal</option>
-						<option value="Venmo">Venmo</option>
 					</select>
 				</div>
 
@@ -309,10 +345,10 @@ const Cart = () => {
 						</span>
 					</p>
 					<p className="flex justify-between">
-						<span>tax (6.5%):</span>
+						<span>tax (7.85%):</span>
 						<span>
 							{currency}
-							{((getCartAmount() * 6.5) / 100).toFixed(2)}
+							{((getCartAmount() * 7.85) / 100).toFixed(2)}
 						</span>
 					</p>
 					<p className="flex justify-between text-lg font-medium mt-3">
@@ -321,7 +357,7 @@ const Cart = () => {
 							{currency}
 							{(
 								getCartAmount() +
-								(getCartAmount() * 6.5) / 100
+								(getCartAmount() * 7.85) / 100
 							).toFixed(2)}
 						</span>
 					</p>
@@ -331,9 +367,7 @@ const Cart = () => {
 					onClick={placeOrder}
 					className="w-full py-3 mt-6 cursor-pointer bg-primary-sage-green hover:bg-primary-forest-green text-primary-cream font-medium hover:bg-primary-forest-green-dull transition"
 				>
-					{paymentOption === "cash"
-						? "place order"
-						: "proceed to checkout"}
+					place order
 				</button>
 			</div>
 		</div>

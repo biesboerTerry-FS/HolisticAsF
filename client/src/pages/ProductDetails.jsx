@@ -1,5 +1,4 @@
-import React, { useEffect } from "react";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useAppContext } from "../context/AppContext";
 import { Link, useParams } from "react-router-dom";
 import { assets } from "../assets/assets";
@@ -15,18 +14,22 @@ const ProductDetails = () => {
 	const product = products.find((item) => item._id === id);
 
 	useEffect(() => {
-		if (products.length > 0) {
+		if (product && products.length > 0) {
 			let productsCopy = products.slice();
 			productsCopy = productsCopy.filter(
-				(item) => product.category === item.category
+				(item) => product.category === item.category,
 			);
 			setRelatedProducts(productsCopy.slice(0, 5));
 		}
-	}, [products]);
+	}, [products, product]);
 
 	useEffect(() => {
 		setThumbnail(product?.image[0] ? product.image[0] : null);
 	}, [product]);
+
+	if (!product) {
+		return <div className="mt-12 text-center">Loading...</div>;
+	}
 
 	return (
 		product && (
@@ -34,9 +37,9 @@ const ProductDetails = () => {
 				<p>
 					<Link to={"/"}>home</Link> /
 					<Link to={"/products"}> products</Link> /
-					<Link to={`/products/${product.category.toLowerCase()}`}>
+					<Link to={`/products/${product.category}`}>
 						{" "}
-						{product.category.toLowerCase()}
+						{product.category}
 					</Link>{" "}
 					/
 					<span className="text-primary-forest-green">
@@ -72,9 +75,7 @@ const ProductDetails = () => {
 					</div>
 
 					<div className="text-sm w-full md:w-1/2">
-						<h1 className="text-3xl font-medium">
-							{product.name.toLowerCase()}
-						</h1>
+						<h1 className="text-3xl font-medium">{product.name}</h1>
 
 						<div className="flex items-center gap-0.5 mt-1">
 							{Array(5)
@@ -112,7 +113,7 @@ const ProductDetails = () => {
 							about
 							<span className="font-medium text-secondary-golden-honey">
 								{" "}
-								{product.name.toLowerCase()}
+								{product.name}
 							</span>
 						</p>
 						<ul className="list-disc ml-4 text-primary-forest-green/80">

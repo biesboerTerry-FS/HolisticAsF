@@ -17,7 +17,7 @@ const MyOrders = () => {
 			}
 		} catch (error) {
 			console.log(error);
-			setMyOrders(dummyOrders);
+			setMyOrders(null);
 		}
 	};
 
@@ -80,7 +80,7 @@ const MyOrders = () => {
 								<p>
 									date:{" "}
 									{new Date(
-										order.createdAt
+										order.createdAt,
 									).toLocaleDateString()}
 								</p>
 							</div>

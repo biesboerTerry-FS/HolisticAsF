@@ -1,26 +1,38 @@
 import React, { useState } from "react";
 import { useAppContext } from "../context/AppContext";
+import toast from "react-hot-toast";
 
 const Login = () => {
-	const { setShowUserLogin, setUser } = useAppContext();
+	const { setShowUserLogin, setUser, axios, navigate } = useAppContext();
 	const [state, setState] = useState("login");
 	const [name, setName] = useState("");
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 
 	const onSubmitHandler = async (event) => {
-		event.preventDefasult();
-		setUser({
-			email: "test@holisticaf.dev",
-			name: "Terry Biesboer",
-		});
-		setShowUserLogin(false);
+		try {
+			event.preventDefault();
+			const { data } = await axios.post(`/api/user/${state}`, {
+				name,
+				email,
+				password,
+			});
+			if (data.success) {
+				navigate("/");
+				setUser(data.user);
+				setShowUserLogin(false);
+			} else {
+				toast.error(data.message);
+			}
+		} catch (error) {
+			toast.error(error.message);
+		}
 	};
 
 	return (
 		<div
 			onClick={() => setShowUserLogin(false)}
-			className="fixed top-0 bottom-0 left-0 right-0 z-30 flex items-center text-sm text-primary-cream
+			className="fixed top-0 bottom-0 left-0 right-0 z-30 flex items-center text-sm
 			bg-secondary-golden-honey/30 backdrop-blur-xl"
 		>
 			<form
@@ -28,7 +40,7 @@ const Login = () => {
 				onClick={(e) => e.stopPropagation()}
 				className="flex flex-col gap-4 m-auto items-start p-8 py-12 w-80 sm:w-[352px] rounded-lg shadow-xl bg-primary-forest-green/50 "
 			>
-				<p className="text-2xl font-medium m-auto text-[##f7f5f2]">
+				<p className="text-2xl font-medium m-auto  text-primary-cream">
 					user{" "}
 					<span className="text-secondary-golden-honey">
 						{state === "login" ? "login" : "sign up"}
@@ -91,7 +103,7 @@ const Login = () => {
 					</p>
 				)}
 				<button className="bg-secondary-golden-honey transition-all text-primary-warm-white w-full py-2 rounded-md cursor-pointer">
-					{state === "register" ? "createa account" : "login"}
+					{state === "register" ? "create an account" : "login"}
 				</button>
 			</form>
 		</div>

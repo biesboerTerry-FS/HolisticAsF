@@ -90,7 +90,7 @@ const Navbar = () => {
 					<div className="relative group">
 						<img
 							src={assets.profile}
-							className="w-10 cursor-pointer"
+							className="w-10 cursor-pointer outline-secondary-soft-beige"
 							alt="profile"
 						/>
 						<ul className="hidden group-hover:block absolute top-10 right-0 bg-secondary-soft-beige shadow border border-primary-forest-green py-2.5 w-30 rounded-md text-sm z-40">

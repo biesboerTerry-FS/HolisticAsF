@@ -3,17 +3,20 @@ import { assets } from "../assets/assets";
 import { useAppContext } from "../context/AppContext";
 
 const ProductCard = ({ product }) => {
-	// const [count, setCount] = useState(0);
 	const { currency, addToCart, removeFromCart, cartItems, navigate } =
 		useAppContext();
+
+	const onClickHandler = () => {
+		if (product?.category && product?._id) {
+			navigate(`/products/${product.category}/${product._id}`);
+		}
+	};
 
 	return (
 		product && (
 			<div
 				onClick={() => {
-					navigate(
-						`/products/${product.category.toLowerCase()}/${product._id}`
-					);
+					navigate(`/products/${product.category}/${product._id}`);
 					scrollTo(0, 0);
 				}}
 				className="border border-primary-forest-green bg-primary-sage-green/40 rounded-md md:px-4 px-3 py-2 min-w-28 max-w-52 w-full"

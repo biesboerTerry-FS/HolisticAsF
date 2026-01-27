@@ -16,9 +16,7 @@ const Categories = () => {
 						key={index}
 						className="group cursor-pointer py-5 px-3 gap-2 rounded-lg flex flex-col justify-center items-center shadow-[0_25px_50px_-12px_rgba(0,0,0,0.35)] bg-primary-sage-green"
 						onClick={() => {
-							navigate(
-								`/products/${category.path.toLowerCase()}`
-							);
+							navigate(`/products/${category.path}`);
 							scrollTo(0, 0);
 						}}
 					>

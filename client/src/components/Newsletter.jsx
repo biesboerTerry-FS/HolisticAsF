@@ -33,8 +33,8 @@ const Newsletter = () => {
 					headers: {
 						"Content-Type": "application/json",
 					},
-					body: JSON.stringify({ email: email.trim().toLowerCase() }),
-				}
+					body: JSON.stringify({ email: email.trim() }),
+				},
 			);
 
 			const data = await response.json();
@@ -42,7 +42,7 @@ const Newsletter = () => {
 			if (!response.ok) {
 				if (response.status === 400) {
 					toast.error(
-						data.message || "This email is already subscribed"
+						data.message || "This email is already subscribed",
 					);
 				} else {
 					toast.error(data.message || "Failed to subscribe");
@@ -51,7 +51,7 @@ const Newsletter = () => {
 			}
 
 			toast.success(
-				"Successfully subscribed! Check your email for confirmation."
+				"Successfully subscribed! Check your email for confirmation.",
 			);
 			setEmail("");
 		} catch (error) {
