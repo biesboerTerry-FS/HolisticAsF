@@ -3,7 +3,14 @@ import { assets } from "../assets/assets";
 import { useAppContext } from "../context/AppContext";
 import toast from "react-hot-toast";
 
-const InputField = ({ type, placeholder, name, handleChange, address }) => (
+const InputField = ({
+	type,
+	placeholder,
+	name,
+	handleChange,
+	address,
+	required = true,
+}) => (
 	<input
 		className="w-full px-2 py-2.5 border border-primary-forest-green/30 rounded outline-none text-primary-forest-green focus:border-primary-forest-green transition"
 		type={type}
@@ -11,7 +18,7 @@ const InputField = ({ type, placeholder, name, handleChange, address }) => (
 		onChange={handleChange}
 		name={name}
 		value={address[name]}
-		required
+		required={required}
 	/>
 );
 
@@ -22,44 +29,78 @@ const AddAddress = () => {
 		firstName: "",
 		lastName: "",
 		email: "",
-		street: "",
+		streetLine1: "",
+		streetLine2: "",
 		city: "",
 		state: "",
-		zipcode: "",
+		zipCode: "",
 		country: "",
 		phone: "",
 	});
 
-	const handleChange = (e) => {
-		const { name, value } = e.target;
+	const [isLoading, setIsLoading] = useState(false);
+
+	const handleChange = (event) => {
+		const { name, value } = event.target;
 
 		setAddress((prevAddress) => ({
 			...prevAddress,
 			[name]: value,
 		}));
-		console.log(address);
 	};
 
 	const onSubmitHandler = async (event) => {
 		event.preventDefault();
-		if (!user || !user._id) {
+
+		// ^ ------------------------------------------------------
+		console.log("=== Address Form Submission ===");
+		console.log("user from context:", user);
+		console.log("user._id:", user?._id);
+		console.log("address data:", address);
+
+		if (!user || !user.id) {
 			toast.error("user not logged in. please sign in.");
 			navigate("/login");
 			return;
 		}
+		// ^ ------------------------------------------------------
+
+		console.log("User is available, proceeding...");
 		try {
-			const { data } = await axios.post("/api/address/add", address, {
-				withCredentials: true,
-			});
+			setIsLoading(true);
+
+			const { data } = await axios.post(
+				"/api/address/add-address",
+				address,
+			);
+
+			// ^ ------------------------------------------------------
+			console.log("API Response:", data);
 
 			if (data.success) {
 				toast.success(data.message);
-				navigate("/cart");
+				setAddress({
+					firstName: "",
+					lastName: "",
+					email: "",
+					streetLine1: "",
+					streetLine2: "",
+					city: "",
+					state: "",
+					zipCode: "",
+					phone: "",
+				});
+				setTimeout(() => {
+					navigate("/cart");
+				}, 500);
 			} else {
 				toast.error(data.message);
 			}
 		} catch (error) {
+			console.error("API Error:", error);
 			toast.error(error.message);
+		} finally {
+			setIsLoading(false);
 		}
 	};
 
@@ -67,12 +108,16 @@ const AddAddress = () => {
 		if (!user) {
 			navigate("/cart");
 		}
-	}, [user]);
+	}, [user, navigate]);
+
+	if (!user) {
+		return null;
+	}
 
 	return (
 		<div className="mt-16 pb-16">
 			<p className="text-2xl md:text-3xl text-primary-forest-green">
-				add shipping{" "}
+				add{" "}
 				<span className="font-semibold text-secondary-golden-honey">
 					address
 				</span>
@@ -90,6 +135,7 @@ const AddAddress = () => {
 								name="firstName"
 								type="text"
 								placeholder="first name"
+								required={true}
 							/>
 							<InputField
 								handleChange={handleChange}
@@ -97,21 +143,24 @@ const AddAddress = () => {
 								name="lastName"
 								type="text"
 								placeholder="last name"
+								required={true}
 							/>
 						</div>
 						<InputField
 							handleChange={handleChange}
 							address={address}
-							name="email"
-							type="email"
-							placeholder="email"
+							name="streetLine1"
+							type="text"
+							placeholder="street line 1"
+							required={true}
 						/>
 						<InputField
 							handleChange={handleChange}
 							address={address}
-							name="street"
+							name="streetLine2"
 							type="text"
-							placeholder="street"
+							placeholder="street line 2"
+							required={false}
 						/>
 						<div>
 							<InputField
@@ -120,6 +169,7 @@ const AddAddress = () => {
 								name="city"
 								type="text"
 								placeholder="city"
+								required={true}
 							/>
 						</div>
 						<div className="grid grid-cols-2 gap-4">
@@ -129,13 +179,15 @@ const AddAddress = () => {
 								name="state"
 								type="text"
 								placeholder="state"
+								required={true}
 							/>
 							<InputField
 								handleChange={handleChange}
 								address={address}
-								name="zipcode"
+								name="zipCode"
 								type="text"
 								placeholder="zip/postal code"
+								required={true}
 							/>
 						</div>
 						<InputField
@@ -144,6 +196,15 @@ const AddAddress = () => {
 							name="phone"
 							type="text"
 							placeholder="phone"
+							required={true}
+						/>
+						<InputField
+							handleChange={handleChange}
+							address={address}
+							name="email"
+							type="email"
+							placeholder="email"
+							required={true}
 						/>
 						<button
 							type="submit"
@@ -151,7 +212,7 @@ const AddAddress = () => {
 							title={!user ? "Login to add address" : ""}
 							className="w-full mt-6 bg-primary-forest-green text-white py-3 hover:bg-primary-forest-green-dull transition cursor-pointer"
 						>
-							save address
+							{isLoading ? "saving address..." : "save address"}
 						</button>
 					</form>
 				</div>

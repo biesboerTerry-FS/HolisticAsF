@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useAppContext } from "../context/AppContext";
 import ProductCard from "../components/ProductCard";
+import Categories from "../components/Categories";
 
 const Products = () => {
 	const { products, searchQuery, setSearchQuery } = useAppContext();
@@ -10,10 +11,8 @@ const Products = () => {
 		if (searchQuery.length > 0) {
 			setFilteredProducts(
 				products.filter((product) =>
-					product.name
-						.toLowerCase()
-						.includes(searchQuery.toLowerCase())
-				)
+					product.name.includes(searchQuery),
+				),
 			);
 		} else {
 			setFilteredProducts(products);
@@ -40,6 +39,7 @@ const Products = () => {
 						<ProductCard key={index} product={product} />
 					))}
 			</div>
+			<Categories />
 		</div>
 	);
 };

@@ -5,7 +5,7 @@ import { useAppContext } from "../../context/AppContext";
 import toast from "react-hot-toast";
 
 const AdminLayout = () => {
-	const { axios, navigate, isAdmin, setIsAdmin } = useAppContext();
+	const { axios, navigate } = useAppContext();
 
 	const sidebarLinks = [
 		{
@@ -18,36 +18,43 @@ const AdminLayout = () => {
 			path: "/admin/inventory",
 			icon: assets.list,
 		},
-		{ name: "orders", path: "/admin/orders", icon: assets.search },
+		{
+			name: "all orders",
+			path: "/admin/orders",
+			icon: assets.search,
+		},
 	];
 
-	// const logout = async () => {
-	// 	try {
-	// 		const { data } = await axios.get("/api/admin/logout");
-	// 		if (data.success) {
-	// 			toast.success(data.message);
-	// 			navigate("/");
-	// 		} else {
-	// 			toast.error(data.message);
-	// 		}
-	// 	} catch (error) {
-	// 		toast.error(error.message);
-	// 	}
-	// };
-
 	const logout = async () => {
-		setIsAdmin(false);
+		try {
+			const { data } = await axios.get("/api/admin/logout");
+			if (data.success) {
+				toast.success(data.message);
+				navigate("/");
+			} else {
+				toast.error(data.message);
+			}
+		} catch (error) {
+			toast.error(error.message);
+		}
 	};
 
 	return (
 		<>
 			<div className="flex items-center justify-between px-4 md:px-8 border-b border-primary-forest-green py-3 bg-primary-sage-green/40">
-				<Link to="/">
+				<Link to="/" className="flex items-center gap-3">
 					<img
 						className="cursor-pointer w-34 md:w-38"
 						src={assets.holisticAfLogoNoBg}
 						alt="logo"
 					/>
+					<h1 className="hidden sm:block text-primary-forest-green">
+						admin{" "}
+						<span className="text-secondary-golden-honey">
+							{" "}
+							portal
+						</span>
+					</h1>
 				</Link>
 				<div className="flex items-center gap-5 text-primary-forest-green">
 					<p>hello admin!</p>

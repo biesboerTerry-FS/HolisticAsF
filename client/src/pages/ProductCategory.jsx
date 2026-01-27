@@ -9,11 +9,11 @@ const ProductCategory = () => {
 	const { category } = useParams();
 
 	const searchCategory = categories.find((item) => {
-		return item.path.toLowerCase() === category;
+		return item.path === category;
 	});
 
 	const filteredProducts = products.filter((product) => {
-		return product.category.toLowerCase() === category;
+		return product.category === category;
 	});
 
 	return (
@@ -21,7 +21,7 @@ const ProductCategory = () => {
 			{searchCategory && (
 				<div className="flex flex-col items-end w-max">
 					<p className="text-2xl font-medium text-primary-forest-green/80">
-						{searchCategory.text.toLowerCase()}
+						{searchCategory.text}
 					</p>
 					<div className="w-16 h-0.5 bg-primary-forest-green rounded-full"></div>
 				</div>
