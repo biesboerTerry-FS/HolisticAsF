@@ -17,7 +17,7 @@ const MyOrders = () => {
 			}
 		} catch (error) {
 			console.log(error);
-			setMyOrders(null);
+			// setMyOrders(null);
 		}
 	};
 

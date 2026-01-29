@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { dummyProducts } from "../assets/assets";
+import KrogerApi from "../services/KrogerApi";
+// import { dummyProducts } from "../assets/assets";
 import axios from "axios";
 import toast from "react-hot-toast";
 
@@ -18,6 +19,7 @@ export const AppContextProvider = ({ children }) => {
 	const [products, setProducts] = useState([]);
 	const [cartItems, setCartItems] = useState({});
 	const [searchQuery, setSearchQuery] = useState({});
+	const [loading, setLoading] = useState(false);
 
 	// & fetch admin status
 	const fetchAdminStatus = async () => {
@@ -33,7 +35,7 @@ export const AppContextProvider = ({ children }) => {
 		}
 	};
 
-	// & fetch user status
+	// ^ fetch user status
 	const fetchUserStatus = async () => {
 		try {
 			const { data } = await axios.get("/api/user/is-auth");
@@ -46,21 +48,91 @@ export const AppContextProvider = ({ children }) => {
 		}
 	};
 
-	// & fetch all products
-	const fetchProducts = async () => {
+	// ^ fetch all products
+	const fetchProducts = async (initialQuery = "healthy") => {
 		try {
-			const { data } = await axios.get("/api/inventory/inventory");
+			if (!initialQuery?.trim()) return;
+
+			setLoading(true);
+			const { data } = await axios.get("/api/kroger/search", {
+				params: { query: initialQuery, limit: 50 },
+			});
+
 			if (data.success) {
 				setProducts(data.products);
+				console.log(`Loaded ${data.products.length} products`);
+				console.log(data.products);
 			} else {
 				toast.error(data.message);
 			}
 		} catch (error) {
-			toast.error(error.message);
+			console.error(error);
+			toast.error("Failed to load products");
+		} finally {
+			setLoading(false);
 		}
 	};
 
-	// & add item to cart
+	// ^ search products krogerAPI
+	const searchProducts = async (query) => {
+		try {
+			setLoading(true);
+			console.log(`Searching for: ${query}`);
+
+			const { data } = await axios.get("/api/kroger/search", {
+				params: { query, limit: 50 },
+			});
+
+			if (data.success) {
+				setProducts(data.products);
+				console.log(`Found ${data.products.length} products`);
+
+				if (data.products.length === 0) {
+					toast.info("No products found. Try a different search.");
+				}
+			} else {
+				toast.error(data.message || "Search failed");
+				setProducts([]);
+			}
+		} catch (error) {
+			console.error("Search error:", error);
+			toast.error("Search failed");
+			setProducts([]);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	// ^ get products by category krogerAPI
+	const getProductsByCategory = async (category) => {
+		try {
+			setLoading(true);
+			console.log(`Loading category: ${category}`);
+
+			const { data } = await axios.get(
+				`/api/kroger/category/${category}`,
+				{
+					params: { limit: 50 },
+				},
+			);
+
+			if (data.success) {
+				setProducts(data.products);
+				console.log(
+					`Loaded ${data.products.length} products in ${category}`,
+				);
+			} else {
+				toast.error("Failed to load category products");
+			}
+		} catch (error) {
+			console.error("Category error:", error);
+			toast.error("Failed to load products");
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	// ^ add item to cart
 	const addToCart = (itemId) => {
 		let cartData = structuredClone(cartItems);
 
@@ -73,7 +145,7 @@ export const AppContextProvider = ({ children }) => {
 		toast.success("Added to cart.");
 	};
 
-	// & update cart item quantity
+	// ^ update cart item quantity
 	const updateCartItems = (itemId, quantity) => {
 		let cartData = structuredClone(cartItems);
 		cartData[itemId] = quantity;
@@ -81,7 +153,7 @@ export const AppContextProvider = ({ children }) => {
 		toast.success("Cart updated.");
 	};
 
-	// & remove product from cart
+	// ^ remove product from cart
 	const removeFromCart = (itemId) => {
 		let cartData = structuredClone(cartItems);
 		if (cartData[itemId]) {
@@ -94,7 +166,7 @@ export const AppContextProvider = ({ children }) => {
 		setCartItems(cartData);
 	};
 
-	// & get cart item count
+	// ^ get cart item count
 	const getCartCount = () => {
 		let totalCount = 0;
 		for (const item in cartItems) {
@@ -103,16 +175,32 @@ export const AppContextProvider = ({ children }) => {
 		return totalCount;
 	};
 
-	// & get cart total amount
+	// ^ get total cart amount krogerAPI
 	const getCartAmount = () => {
 		let totalAmount = 0;
-		for (const items in cartItems) {
-			let itemInfo = products.find((product) => product._id === items);
-			if (cartItems[items] > 0 && itemInfo) {
-				totalAmount += itemInfo.offerPrice * cartItems[items];
+
+		for (const itemId in cartItems) {
+			const product = products.find(
+				(product) =>
+					product._id === itemId ||
+					product.productId === itemId ||
+					product.id === itemId ||
+					product.upc === itemId,
+			);
+
+			if (product && cartItems[itemId] > 0) {
+				const price =
+					product.offerPrice ||
+					product.price?.sale ||
+					product.regularPrice ||
+					product.price?.regular ||
+					product.price ||
+					0;
+				totalAmount += price * cartItems[itemId];
 			}
 		}
-		return Math.floor(totalAmount * 100) / 100;
+
+		return Math.round(totalAmount * 100) / 100;
 	};
 
 	useEffect(() => {
@@ -162,6 +250,9 @@ export const AppContextProvider = ({ children }) => {
 		getCartCount,
 		fetchProducts,
 		fetchUserStatus,
+		loading,
+		searchProducts,
+		getProductsByCategory,
 	};
 	return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };

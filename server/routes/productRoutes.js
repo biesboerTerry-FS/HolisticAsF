@@ -4,7 +4,6 @@ import {
 	addProduct,
 	inventoryList,
 	productById,
-	inStockStatus,
 } from "../controllers/productController.js";
 import authAdmin from "../middleware/authAdmin.js";
 
@@ -18,6 +17,5 @@ productRouter.post(
 );
 productRouter.get("/inventory", inventoryList);
 productRouter.get("/product/:id", productById);
-productRouter.post("/stock", authAdmin, inStockStatus);
 
 export default productRouter;

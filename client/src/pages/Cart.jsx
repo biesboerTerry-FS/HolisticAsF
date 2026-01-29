@@ -19,18 +19,18 @@ const Cart = () => {
 	} = useAppContext();
 
 	const [cartArray, setCartArray] = useState([]);
-	const [addresses, setAddresses] = useState([dummyAddress]);
+	const [addresses, setAddresses] = useState([]);
 	const [showAddress, setShowAddress] = useState(false);
-	const [selectedAddress, setSelectedAddress] = useState(
-		// dummyAddress.length > 0 ? dummyAddress[ 0 ] :
-		null,
-	);
+	const [selectedAddress, setSelectedAddress] = useState(false);
 	const [paymentOption, setPaymentOption] = useState("cod");
+	const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
 	const getCart = () => {
 		let tempArray = [];
 		for (const key in cartItems) {
-			const product = products.find((item) => item._id === key);
+			const product = products.find(
+				(item) => item._id === key || item.upc === key,
+			);
 			if (product) {
 				product.quantity = cartItems[key];
 				tempArray.push(product);
@@ -41,38 +41,28 @@ const Cart = () => {
 
 	const getUserAddress = async () => {
 		try {
-			const { data } = await axios.get("/api/address/get-addresses", {
-				// userId: user._id,
-			});
-			if (!data.addresses || !Array.isArray(data.addresses)) {
-				setAddresses([]);
-				setSelectedAddress(null);
-				return;
-			}
-			if (data.success) {
-				setAddresses(data.addresses);
+			const { data } = await axios.get("/api/address/get-addresses", {});
+
+			if (data.success && Array.isArray(data.addresses)) {
 				if (data.addresses.length > 0) {
+					setAddresses(data.addresses);
 					setSelectedAddress(data.addresses[0]);
+				} else {
+					setAddresses([]);
+					setSelectedAddress(null);
+					toast.info("No addresses found. Please add one.");
 				}
 			} else {
-				console.log("API error, using dummyAddress for development");
-				setAddresses(dummyAddress);
-				if (dummyAddress.length > 0) {
-					setSelectedAddress(dummyAddress[0]);
+				setAddresses([]);
+				setSelectedAddress(null);
+				if (data.message) {
+					toast.error(data.message);
 				}
-				toast.error(data.message);
 			}
 		} catch (error) {
-			// Network error - use dummyAddress for dev
-			console.log(
-				"Network error, using dummyAddress for development:",
-				error.message,
-			);
-			setAddresses(dummyAddress);
-			if (dummyAddress.length > 0) {
-				setSelectedAddress(dummyAddress[0]);
-			}
-			toast.error(error.message);
+			console.error("Error fetching addresses:", error.message);
+			setAddresses([]);
+			setSelectedAddress(null);
 		}
 	};
 
@@ -81,51 +71,65 @@ const Cart = () => {
 			if (!selectedAddress) {
 				return toast.error("Please choose an address");
 			}
+
 			if (!selectedAddress._id) {
 				return toast.error("Invalid address selected");
 			}
-			const { data } = await axios.post("/api/order/cod", {
-				userId: user._id,
+
+			if (cartArray.length === 0) {
+				return toast.error("Your cart is empty");
+			}
+
+			setIsPlacingOrder(true);
+
+			console.log("Placing order...");
+			console.log("User ID:", user?.id);
+			console.log("Items:", cartArray.length);
+			console.log("Address:", selectedAddress._id);
+
+			const orderData = {
+				userId: user.id,
 				items: cartArray.map((item) => ({
-					product: item._id,
+					product: item._id || item.upc,
+					productSource: item.isKrogerProduct ? "kroger" : "local",
 					quantity: item.quantity,
 				})),
 				address: selectedAddress._id,
-			});
+			};
 
-			if (data.success) {
-				toast.success(data.message);
-				setCartItems({});
-				navigate("/my-orders");
-			} else {
-				toast.error(error.message);
-			}
-			if (paymentOption === "cash") {
-				const { data } = await axios.post("/api/order/cod", {
-					userId: user._id,
-					items: cartArray.map((item) => ({
-						product: item._id,
-						quantity: item.quantity,
-					})),
-					address: selectedAddress._id,
-				});
+			console.log("Order data:", orderData);
+
+			if (paymentOption === "cod" || paymentOption === "cash") {
+				const { data } = await axios.post("/api/order/cod", orderData);
+
+				console.log("Order response:", data);
 
 				if (data.success) {
-					toast.success(data.message);
+					toast.success(data.message || "Order placed successfully!");
 					setCartItems({});
+
+					console.log("Navigating to /my-orders");
 					navigate("/my-orders");
 				} else {
-					toast.error(error.message);
+					toast.error(data.message || "Failed to place order");
 				}
-			} else {
+			} else if (paymentOption === "Credit/Debit") {
+				const { data } = await axios.post(
+					"/api/order/payment",
+					orderData,
+				);
+
 				if (data.success) {
 					window.location.replace(data.url);
 				} else {
-					toast.error(data.message);
+					toast.error(data.message || "Payment initiation failed");
 				}
 			}
 		} catch (error) {
-			toast.error(error.message);
+			console.error("Order placement error:", error);
+			toast.error(error.message || "Failed to place order");
+		} finally {
+			setIsPlacingOrder(false);
 		}
 	};
 
@@ -143,6 +147,22 @@ const Cart = () => {
 
 	console.log("selected address in cart:", selectedAddress);
 
+	if (products.length === 0 || Object.keys(cartItems).length === 0) {
+		return (
+			<div className="text-center mt-20 mb-20">
+				<p className="text-primary-forest-green text-xl">
+					Your cart is empty
+				</p>
+				<button
+					onClick={() => navigate("/products")}
+					className="mt-4 text-secondary-golden-honey hover:underline"
+				>
+					Continue Shopping
+				</button>
+			</div>
+		);
+	}
+
 	return products.length > 0 && cartItems ? (
 		<div className="flex flex-col md:flex-row py-16 mt-16 ">
 			<div className="flex-1 max-w-4xl">
@@ -157,7 +177,7 @@ const Cart = () => {
 						{getCartCount()} items{" "}
 					</span>
 				</h1>
-				<div className="grid grid-cols-[2fr_1fr_1fr] text-primary-forest-green/708text-base font-medium pb-3">
+				<div className="grid grid-cols-[4fr_2fr_2fr] text-primary-forest-green/70 text-base font-medium pb-3">
 					<p className="text-left">product details</p>
 					<p className="text-center">subtotal</p>
 					<p className="text-center">action</p>
@@ -165,14 +185,14 @@ const Cart = () => {
 				{cartArray.map((product, index) => (
 					<div
 						key={index}
-						className="grid grid-cols-[2fr_1fr_1fr] text-primary-forest-greenitems-center text-sm md:text-base font-medium pt-3"
+						className="grid grid-cols-[4fr_2fr_2fr] text-primary-forest-green items-center text-sm md:text-base font-medium pt-3"
 					>
 						<div className="flex items-center md:gap-6 gap-3">
 							<div
 								onClick={() => {
 									navigate(
 										`/products/${product.category}/${
-											product._id
+											product._id || product.upc
 										}`,
 									);
 									scrollTo(0, 0);
@@ -187,7 +207,10 @@ const Cart = () => {
 							</div>
 							<div>
 								<p className="hidden md:block font-semibold">
-									{product.name}
+									{product.brand}
+								</p>
+								<p className="hidden md:block font-semibold">
+									{product.description}
 								</p>
 								<div className="font-normal text-primary-forest-green/70">
 									<div className="flex items-center">
@@ -197,16 +220,25 @@ const Cart = () => {
 										<select
 											onChange={(e) =>
 												updateCartItems(
-													product._id,
+													product._id || product.upc,
 													Number(e.target.value),
 												)
 											}
-											value={cartItems[product._id]}
+											value={
+												cartItems[
+													product._id || product.upc
+												]
+											}
 											className="outline-none"
 										>
 											{Array(
-												cartItems[product._id] > 9
-													? cartItems[product._id]
+												cartItems[
+													product._id || product.upc
+												] > 9
+													? cartItems[
+															product._id ||
+																product.upc
+														]
 													: 9,
 											)
 												.fill("")
@@ -225,10 +257,12 @@ const Cart = () => {
 						</div>
 						<p className="text-center">
 							{currency}
-							{product.offerPrice * product.quantity}
+							{(product.offerPrice * product.quantity).toFixed(2)}
 						</p>
 						<button
-							onClick={() => removeFromCart(product._id)}
+							onClick={() =>
+								removeFromCart(product._id || product.upc)
+							}
 							className="cursor-pointer mx-auto"
 						>
 							<img
@@ -324,7 +358,7 @@ const Cart = () => {
 						className="w-full border border-primary-forest-green bg-primary-cream px-3 py-2 mt-2 outline-none"
 					>
 						<option value="cash">cash</option>
-						<option value="Credit/Debit">credit/debit</option>
+						{/* <option value="Credit/Debit">credit/debit</option> */}
 					</select>
 				</div>
 

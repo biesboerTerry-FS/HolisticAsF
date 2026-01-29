@@ -11,47 +11,70 @@ const ProductDetails = () => {
 	const [relatedProducts, setRelatedProducts] = useState([]);
 	const [thumbnail, setThumbnail] = useState(null);
 
-	const product = products.find((item) => item._id === id);
+	// find product safely
+	const product = products.find((item) => item._id === id || item.upc === id);
 
+	// related products
 	useEffect(() => {
 		if (product && products.length > 0) {
-			let productsCopy = products.slice();
-			productsCopy = productsCopy.filter(
-				(item) => product.category === item.category,
+			const productsCopy = products.filter(
+				(item) =>
+					product.category === item.category &&
+					(item._id || item.upc) !== id,
 			);
 			setRelatedProducts(productsCopy.slice(0, 5));
 		}
-	}, [products, product]);
+	}, [products, product, id]);
 
 	useEffect(() => {
-		setThumbnail(product?.image[0] ? product.image[0] : null);
+		// ✅ FIXED: Handle image as string or array
+		if (product?.image) {
+			const imageUrl = Array.isArray(product.image)
+				? product.image[0]
+				: product.image;
+			setThumbnail(imageUrl);
+		} else {
+			setThumbnail(assets.leaf);
+		}
 	}, [product]);
 
-	if (!product) {
-		return <div className="mt-12 text-center">Loading...</div>;
-	}
+	if (!product) return <div className="mt-12 text-center">Loading...</div>;
+
+	// Handle both price formats
+	const regularPrice =
+		product.regularPrice ?? product.price?.regular ?? product.price ?? 0;
+
+	const salePrice = product.offerPrice ?? product.price?.sale ?? regularPrice;
+
+	// ✅ FIXED: Handle image as string or array for thumbnails
+	const imageArray = Array.isArray(product.image)
+		? product.image
+		: product.image
+			? [product.image]
+			: [assets.leaf];
 
 	return (
-		product && (
-			<div className="mt-12">
-				<p>
-					<Link to={"/"}>home</Link> /
-					<Link to={"/products"}> products</Link> /
-					<Link to={`/products/${product.category}`}>
-						{" "}
-						{product.category}
-					</Link>{" "}
-					/
-					<span className="text-primary-forest-green">
-						{" "}
-						{product.name}
-					</span>
-				</p>
+		<div className="mt-12">
+			{/* Breadcrumb */}
+			<p>
+				<Link to={"/"}>home</Link> /
+				<Link to={"/products"}> products</Link> /
+				<Link to={`/products/${product.category?.toLowerCase()}`}>
+					{product.category?.toLowerCase()}
+				</Link>{" "}
+				/
+				<span className="text-primary-forest-green">
+					{product.name?.toLowerCase()}
+				</span>
+			</p>
 
-				<div className="flex flex-col md:flex-row gap-16 mt-4">
-					<div className="flex gap-3">
-						<div className="flex flex-col gap-3">
-							{product.image.map((image, index) => (
+			<div className="flex flex-col md:flex-row gap-16 mt-4">
+				{/* Thumbnails & Main Image */}
+				<div className="flex gap-3">
+					<div className="flex flex-col gap-3">
+						{/* ✅ FIXED: Map over imageArray instead of product.image */}
+						{imageArray.length > 1 &&
+							imageArray.map((image, index) => (
 								<div
 									key={index}
 									onClick={() => setThumbnail(image)}
@@ -60,89 +83,91 @@ const ProductDetails = () => {
 									<img
 										src={image}
 										alt={`Thumbnail ${index + 1}`}
+										onError={(e) => {
+											e.target.src = assets.leaf;
+										}}
 									/>
 								</div>
 							))}
-						</div>
-
-						<div className="border border-gray-500/30 max-w-100 rounded overflow-hidden">
-							<img
-								src={thumbnail}
-								alt="selected product"
-								className="w-full h-full object-cover"
-							/>
-						</div>
 					</div>
 
-					<div className="text-sm w-full md:w-1/2">
-						<h1 className="text-3xl font-medium">{product.name}</h1>
-
-						<div className="flex items-center gap-0.5 mt-1">
-							{Array(5)
-								.fill("")
-								.map((_, i) => (
-									<img
-										key={i}
-										className="md:w-4 w-3.5"
-										src={
-											i < 4
-												? assets.star_icon
-												: assets.star_dull_icon
-										}
-										alt=""
-									/>
-								))}
-							<p className="text-base ml-2">(4)</p>
-						</div>
-
-						<div className="mt-6">
-							<p className="text-primary-forest-green/70 line-through">
-								original price: {currency}
-								{product.price}
-							</p>
-							<p className="text-2xl font-medium">
-								sale price: {currency}
-								{product.offerPrice}
-							</p>
-							<span className="text-primary-forest-green/70">
-								(plus tax)
-							</span>
-						</div>
-
-						<p className="text-base font-medium mt-6">
-							about
-							<span className="font-medium text-secondary-golden-honey">
-								{" "}
-								{product.name}
-							</span>
-						</p>
-						<ul className="list-disc ml-4 text-primary-forest-green/80">
-							{product.description.map((desc, index) => (
-								<li key={index}>{desc}</li>
-							))}
-						</ul>
-
-						<div className="flex items-center mt-10 gap-4 text-base">
-							<button
-								onClick={() => addToCart(product._id)}
-								className="w-full py-3.5 cursor-pointer font-medium bg-primary-sage-green/90 text-primary-warm-white hover:bg-primary-forest-green transition"
-							>
-								add to cart
-							</button>
-							<button
-								onClick={() => {
-									addToCart(product._id);
-									navigate("/cart");
-								}}
-								className="w-full py-3.5 cursor-pointer font-medium bg-primary-sage-green/90 text-primary-warm-white hover:bg-primary-forest-green transition"
-							>
-								buy now
-							</button>
-						</div>
+					<div className="border border-gray-500/30 max-w-100 rounded overflow-hidden">
+						<img
+							src={thumbnail || assets.leaf}
+							alt="selected product"
+							className="w-full h-full object-cover"
+							onError={(e) => {
+								e.target.src = assets.leaf;
+							}}
+						/>
 					</div>
 				</div>
 
-				{/* related products */}
+				{/* Product Info */}
+				<div className="text-sm w-full md:w-1/2">
+					<h1 className="text-3xl font-medium">
+						{product.name?.toLowerCase()}
+					</h1>
+					<div className="mt-6">
+						<p className="text-primary-forest-green/70 line-through">
+							original price: {currency}
+							{regularPrice.toFixed(2)}
+						</p>
+						<p className="text-2xl font-medium">
+							sale price: {currency}
+							{salePrice.toFixed(2)}
+						</p>
+						<span className="text-primary-forest-green/70">
+							(plus tax)
+						</span>
+					</div>
+
+					<p className="text-base font-medium mt-6">
+						about
+						<span className="font-medium text-secondary-golden-honey">
+							{" "}
+							{product.name?.toLowerCase()}
+						</span>
+					</p>
+
+					{product.description && (
+						<p className="text-primary-forest-green/80 mt-2 text-sm">
+							{product.description.toLowerCase()}
+						</p>
+					)}
+
+					{product.brand && (
+						<p className="text-sm text-primary-forest-green/70 mt-2">
+							brand:{" "}
+							<span className="text-primary-forest-green">
+								{product.brand.toLowerCase()}
+							</span>
+						</p>
+					)}
+
+					<div className="flex items-center mt-10 gap-4 text-base">
+						<button
+							onClick={() =>
+								addToCart(product._id || product.upc)
+							}
+							className="w-full py-3.5 cursor-pointer font-medium bg-primary-sage-green/90 text-primary-warm-white hover:bg-primary-forest-green transition"
+						>
+							add to cart
+						</button>
+						<button
+							onClick={() => {
+								addToCart(product._id || product.upc);
+								navigate("/cart");
+							}}
+							className="w-full py-3.5 cursor-pointer font-medium bg-primary-sage-green/90 text-primary-warm-white hover:bg-primary-forest-green transition"
+						>
+							buy now
+						</button>
+					</div>
+				</div>
+			</div>
+
+			{relatedProducts.length > 0 && (
 				<div className="flex flex-col items-center mt-20">
 					<div className="flex flex-col items-center w-max">
 						<p className="text-secondary-golden-honey text-3xl font-medium">
@@ -150,17 +175,17 @@ const ProductDetails = () => {
 							<span className="text-primary-forest-green text-3xl font-medium">
 								{" "}
 								products
-							</span>{" "}
+							</span>
 						</p>
 						<div className="w-20 h-0.5 bg-primary-sage-green rounded-full mt-2"></div>
 					</div>
+
 					<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 md:gap-6 lg:grid-cols-5 mt-6 w-full">
-						{relatedProducts
-							.filter((product) => product.inStock)
-							.map((product, index) => (
-								<ProductCard key={index} product={product} />
-							))}
+						{relatedProducts.map((product, index) => (
+							<ProductCard key={index} product={product} />
+						))}
 					</div>
+
 					<button
 						onClick={() => {
 							navigate("/products");
@@ -171,8 +196,8 @@ const ProductDetails = () => {
 						see more
 					</button>
 				</div>
-			</div>
-		)
+			)}
+		</div>
 	);
 };
 

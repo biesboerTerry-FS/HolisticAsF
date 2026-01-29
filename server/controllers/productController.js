@@ -1,5 +1,6 @@
 import { v2 as cloudinary } from "cloudinary";
 import Product from "../models/Product.js";
+import KrogerProduct from "../models/KrogerProduct.js";
 
 // ^ add new product: /api/inventory/add-inventory`
 export const addProduct = async (request, response) => {
@@ -68,19 +69,20 @@ export const productById = async (request, response) => {
 };
 
 // ^ inStock status: /api/inventory/stock
-export const inStockStatus = async (request, response) => {
-	try {
-		const { id, inStock } = request.body;
-		await Product.findByIdAndUpdate(id, { inStock });
-		response.json({
-			success: true,
-			message: "Stock status updated.",
-		});
-	} catch (error) {
-		console.log(error.message);
-		response.json({
-			success: false,
-			error: error.message,
-		});
-	}
-};
+// ^ removed after integrating kroger API due to functionality conflicts
+// export const inStockStatus = async (request, response) => {
+// 	try {
+// 		const { id, inStock } = request.body;
+// 		await Product.findByIdAndUpdate(id, { inStock });
+// 		response.json({
+// 			success: true,
+// 			message: "Stock status updated.",
+// 		});
+// 	} catch (error) {
+// 		console.log(error.message);
+// 		response.json({
+// 			success: false,
+// 			error: error.message,
+// 		});
+// 	}
+// };

@@ -5,22 +5,22 @@ import toast from "react-hot-toast";
 const Inventory = () => {
 	const { products, currency, axios, fetchProducts } = useAppContext();
 
-	const toggleStock = async (id, inStock) => {
-		try {
-			const { data } = await axios.post("/api/inventory/stock", {
-				id,
-				inStock,
-			});
-			if (data.success) {
-				fetchProducts();
-				toast.success(data.message);
-			} else {
-				toast.error(data.message);
-			}
-		} catch (error) {
-			toast.error(error.message);
-		}
-	};
+	// const toggleStock = async (id, inStock) => {
+	// 	try {
+	// 		const { data } = await axios.post("/api/inventory/stock", {
+	// 			id,
+	// 			inStock,
+	// 		});
+	// 		if (data.success) {
+	// 			fetchProducts();
+	// 			toast.success(data.message);
+	// 		} else {
+	// 			toast.error(data.message);
+	// 		}
+	// 	} catch (error) {
+	// 		toast.error(error.message);
+	// 	}
+	// };
 
 	return (
 		<div className="no-scrollbar flex-1 h-[95vh] overflow-y-scroll flex flex-col justify-between">
@@ -67,7 +67,7 @@ const Inventory = () => {
 											/>
 										</div>
 										<span className="truncate max-sm:hidden w-full">
-											{product.name}
+											{product.description}
 										</span>
 									</td>
 									<td className="px-4 py-3">
@@ -79,7 +79,7 @@ const Inventory = () => {
 									<td className="px-4 py-3 max-sm:hidden">
 										{currency} {product.offerPrice}
 									</td>
-									<td className="px-4 py-3">
+									{/* <td className="px-4 py-3">
 										<label className="relative inline-flex items-center cursor-pointer text-primary-forest-green gap-3">
 											<input
 												type="checkbox"
@@ -95,7 +95,7 @@ const Inventory = () => {
 											<div className="w-12 h-7 bg-primary-sage-green rounded-full peer peer-checked:bg-primary-forest-green transition-colors duration-200"></div>
 											<span className="dot absolute left-1 top-1 w-5 h-5 bg-secondary-golden-honey rounded-full transition-transform duration-200 ease-in-out peer-checked:translate-x-5"></span>
 										</label>
-									</td>
+									</td> */}
 								</tr>
 							))}
 						</tbody>

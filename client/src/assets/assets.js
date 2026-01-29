@@ -150,46 +150,55 @@ export const assets = {
 
 export const categories = [
 	{
-		text: "Organic veggies",
-		path: "Vegetables",
-		image: organic_vegitable_image,
-		bgColor: "#FEF6DA",
+		text: "Fresh",
+		subCategories: {
+			text: "Fruit & Vegetables",
+			text: "Meat",
+			text: "Seafood",
+			text: "Deli",
+			text: "Bakery",
+			text: "Floral",
+		},
 	},
 	{
-		text: "Fresh Fruits",
-		path: "Fruits",
-		image: fresh_fruits_image,
-		bgColor: "#FEE0E0",
+		text: "Grocery",
+		subCategories: {
+			text: "Pantry",
+			text: "Dairy & Eggs",
+			text: "Frozen",
+			text: "Natural & Organic",
+			text: "Beverages",
+			text: "Breakfast",
+			text: "Coffee",
+			text: "Candy",
+		},
 	},
 	{
-		text: "Cold Drinks",
-		path: "Drinks",
-		image: bottles_image,
-		bgColor: "#F0F5DE",
+		text: "Beer, Wine, & Liquor",
+		subCategories: {
+			text: "Beer & Seltzers",
+			text: "Wine",
+			text: "Liquor",
+			text: "Non-Alcoholic",
+		},
 	},
 	{
-		text: "Instant Food",
-		path: "Instant",
-		image: maggi_image,
-		bgColor: "#E1F5EC",
+		text: "Health, Beauty, & Baby",
+		subCategories: {
+			text: "Health & Wellness",
+			text: "Personal Care",
+			text: "Beauty",
+			text: "Baby",
+		},
 	},
 	{
-		text: "Dairy Products",
-		path: "Dairy",
-		image: dairy_product_image,
-		bgColor: "#FEE6CD",
-	},
-	{
-		text: "Bakery & Breads",
-		path: "Bakery",
-		image: bakery_image,
-		bgColor: "#E0F6FE",
-	},
-	{
-		text: "Grains & Cereals",
-		path: "Grains",
-		image: grain_image,
-		bgColor: "#F1E3F9",
+		text: "Cleaning & Household",
+		subCategories: {
+			text: "Laundry",
+			text: "Paper Products",
+			text: "Kitchen",
+			text: "Cleaning Supplies",
+		},
 	},
 ];
 
