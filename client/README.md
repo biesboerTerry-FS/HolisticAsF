@@ -81,13 +81,13 @@ If you are having trouble, contact your instructor ASAP, you might need to be pa
 
 ### Milestone 3
 
-⚙️ Overview - Write overview here.
+⚙️ Overview - Integrated external API, migrated data (user, orders, address, products, krogerProducts.
 <br>
-🌵 Challenges - Write challenges here.
+🌵 Challenges - Integrating the Kroger API and making it work. Lots of adjustments to be made and I felt like I bit off more than I can chew with this one
 <br>
-🏆 Accomplishments - Write Accomplishments here.
+🏆 Accomplishments - All persistent data is in MongoDB, Most of the data from Kroger API is displayed
 <br>
-🔮 Next Steps - Write your next steps here.
+🔮 Next Steps - Finish integreating Kroger products, polish and fine-tune the rest
 
 <br>
 
@@ -95,28 +95,28 @@ Please discuss the following:
 
 #### API
 
--   Link to the API that is used in your code
--   Reason you chose the API
--   Where in your code did you use it?
+-   https://api.kroger.com/v1/
+-   Kroger is a well known grocery store chain, wider selection of products to import 
+-   I used this API to display live products from a stores website
 
 #### 1st Library
 
--   Link to the library
--   Link to library tutorial that you made already.
--   Reason you chose this library.
--   Where in your code is it used?
+-   https://www.npmjs.com/package/react-toastify.
+-   [Biesboer_Terry_Library Tutorial]([url](https://fullsailedu-my.sharepoint.com/:v:/g/personal/tebiesboer_student_fullsail_edu/IQDMqxExgwJzTI2C_MPlI5tnAQilgwhvRCRWmv76-uK3uGk?e=K5d1Ge&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D))
+-   I've used it on previous projects and really enjoy its customization and effects.
+-   It is used in both the client side and the admin side
 
 #### 2nd Library
 
--   Link to the library
--   Reason you chose this library.
--   Where in your code is it used?
+-   [Clerk](https://clerk.com/)
+-   I used this in the past, simple sign in using various methods, i.e. Apple, Google, GitHub, Facebook
+-   The package has been installed, login for will be updated this week
 
 #### Persistent Data
 
--   Discuss if you have used MongoDB or Local Storage.
--   How was it used in your code?
--   Where in your code is it used?
+-   I went with MongoDB for storage. I am using it to store admin, users, orders, address, and products from the Kroger API
+-   Stores all persistent data (see above)
+-   Server side logic
 
 <br>
 
