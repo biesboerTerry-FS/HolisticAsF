@@ -10,6 +10,7 @@ import cartRouter from "./routes/cartRoutes.js";
 import addressRouter from "./routes/addressRoutes.js";
 import orderRouter from "./routes/orderRoutes.js";
 import connectCloudinary from "./configs/cloudinary.js";
+import krogerRouter from "./routes/krogerRoutes.js";
 
 const app = express();
 
@@ -31,6 +32,15 @@ app.use("/api/inventory", productRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/address", addressRouter);
 app.use("/api/order", orderRouter);
+app.use("/api/kroger", krogerRouter);
+
+app.use((error, request, response, next) => {
+	console.error("Server error:", error);
+	response.status(500).json({
+		success: false,
+		message: error.message,
+	});
+});
 
 app.listen(port, () => {
 	console.log(`Server is running on http://localhost:${port}`);

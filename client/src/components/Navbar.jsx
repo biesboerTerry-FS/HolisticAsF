@@ -136,7 +136,6 @@ const Navbar = () => {
 				</button>
 			</div>
 
-			{/* Mobile Menu */}
 			{open && (
 				<div className="flex sm:hidden absolute top-[60px] left-0 w-full h-full bg-primary-sage-green shadow-md py-8 flex-col items-center gap-2 px-5 text-3xl z-50">
 					<NavLink to={"/"} onClick={() => setOpen(false)}>

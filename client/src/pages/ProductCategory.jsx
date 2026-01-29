@@ -15,6 +15,7 @@ const ProductCategory = () => {
 	const filteredProducts = products.filter((product) => {
 		return product.category === category;
 	});
+	console.log("Filtered Products:", filteredProducts);
 
 	return (
 		<div className="mt-16">
@@ -28,8 +29,11 @@ const ProductCategory = () => {
 			)}
 			{filteredProducts.length > 0 ? (
 				<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 md:gap-6 lg:grid-cols-5 mt-6">
-					{filteredProducts.map((product) => (
+					{/* {filteredProducts.map((product) => (
 						<ProductCard key={product._id} product={product} />
+					))} */}
+					{filteredProducts.map((product, index) => (
+						<ProductCard key={index} product={product} />
 					))}
 				</div>
 			) : (

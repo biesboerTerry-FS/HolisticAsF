@@ -8,7 +8,7 @@ const InputField = ({
 	placeholder,
 	name,
 	handleChange,
-	address,
+	address = {},
 	required = true,
 }) => (
 	<input
@@ -17,7 +17,7 @@ const InputField = ({
 		placeholder={placeholder}
 		onChange={handleChange}
 		name={name}
-		value={address[name]}
+		value={address?.[name] || ""}
 		required={required}
 	/>
 );
@@ -34,7 +34,6 @@ const AddAddress = () => {
 		city: "",
 		state: "",
 		zipCode: "",
-		country: "",
 		phone: "",
 	});
 
@@ -55,7 +54,7 @@ const AddAddress = () => {
 		// ^ ------------------------------------------------------
 		console.log("=== Address Form Submission ===");
 		console.log("user from context:", user);
-		console.log("user._id:", user?._id);
+		console.log("user._id:", user?.id);
 		console.log("address data:", address);
 
 		if (!user || !user.id) {

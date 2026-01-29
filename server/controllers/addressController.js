@@ -1,32 +1,6 @@
 import Address from "../models/Address.js";
 import User from "../models/User.js";
 
-// ^ add address : /api/address/add-address
-// export const addAddress = async (request, response) => {
-// 	try {
-// 		const userId = request.userId;
-
-// 		// const { address } = request.body;
-// 		const addressData = request.body;
-
-// 		// await Address.create( { ...address, userId } );
-// 		await Address.create({
-// 			userId,
-// 			...addressData,
-// 		});
-
-// 		return response.json({
-// 			success: true,
-// 			message: "Address added successfully.",
-// 		});
-// 	} catch (error) {
-// 		console.log(error.message, "add address");
-// 		response.json({
-// 			success: false,
-// 			message: error.message,
-// 		});
-// 	}
-// };
 export const addAddress = async (request, response) => {
 	try {
 		// ^ ------------------------------------------------------
@@ -36,7 +10,7 @@ export const addAddress = async (request, response) => {
 
 		// ^ ------------------------------------------------------
 		if (!request.user) {
-			console.error("❌ request.user is undefined!");
+			console.error("request.user is undefined!");
 			return response.json({
 				success: false,
 				message: "Authentication failed: user not found in request",
@@ -53,12 +27,12 @@ export const addAddress = async (request, response) => {
 			...addressData,
 		});
 
-		console.log("✅ Address created:", address);
+		console.log("Address created:", address);
 
 		await User.findByIdAndUpdate(userId, {
 			$push: { addresses: address._id },
 		});
-		console.log("✅ User document updated");
+		console.log("User document updated");
 
 		return response.json({
 			success: true,
@@ -77,8 +51,6 @@ export const addAddress = async (request, response) => {
 export const getAddresses = async (request, response) => {
 	try {
 		const userId = request.user.id;
-		// const userId = request.body;
-		// const userId = request.user._id;
 		const addresses = await Address.find({ userId });
 
 		response.json({
@@ -95,6 +67,7 @@ export const getAddresses = async (request, response) => {
 };
 
 // ^ delete address: /api/address/delete-address
+// & did not get function to work
 // export const deleteAddress = async (request, response) => {
 // 	try {
 // 		const userId = request.user.id;

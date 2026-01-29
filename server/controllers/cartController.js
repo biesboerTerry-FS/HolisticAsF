@@ -3,7 +3,7 @@ import User from "../models/User.js";
 //^ update cart data: /api/cart/update
 export const updateCart = async (request, response) => {
 	try {
-		const userId = request.userId;
+		const userId = request.user.id;
 		const { cartItems } = request.body;
 
 		if (!userId) {
