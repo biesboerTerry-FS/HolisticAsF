@@ -56,10 +56,6 @@ const App = () => {
 						path="/admin"
 						element={isAdmin ? <AdminLayout /> : <AdminLogin />}
 					>
-						{/* <Route
-							index
-							element={isAdmin ? <AddInventory /> : null}
-						/> */}
 						<Route
 							path="add-inventory"
 							element={<AddInventory />}

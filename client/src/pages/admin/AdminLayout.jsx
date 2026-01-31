@@ -1,11 +1,13 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link, NavLink, Outlet } from "react-router-dom";
 import { assets } from "../../assets/assets";
 import { useAppContext } from "../../context/AppContext";
 import toast from "react-hot-toast";
+import { useClerk } from "@clerk/clerk-react";
 
 const AdminLayout = () => {
-	const { axios, navigate } = useAppContext();
+	const { signOut } = useClerk();
+	const { axios, navigate, isAdmin, isAuthLoading } = useAppContext();
 
 	const sidebarLinks = [
 		{
@@ -25,18 +27,26 @@ const AdminLayout = () => {
 		},
 	];
 
-	const logout = async () => {
-		try {
-			const { data } = await axios.get("/api/admin/logout");
-			if (data.success) {
-				toast.success(data.message);
-				navigate("/");
-			} else {
-				toast.error(data.message);
-			}
-		} catch (error) {
-			toast.error(error.message);
+	useEffect(() => {
+		if (!isAuthLoading && isAdmin === false) {
+			toast.error("Access Denied: Admin only");
+			navigate("/");
 		}
+	}, [isAdmin, isAuthLoading, navigate]);
+
+	if (isAuthLoading) {
+		return (
+			<div className="h-screen flex items-center justify-center text-primary-forest-green">
+				Verifying Admin...
+			</div>
+		);
+	}
+
+	if (!isAdmin) return null;
+
+	const logout = async () => {
+		await signOut();
+		navigate("/");
 	};
 
 	return (

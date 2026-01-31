@@ -51,7 +51,6 @@ const AddAddress = () => {
 	const onSubmitHandler = async (event) => {
 		event.preventDefault();
 
-		// ^ ------------------------------------------------------
 		console.log("=== Address Form Submission ===");
 		console.log("user from context:", user);
 		console.log("user._id:", user?.id);
@@ -62,7 +61,6 @@ const AddAddress = () => {
 			navigate("/login");
 			return;
 		}
-		// ^ ------------------------------------------------------
 
 		console.log("User is available, proceeding...");
 		try {
@@ -73,7 +71,6 @@ const AddAddress = () => {
 				address,
 			);
 
-			// ^ ------------------------------------------------------
 			console.log("API Response:", data);
 
 			if (data.success) {

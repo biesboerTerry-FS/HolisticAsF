@@ -4,6 +4,7 @@ import {
 	loginUser,
 	isAuth,
 	logoutUser,
+	syncClerkUser,
 } from "../controllers/userController.js";
 import authUser from "../middleware/authUser.js";
 
@@ -13,5 +14,6 @@ userRouter.post("/register", registerUser);
 userRouter.post("/login", loginUser);
 userRouter.get("/is-auth", authUser, isAuth);
 userRouter.get("/logout", authUser, logoutUser);
+userRouter.post("/sync", syncClerkUser);
 
 export default userRouter;

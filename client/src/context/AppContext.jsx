@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import KrogerApi from "../services/KrogerApi";
+import { useUser } from "@clerk/clerk-react";
 // import { dummyProducts } from "../assets/assets";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -11,6 +12,8 @@ axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
 export const AppContext = createContext();
 
 export const AppContextProvider = ({ children }) => {
+	const { user: clerkUser, isSignedIn } = useUser();
+	const [isAuthLoading, setIsAuthLoading] = useState(true);
 	const currency = import.meta.env.VITE_CURRENCY;
 	const navigate = useNavigate();
 	const [user, setUser] = useState(null);
@@ -21,7 +24,7 @@ export const AppContextProvider = ({ children }) => {
 	const [searchQuery, setSearchQuery] = useState({});
 	const [loading, setLoading] = useState(false);
 
-	// & fetch admin status
+	// ^ fetch admin status
 	const fetchAdminStatus = async () => {
 		try {
 			const { data } = await axios.get("/api/admin/is-auth");
@@ -40,11 +43,10 @@ export const AppContextProvider = ({ children }) => {
 		try {
 			const { data } = await axios.get("/api/user/is-auth");
 			if (data.success) {
-				setUser(data.user);
-				setCartItems(data.user.cartItems);
+				setCartItems(data.user.cartItems || {});
 			}
 		} catch (error) {
-			setUser(null);
+			console.error("DB User status check failed");
 		}
 	};
 
@@ -204,28 +206,83 @@ export const AppContextProvider = ({ children }) => {
 	};
 
 	useEffect(() => {
-		fetchAdminStatus();
-		fetchUserStatus();
 		fetchProducts();
 	}, []);
 
 	useEffect(() => {
+		const handleSync = async () => {
+			if (clerkUser === undefined) return;
+
+			if (isSignedIn && clerkUser?.id) {
+				setIsAuthLoading(true);
+				// console.log("Attempting to sync user:", clerkUser.id);
+				try {
+					const { data } = await axios.post("/api/user/sync", {
+						clerkId: clerkUser.id,
+						email: clerkUser.primaryEmailAddress.emailAddress,
+						name: clerkUser.fullName,
+					});
+
+					if (data.success) {
+						setUser(data.user);
+						setCartItems(data.user.cartItems || {});
+						setIsAdmin(data.user.role === "admin");
+						setShowUserLogin(false);
+						setIsAuthLoading(false);
+						console.log("Sync successful. Role:", data.user.role);
+					}
+				} catch (error) {
+					console.error("Sync error:", error);
+				}
+			} else {
+				setUser(null);
+				setIsAdmin(false);
+				setIsAuthLoading(false);
+			}
+		};
+
+		handleSync();
+	}, [isSignedIn, clerkUser?.id]);
+
+	useEffect(() => {
 		const updateCart = async () => {
+			if (isAuthLoading || !user?.clerkId) return;
+
 			try {
 				const { data } = await axios.post("/api/cart/update", {
 					cartItems,
 				});
-				if (!data.success) {
+
+				if (!data.success && data.message) {
+					console.warn("Cart sync delayed:", data.message);
 					toast.error(data.message);
 				}
 			} catch (error) {
-				toast.error(error.message);
+				console.error("Cart update error:", error.message);
 			}
 		};
+
 		if (user) {
 			updateCart();
 		}
-	}, [cartItems]);
+	}, [cartItems, isAuthLoading, user?.clerkId]);
+
+	useEffect(() => {
+		const authInterceptor = axios.interceptors.request.use(
+			(config) => {
+				const id = user?.clerkId || user?.id;
+
+				if (id) {
+					config.headers["clerkid"] = id;
+				}
+				return config;
+			},
+			(error) => Promise.reject(error),
+		);
+		return () => {
+			axios.interceptors.request.eject(authInterceptor);
+		};
+	}, [user]);
 
 	const value = {
 		addToCart,

@@ -21,7 +21,6 @@ const Contact = () => {
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
-		// In dev, just log the form data
 		console.log("Form submitted:", formData);
 		setSubmitted(true);
 		setFormData({ name: "", email: "", subject: "", message: "" });

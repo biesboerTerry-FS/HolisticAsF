@@ -30,8 +30,6 @@ export const fetchAndSaveKrogerProducts = async (
 			},
 		});
 
-		console.log("Raw Kroger API Response:", response.data);
-
 		const krogerItems = response.data.data || response.data || [];
 
 		if (!Array.isArray(krogerItems) || krogerItems.length === 0) {
@@ -41,21 +39,84 @@ export const fetchAndSaveKrogerProducts = async (
 
 		console.log(`Processing ${krogerItems.length} items from Kroger API`);
 
-		const krogerProducts = krogerItems.map((item) => {
+		const krogerProducts = krogerItems.map((item, idx) => {
 			const regularPrice = item.items?.[0]?.price?.regular || 0;
 			const salePrice = item.items?.[0]?.price?.sale || regularPrice;
 
-			const imageUrls =
-				item.images && Array.isArray(item.images)
-					? item.images.map((img) => img.url).filter(Boolean)
-					: [PLACEHOLDER_IMAGE];
+			if (idx < 3) {
+				console.log(`\n[DEBUG Product ${idx}]`);
+				console.log(
+					`  - description field: ${item.description?.substring(0, 50)}`,
+				);
+				console.log(`  - item.name: ${item.name}`);
+				console.log(`  - item.brand: ${item.brand}`);
+				console.log(`  - item.productId: ${item.productId}`);
+			}
+
+			let productName =
+				item.description || item.name || "Unknown Product";
+
+			if (idx < 3) {
+				console.log(
+					`  - Final productName: ${productName.substring(0, 50)}`,
+				);
+			}
+
+			let imageUrls = [];
+
+			if (
+				item.images &&
+				Array.isArray(item.images) &&
+				item.images.length > 0
+			) {
+				item.images.forEach((imageObj) => {
+					if (
+						imageObj &&
+						imageObj.sizes &&
+						Array.isArray(imageObj.sizes) &&
+						imageObj.sizes.length > 0
+					) {
+						const largeSize = imageObj.sizes.find(
+							(s) => s.size === "large",
+						);
+						if (largeSize && largeSize.url) {
+							imageUrls.push(largeSize.url);
+							if (idx < 3) {
+								console.log(
+									`  ✅ Found large image from perspective "${imageObj.perspective}": ${largeSize.url.substring(0, 60)}`,
+								);
+							}
+						} else {
+							const firstSize = imageObj.sizes[0];
+							if (
+								firstSize &&
+								firstSize.url &&
+								!imageUrls.includes(firstSize.url)
+							) {
+								imageUrls.push(firstSize.url);
+								if (idx < 3) {
+									console.log(
+										`  ✅ Found fallback image (${firstSize.size}): ${firstSize.url.substring(0, 60)}`,
+									);
+								}
+							}
+						}
+					}
+				});
+			}
+
+			const finalImages =
+				imageUrls.length > 0 ? imageUrls : [PLACEHOLDER_IMAGE];
+
+			if (idx < 3) {
+				console.log(
+					`  - Final image count: ${finalImages.length}, Using placeholder: ${finalImages[0] === PLACEHOLDER_IMAGE}`,
+				);
+			}
 
 			const product = {
-				name: item.name || "Unknown Product",
-				description:
-					item.description ||
-					item.brand ||
-					"No description available",
+				name: productName,
+				description: item.description || "No description available",
 				brand: item.brand || "Unknown",
 				regularPrice: regularPrice,
 				offerPrice: salePrice,
@@ -63,7 +124,7 @@ export const fetchAndSaveKrogerProducts = async (
 					regular: regularPrice,
 					sale: salePrice,
 				},
-				image: imageUrls,
+				image: finalImages,
 				category: item.categories?.[0]?.name || term || "Uncategorized",
 				subCategory: item.categories?.[1]?.name || "",
 				upc: item.upc || item.productId,
@@ -77,18 +138,10 @@ export const fetchAndSaveKrogerProducts = async (
 				krogerUpc: item.upc,
 			};
 
-			console.log("Mapped product:", {
-				name: product.name,
-				regularPrice: product.regularPrice,
-				offerPrice: product.offerPrice,
-				image: product.image[0],
-				upc: product.upc,
-			});
-
 			return product;
 		});
 
-		console.log(`Saving ${krogerProducts.length} products to MongoDB...`);
+		console.log(`\nSaving ${krogerProducts.length} products to MongoDB...`);
 
 		let savedCount = 0;
 		for (const product of krogerProducts) {
@@ -131,8 +184,16 @@ export const validateKrogerProduct = (product) => {
 		issues.push("Missing or zero regular price");
 	}
 
-	if (!product.image || product.image[0] === PLACEHOLDER_IMAGE) {
-		issues.push("Missing or placeholder image");
+	if (!product.image || product.image.length === 0) {
+		issues.push("Missing image");
+	}
+
+	if (
+		product.image &&
+		product.image.length > 0 &&
+		product.image[0] === PLACEHOLDER_IMAGE
+	) {
+		issues.push("Using placeholder image only");
 	}
 
 	if (!product.upc) {

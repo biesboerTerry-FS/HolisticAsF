@@ -11,10 +11,8 @@ const ProductDetails = () => {
 	const [relatedProducts, setRelatedProducts] = useState([]);
 	const [thumbnail, setThumbnail] = useState(null);
 
-	// find product safely
 	const product = products.find((item) => item._id === id || item.upc === id);
 
-	// related products
 	useEffect(() => {
 		if (product && products.length > 0) {
 			const productsCopy = products.filter(
@@ -27,7 +25,6 @@ const ProductDetails = () => {
 	}, [products, product, id]);
 
 	useEffect(() => {
-		// ✅ FIXED: Handle image as string or array
 		if (product?.image) {
 			const imageUrl = Array.isArray(product.image)
 				? product.image[0]
@@ -40,13 +37,11 @@ const ProductDetails = () => {
 
 	if (!product) return <div className="mt-12 text-center">Loading...</div>;
 
-	// Handle both price formats
 	const regularPrice =
 		product.regularPrice ?? product.price?.regular ?? product.price ?? 0;
 
 	const salePrice = product.offerPrice ?? product.price?.sale ?? regularPrice;
 
-	// ✅ FIXED: Handle image as string or array for thumbnails
 	const imageArray = Array.isArray(product.image)
 		? product.image
 		: product.image
@@ -55,7 +50,6 @@ const ProductDetails = () => {
 
 	return (
 		<div className="mt-12">
-			{/* Breadcrumb */}
 			<p>
 				<Link to={"/"}>home</Link> /
 				<Link to={"/products"}> products</Link> /
@@ -69,10 +63,8 @@ const ProductDetails = () => {
 			</p>
 
 			<div className="flex flex-col md:flex-row gap-16 mt-4">
-				{/* Thumbnails & Main Image */}
 				<div className="flex gap-3">
 					<div className="flex flex-col gap-3">
-						{/* ✅ FIXED: Map over imageArray instead of product.image */}
 						{imageArray.length > 1 &&
 							imageArray.map((image, index) => (
 								<div
@@ -103,7 +95,6 @@ const ProductDetails = () => {
 					</div>
 				</div>
 
-				{/* Product Info */}
 				<div className="text-sm w-full md:w-1/2">
 					<h1 className="text-3xl font-medium">
 						{product.name?.toLowerCase()}

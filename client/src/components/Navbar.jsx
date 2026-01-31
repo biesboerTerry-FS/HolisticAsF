@@ -3,8 +3,10 @@ import { assets } from "../assets/assets";
 import toast from "react-hot-toast";
 import { NavLink } from "react-router-dom";
 import { useAppContext } from "../context/AppContext";
+import { useClerk } from "@clerk/clerk-react";
 
 const Navbar = () => {
+	const { signOut } = useClerk();
 	const [open, setOpen] = useState(false);
 
 	const {
@@ -20,7 +22,11 @@ const Navbar = () => {
 
 	const logout = async () => {
 		try {
-			const { data } = await axios.get("/api/user/logout");
+			// const { data } = await axios.get("/api/user/logout");
+			await signOut();
+			toast.success("Logged out successfully");
+			setShowUserLogin(false);
+			navigate("/");
 			if (data.success) {
 				toast.success(data.message);
 				setUser(null);
@@ -64,6 +70,13 @@ const Navbar = () => {
 				<NavLink to={"/"}>home</NavLink>
 				<NavLink to={"/products"}>products</NavLink>
 				<NavLink to={"/contact"}>contact</NavLink>
+
+				<button
+					onClick={() => (window.location.href = "/admin")}
+					className="text-xs border border-primary-forest-green px-2 py-1  hover:bg-primary-forest-green hover:text-white rounded-full transition"
+				>
+					admin
+				</button>
 
 				<div
 					onClick={() => navigate("/cart")}
@@ -111,7 +124,6 @@ const Navbar = () => {
 				)}
 			</div>
 
-			{/* Mobile Menu Trigger */}
 			<div className="flex items-center gap-6 sm:hidden">
 				<div
 					onClick={() => navigate("/cart")}

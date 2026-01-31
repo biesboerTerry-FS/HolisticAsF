@@ -21,7 +21,6 @@ const ProductSearch = () => {
 		try {
 			console.log(`Searching for: ${searchQuery}`);
 			await searchProducts(searchQuery);
-			// setSearchQuery("");
 		} catch (error) {
 			console.error("Search error:", error);
 			toast.error(error.message || "Search failed. Please try again.");
