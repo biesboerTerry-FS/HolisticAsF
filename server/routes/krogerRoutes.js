@@ -155,7 +155,7 @@ krogerRouter.get("/category/:category", async (request, response) => {
 			total: products.length,
 		});
 	} catch (error) {
-		console.error("Category error:", err.message);
+		console.error("Category error:", error.message);
 		response.json({
 			success: false,
 			message: error.message,
@@ -176,7 +176,7 @@ krogerRouter.get("/featured", async (_request, response) => {
 			total: products.length,
 		});
 	} catch (error) {
-		console.error("Featured error:", err.message);
+		console.error("Featured error:", error.message);
 		response.json({
 			success: false,
 			message: error.message,

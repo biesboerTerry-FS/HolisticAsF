@@ -15,7 +15,7 @@ export const updateCart = async (request, response) => {
 		}
 
 		await User.findByIdAndUpdate(userId, { cartItems });
-		// console.log("updateCart success");
+		console.log("updateCart success");
 		response.json({
 			success: true,
 			message: "Cart updated.",

@@ -11,7 +11,6 @@ const Products = () => {
 	const [categories, setCategories] = useState([]);
 	const [isLoadingCategories, setIsLoadingCategories] = useState(false);
 
-	// Get unique categories from products
 	useEffect(() => {
 		if (products && products.length > 0) {
 			const uniqueCategories = [
@@ -30,7 +29,6 @@ const Products = () => {
 		}
 	}, [products]);
 
-	// Filter products by category
 	const handleCategoryChange = (category) => {
 		setSelectedCategory(category);
 
@@ -50,12 +48,10 @@ const Products = () => {
 		}
 	};
 
-	// Handle add to cart
 	const handleAddToCart = (productId) => {
 		addToCart(productId);
 	};
 
-	// Get unique product ID (Kroger or MongoDB)
 	const getProductId = (product) => {
 		return product._id || product.productId || product.id;
 	};
@@ -77,12 +73,9 @@ const Products = () => {
 
 	return (
 		<div className="min-h-screen bg-white">
-			{/* Search Bar */}
 			<ProductSearch />
 
-			{/* Main Content */}
 			<div className="max-w-7xl mx-auto px-4 py-12">
-				{/* Category Filter */}
 				{categories.length > 0 && (
 					<div className="mb-8">
 						<h3 className="text-lg font-semibold text-primary-forest-green mb-4">
@@ -119,7 +112,6 @@ const Products = () => {
 					</div>
 				)}
 
-				{/* Products Grid */}
 				{displayedProducts.length === 0 ? (
 					<div className="text-center py-12">
 						<div className="text-6xl mb-4">🛒</div>
@@ -141,7 +133,6 @@ const Products = () => {
 					</div>
 				) : (
 					<>
-						{/* Results Count */}
 						<div className="mb-6 text-gray-600">
 							<p>
 								Showing{" "}
@@ -154,7 +145,6 @@ const Products = () => {
 							</p>
 						</div>
 
-						{/* Products Grid */}
 						<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
 							{displayedProducts.map((product) => (
 								<div key={getProductId(product)}>
@@ -172,7 +162,6 @@ const Products = () => {
 					</>
 				)}
 
-				{/* Info Section */}
 				<div className="mt-16 text-center bg-primary-sage-green/20 rounded-lg p-8">
 					<h3 className="text-xl font-semibold text-primary-forest-green mb-2">
 						Real-time Kroger Products

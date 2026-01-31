@@ -18,7 +18,7 @@ export const addProduct = async (request, response) => {
 			}),
 		);
 
-		await Product.create({ ...productData, image: imagesUrl });
+		await KrogerProduct.create({ ...productData, image: imagesUrl });
 
 		response.json({
 			success: true,
@@ -36,7 +36,7 @@ export const addProduct = async (request, response) => {
 // ^ get all products: /api/inventory/
 export const inventoryList = async (request, response) => {
 	try {
-		const products = await Product.find({});
+		const products = await KrogerProduct.find({});
 		response.json({
 			success: true,
 			products,
@@ -54,7 +54,7 @@ export const inventoryList = async (request, response) => {
 export const productById = async (request, response) => {
 	try {
 		const { id } = request.params.id;
-		const product = await Product.findById(id);
+		const product = await KrogerProduct.findById(id);
 		response.json({
 			success: true,
 			product,
@@ -67,22 +67,3 @@ export const productById = async (request, response) => {
 		});
 	}
 };
-
-// ^ inStock status: /api/inventory/stock
-// ^ removed after integrating kroger API due to functionality conflicts
-// export const inStockStatus = async (request, response) => {
-// 	try {
-// 		const { id, inStock } = request.body;
-// 		await Product.findByIdAndUpdate(id, { inStock });
-// 		response.json({
-// 			success: true,
-// 			message: "Stock status updated.",
-// 		});
-// 	} catch (error) {
-// 		console.log(error.message);
-// 		response.json({
-// 			success: false,
-// 			error: error.message,
-// 		});
-// 	}
-// };

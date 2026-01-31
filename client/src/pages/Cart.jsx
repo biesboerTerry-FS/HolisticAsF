@@ -89,11 +89,18 @@ const Cart = () => {
 
 			const orderData = {
 				userId: user.id,
-				items: cartArray.map((item) => ({
-					product: item._id || item.upc,
-					productSource: item.isKrogerProduct ? "kroger" : "local",
-					quantity: item.quantity,
-				})),
+				items: cartArray.map((item) => {
+					const isKrogerProduct = item.isKrogerProduct || !item._id;
+					const productId = item._id || item.upc;
+					const productSource = isKrogerProduct ? "kroger" : "local";
+
+					return {
+						productId: productId,
+						productSource: productSource,
+						quantity: item.quantity,
+						upc: item.upc || null,
+					};
+				}),
 				address: selectedAddress._id,
 			};
 

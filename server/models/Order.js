@@ -10,13 +10,25 @@ const orderSchema = new mongoose.Schema(
 		items: [
 			{
 				product: {
-					type: mongoose.Schema.Types.ObjectId,
+					type: String,
 					required: true,
-					ref: "Product",
+				},
+				productSource: {
+					type: String,
+					enum: ["local", "kroger"],
+					default: "local",
 				},
 				quantity: {
 					type: Number,
 					required: true,
+				},
+				price: {
+					type: Number,
+					default: 0,
+				},
+				name: {
+					type: String,
+					default: "Unknown Product",
 				},
 			},
 		],
@@ -29,17 +41,12 @@ const orderSchema = new mongoose.Schema(
 			required: true,
 			ref: "Address",
 		},
-		status: {
-			type: String,
-			default: "order placed",
-		},
 		paymentType: {
 			type: String,
 			required: true,
 		},
 		isPaid: {
 			type: Boolean,
-			required: true,
 			default: false,
 		},
 		status: {

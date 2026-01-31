@@ -3,47 +3,127 @@ import KrogerProduct from "../models/KrogerProduct.js";
 import Order from "../models/Order.js";
 import User from "../models/User.js";
 
-// ^ place order cod: /api/order/cod:
+// ^ place order cod: /api/order/cod
 export const placeOrderCOD = async (request, response) => {
 	try {
 		console.log("========== placeOrderCOD ==========");
 		const userId = request.user.id;
 		const { items, address } = request.body;
+
 		console.log("userId:", userId);
-		console.log("items:", items.length);
+		console.log("items count:", items.length);
 		console.log("address:", address);
 
 		if (!address || items.length === 0) {
 			return response.json({
 				success: false,
-				message: "Invalid data",
+				message: "Invalid data: missing address or items",
 			});
 		}
+
+		const processedItems = [];
 		let amount = 0;
+
 		for (const item of items) {
-			const product = await Product.findById(item.product);
-			if (!product) {
-				return response.json({
-					success: false,
-					message: `Product not found: ${item.product}`,
+			console.log(`\nProcessing item:`, {
+				productId: item.productId,
+				productSource: item.productSource,
+				quantity: item.quantity,
+			});
+
+			let product = null;
+			let itemPrice = 0;
+			let itemName = "Unknown Product";
+
+			if (item.productSource === "kroger") {
+				console.log(
+					`Looking up Kroger product with UPC: ${item.productId}`,
+				);
+				product = await KrogerProduct.findOne({
+					upc: item.productId,
 				});
+				if (product) {
+					itemPrice = product.offerPrice || product.price || 0;
+					itemName =
+						product.name || product.description || "Kroger Product";
+					console.log(
+						`Kroger product found: ${itemName}, Price: ${itemPrice}`,
+					);
+				} else {
+					console.warn(
+						`Kroger product not found for UPC: ${item.productId}`,
+					);
+					itemPrice = 0;
+					itemName = "Kroger Product (Not Found)";
+				}
+			} else {
+				console.log(
+					`Looking up local product with ObjectId: ${item.productId}`,
+				);
+				try {
+					product = await Product.findById(item.productId);
+
+					if (product) {
+						itemPrice = product.offerPrice || product.price || 0;
+						itemName = product.name || "Local Product";
+						console.log(
+							`Local product found: ${itemName}, Price: ${itemPrice}`,
+						);
+					} else {
+						console.warn(
+							`Local product not found: ${item.productId}`,
+						);
+						return response.json({
+							success: false,
+							message: `Product not found: ${item.productId}`,
+						});
+					}
+				} catch (err) {
+					console.error(
+						`Invalid product ID format: ${item.productId}`,
+						err.message,
+					);
+					return response.json({
+						success: false,
+						message: `Invalid product ID: ${item.productId}`,
+					});
+				}
 			}
-			amount += product.offerPrice * item.quantity;
+
+			const itemTotal = itemPrice * item.quantity;
+			amount += itemTotal;
+
+			console.log(
+				`Item subtotal: ${itemPrice} × ${item.quantity} = ${itemTotal}`,
+			);
+
+			processedItems.push({
+				product: item.productId,
+				productSource: item.productSource,
+				quantity: item.quantity,
+				price: itemPrice,
+				name: itemName,
+			});
 		}
 
-		// ^ add tax 7.85%
-		amount += Math.floor(amount * 0.0785);
-		console.log("Total amount with tax:", amount);
+		const tax = Math.floor(amount * 0.0785);
+		const totalAmount = amount + tax;
+
+		console.log(`\nOrder Summary:`);
+		console.log(`Subtotal: ${amount}`);
+		console.log(`Tax (7.85%): ${tax}`);
+		console.log(`Total: ${totalAmount}`);
 
 		const order = await Order.create({
 			userId,
-			items,
-			amount,
+			items: processedItems,
+			amount: totalAmount,
 			address,
 			paymentType: "cod",
 			status: "pending",
 		});
-		console.log("Order created with ID:", order._id);
+
+		console.log("✅ Order created with ID:", order._id);
 
 		const updatedUser = await User.findByIdAndUpdate(
 			userId,
@@ -52,13 +132,13 @@ export const placeOrderCOD = async (request, response) => {
 		);
 
 		console.log(
-			"Order linked to user, total orders:",
-			updatedUser.orders.length,
+			`Order linked to user. Total orders: ${updatedUser.orders.length}`,
 		);
 
 		return response.json({
 			success: true,
-			message: "Order placed.",
+			message: "Order placed successfully",
+			orderId: order._id,
 		});
 	} catch (error) {
 		console.error("Error in placeOrderCOD:", error.message);
@@ -78,17 +158,13 @@ export const getUserOrders = async (request, response) => {
 
 		const orders = await Order.find({
 			userId,
-			$or: [{ paymentType: "cod" }, { isPaid: true }],
 		})
-			.populate({
-				path: "items.product",
-				model: "Product",
-			})
 			.populate({
 				path: "address",
 				model: "Address",
 			})
 			.sort({ createdAt: -1 });
+
 		console.log(`Found ${orders.length} orders for user ${userId}`);
 
 		response.json({
@@ -108,11 +184,13 @@ export const getUserOrders = async (request, response) => {
 export const getAllOrders = async (request, response) => {
 	try {
 		console.log("========== getAllOrders (Admin) ==========");
-		const orders = await Order.find({
-			$or: [{ paymentType: "cod" }, { isPaid: true }],
-		})
-			.populate("items.product address")
+		const orders = await Order.find({})
+			.populate({
+				path: "address",
+				model: "Address",
+			})
 			.sort({ createdAt: -1 });
+
 		console.log(`Found ${orders.length} total orders`);
 
 		response.json({
@@ -131,34 +209,7 @@ export const getAllOrders = async (request, response) => {
 // ^ update order status : /api/order/:orderId
 export const updateOrderStatus = async (request, response) => {
 	try {
-		const { orderId } = request.params;
-		const { status } = request.body;
-
-		console.log("========== updateOrderStatus ==========");
-		console.log("orderId:", orderId);
-		console.log("status:", status);
-
-		if (!status) {
-			return response.json({
-				success: false,
-				message: "Status is required",
-			});
-		}
-
-		const validStatuses = [
-			"pending",
-			"processing",
-			"shipped",
-			"delivered",
-			"cancelled",
-		];
-
-		if (!validStatuses.includes(status)) {
-			return response.json({
-				success: false,
-				message: `Invalid status. Valid values: ${validStatuses.join(", ")}`,
-			});
-		}
+		const { orderId, status } = request.body;
 
 		const order = await Order.findByIdAndUpdate(
 			orderId,
@@ -173,63 +224,8 @@ export const updateOrderStatus = async (request, response) => {
 			});
 		}
 
-		console.log(`Order status updated to: ${status}`);
-
-		response.json({
-			success: true,
-			message: "Order status updated",
-			order,
-		});
+		response.json({ success: true, message: "Status updated", order });
 	} catch (error) {
-		console.error("Error in updateOrderStatus:", error.message);
-		response.json({
-			success: false,
-			message: error.message,
-		});
-	}
-};
-
-// ^ place order Online Payment : /api/order/online
-export const placeOrderOnline = async (request, response) => {
-	try {
-		console.log("========== placeOrderOnline ==========");
-
-		const userId = request.user.id;
-		const { items, address } = request.body;
-
-		if (!items || items.length === 0 || !address) {
-			return response.json({
-				success: false,
-				message: "Invalid order data",
-			});
-		}
-
-		// Calculate amount
-		let amount = 0;
-		for (const item of items) {
-			const product = await Product.findById(item.product);
-			if (!product) {
-				return response.json({
-					success: false,
-					message: `Product not found: ${item.product}`,
-				});
-			}
-			amount += product.offerPrice * item.quantity;
-		}
-		amount += Math.floor(amount * 0.0785);
-
-		console.log(`Payment URL generated`);
-
-		response.json({
-			success: true,
-			message: "Redirecting to payment gateway",
-			url: paymentUrl,
-		});
-	} catch (error) {
-		console.error("Error in placeOrderOnline:", error.message);
-		response.json({
-			success: false,
-			message: error.message,
-		});
+		response.json({ success: false, message: error.message });
 	}
 };

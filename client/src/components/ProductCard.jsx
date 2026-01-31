@@ -17,9 +17,21 @@ const ProductCard = ({ product }) => {
 	const offerPrice =
 		product.offerPrice ?? product.price?.sale ?? regularPrice;
 
-	const imageSrc =
-		(Array.isArray(product.image) ? product.image[0] : product.image) ||
-		assets.leaf;
+	const resolveImage = () => {
+		if (product.image) {
+			return Array.isArray(product.image)
+				? product.image[0]
+				: product.image;
+		}
+
+		if (product.upc) {
+			return `/api/media/image?upc=${product.upc}`;
+		}
+
+		return assets.leaf;
+	};
+
+	const imageSrc = resolveImage();
 
 	const handleNavigation = () => {
 		if (product?.category && (product._id || product.upc)) {

@@ -11,6 +11,8 @@ import addressRouter from "./routes/addressRoutes.js";
 import orderRouter from "./routes/orderRoutes.js";
 import connectCloudinary from "./configs/cloudinary.js";
 import krogerRouter from "./routes/krogerRoutes.js";
+import newsletterRouter from "./routes/newsletterRoute.js";
+import fetch from "node-fetch";
 
 const app = express();
 
@@ -33,6 +35,31 @@ app.use("/api/cart", cartRouter);
 app.use("/api/address", addressRouter);
 app.use("/api/order", orderRouter);
 app.use("/api/kroger", krogerRouter);
+app.use("/api/newsletter", newsletterRouter);
+
+app.get("/api/media/image", async (req, res) => {
+	try {
+		const { upc } = req.query;
+
+		if (!upc) {
+			return res.status(400).send("Missing UPC");
+		}
+
+		const imageUrl = `https://www.kroger.com/product/images/large/front/${upc}`;
+
+		const response = await fetch(imageUrl);
+
+		if (!response.ok) {
+			return res.redirect("/fallback.png");
+		}
+
+		res.setHeader("Content-Type", response.headers.get("content-type"));
+		response.body.pipe(res);
+	} catch (err) {
+		console.error("Image proxy error:", err.message);
+		res.redirect("/fallback.png");
+	}
+});
 
 app.use((error, request, response, next) => {
 	console.error("Server error:", error);

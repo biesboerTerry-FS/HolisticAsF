@@ -148,3 +148,22 @@ export const logoutUser = async (request, response) => {
 		});
 	}
 };
+
+// ^ clerk sync for user
+export const syncClerkUser = async (request, response) => {
+	try {
+		const { clerkId, email, name } = request.body;
+		console.log("Data received for sync:", { clerkId, email, name });
+
+		const user = await User.findOneAndUpdate(
+			{ clerkId },
+			{ clerkId, email, name },
+			{ new: true, upsert: true, setDefaultsOnInsert: true },
+		);
+		console.log("User saved to MongoDB:", user);
+		response.json({ success: true, user });
+	} catch (error) {
+		console.error("MongoDB Sync Error Detail:", error);
+		response.status(500).json({ success: false, message: error.message });
+	}
+};
