@@ -1,7 +1,10 @@
 import React, { useState } from "react";
 import { Mail, Phone, Send } from "lucide-react";
+import { useAppContext } from "../context/AppContext";
+import toast from "react-hot-toast";
 
 const Contact = () => {
+	const { axios } = useAppContext();
 	const [formData, setFormData] = useState({
 		name: "",
 		email: "",
@@ -10,6 +13,7 @@ const Contact = () => {
 	});
 
 	const [submitted, setSubmitted] = useState(false);
+	const [isLoading, setIsLoading] = useState(false);
 
 	const handleChange = (e) => {
 		const { name, value } = e.target;
@@ -19,12 +23,54 @@ const Contact = () => {
 		}));
 	};
 
-	const handleSubmit = (e) => {
+	const handleSubmit = async (e) => {
 		e.preventDefault();
-		console.log("Form submitted:", formData);
-		setSubmitted(true);
-		setFormData({ name: "", email: "", subject: "", message: "" });
-		setTimeout(() => setSubmitted(false), 3000);
+
+		// Validate form data
+		if (
+			!formData.name ||
+			!formData.email ||
+			!formData.subject ||
+			!formData.message
+		) {
+			toast.error("Please fill in all fields");
+			return;
+		}
+
+		// Validate email
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		if (!emailRegex.test(formData.email)) {
+			toast.error("Please enter a valid email address");
+			return;
+		}
+
+		setIsLoading(true);
+
+		try {
+			console.log("Submitting contact form:", formData);
+
+			const { data } = await axios.post("/api/contact/submit", formData);
+
+			console.log("Response:", data);
+
+			if (data.success) {
+				toast.success(data.message || "Message sent successfully!");
+				setFormData({ name: "", email: "", subject: "", message: "" });
+				setSubmitted(true);
+				setTimeout(() => setSubmitted(false), 3000);
+			} else {
+				toast.error(data.message || "Failed to send message");
+			}
+		} catch (error) {
+			console.error("Error submitting contact form:", error);
+			toast.error(
+				error.response?.data?.message ||
+					error.message ||
+					"Failed to send message",
+			);
+		} finally {
+			setIsLoading(false);
+		}
 	};
 
 	return (
@@ -103,11 +149,12 @@ const Contact = () => {
 
 					{submitted && (
 						<div className="mb-6 p-4 bg-primary-sage-green text-primary-forest-green rounded-lg">
-							thank you! your message has been sent successfully.
+							✅ Thank you! Your message has been sent
+							successfully. We'll get back to you within 24 hours.
 						</div>
 					)}
 
-					<div
+					<form
 						onSubmit={handleSubmit}
 						className="flex flex-col gap-4"
 					>
@@ -123,6 +170,7 @@ const Contact = () => {
 								required
 								className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-sage-green"
 								placeholder="your name"
+								disabled={isLoading}
 							/>
 						</div>
 
@@ -138,6 +186,7 @@ const Contact = () => {
 								required
 								className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-sage-green"
 								placeholder="john@example.com"
+								disabled={isLoading}
 							/>
 						</div>
 
@@ -153,6 +202,7 @@ const Contact = () => {
 								required
 								className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-sage-green"
 								placeholder="how can we help?"
+								disabled={isLoading}
 							/>
 						</div>
 
@@ -168,17 +218,19 @@ const Contact = () => {
 								rows="5"
 								className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-sage-green resize-none"
 								placeholder="your message here..."
+								disabled={isLoading}
 							></textarea>
 						</div>
 
 						<button
-							onClick={handleSubmit}
-							className="flex items-center justify-center gap-2 w-full bg-primary-forest-green hover:bg-primary-sage-green text-white font-medium py-3 rounded-lg transition"
+							type="submit"
+							disabled={isLoading}
+							className="flex items-center justify-center gap-2 w-full bg-primary-forest-green hover:bg-primary-sage-green text-white font-medium py-3 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
 						>
 							<Send size={18} />
-							send message
+							{isLoading ? "sending..." : "send message"}
 						</button>
-					</div>
+					</form>
 				</div>
 			</div>
 		</div>

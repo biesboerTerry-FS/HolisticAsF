@@ -66,6 +66,12 @@ const Cart = () => {
 		}
 	};
 
+	const handleAddNewAddress = () => {
+		setShowAddress(false);
+		navigate("/add-address");
+		window.scrollTo(0, 0);
+	};
+
 	const placeOrder = async () => {
 		try {
 			if (!selectedAddress) {
@@ -346,9 +352,9 @@ const Cart = () => {
 									</p>
 								))}
 								<button
+									type="button"
 									onClick={() => {
-										setShowAddress(false);
-										navigate("/add-address");
+										handleAddNewAddress;
 									}}
 									className="text-primary-forest-green text-center cursor-pointer p-2 hover:bg-primary-forest-green/10"
 								>

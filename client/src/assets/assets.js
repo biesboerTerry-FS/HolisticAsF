@@ -215,7 +215,10 @@ export const footerLinks = [
 	{
 		title: "follow us",
 		links: [
-			{ text: "insta", url: "https://www.instagram.com/" },
+			{
+				text: "insta",
+				url: "https://www.instagram.com/holisticasfuuuuu/",
+			},
 			{ text: "twitter", url: "https://www.x.com/" },
 			{ text: "facebook", url: "https://www.facebook.com/" },
 		],

@@ -12,6 +12,7 @@ import orderRouter from "./routes/orderRoutes.js";
 import connectCloudinary from "./configs/cloudinary.js";
 import krogerRouter from "./routes/krogerRoutes.js";
 import newsletterRouter from "./routes/newsletterRoute.js";
+import contactRouter from "./routes/contactRoutes.js";
 import fetch from "node-fetch";
 
 const app = express();
@@ -36,6 +37,7 @@ app.use("/api/address", addressRouter);
 app.use("/api/order", orderRouter);
 app.use("/api/kroger", krogerRouter);
 app.use("/api/newsletter", newsletterRouter);
+app.use("/api/contact", contactRouter);
 
 app.get("/api/media/image", async (req, res) => {
 	try {

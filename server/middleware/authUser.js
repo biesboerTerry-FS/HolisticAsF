@@ -1,28 +1,24 @@
-import User from "../models/User.js";
+import jwt from "jsonwebtoken";
 
 const authUser = async (request, response, next) => {
 	try {
-		const { clerkid } = request.headers;
+		const token = request.cookies.token;
 
-		console.log("Clerk ID from header:", clerkid ? clerkid : "missing");
+		console.log("------------ authUser Middleware ------------");
+		console.log("token:", token ? "exists" : "missing");
 
-		if (!clerkid) {
+		if (!token) {
 			return response.json({
 				success: false,
-				message: "Not Authenticated. Please login via Clerk.",
+				message: "Not Authenticated",
 			});
 		}
 
-		const user = await User.findOne({ clerkId: clerkid });
+		const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+		console.log("decodedToken:", decodedToken);
 
-		if (!user) {
-			return response.json({
-				success: false,
-				message: "User not found in database.",
-			});
-		}
-
-		request.body.userId = user._id;
+		request.user = decodedToken;
+		console.log("request.user set:", request.user);
 
 		next();
 	} catch (error) {

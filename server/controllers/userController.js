@@ -153,17 +153,24 @@ export const logoutUser = async (request, response) => {
 export const syncClerkUser = async (request, response) => {
 	try {
 		const { clerkId, email, name } = request.body;
-		console.log("Data received for sync:", { clerkId, email, name });
 
-		const user = await User.findOneAndUpdate(
-			{ clerkId },
-			{ clerkId, email, name },
-			{ new: true, upsert: true, setDefaultsOnInsert: true },
-		);
-		console.log("User saved to MongoDB:", user);
+		let user = await User.findOne({ $or: [{ email }, { clerkId }] });
+
+		if (user) {
+			user.clerkId = clerkId;
+			if (!user.name) user.name = name;
+			await user.save();
+		} else {
+			user = await User.create({
+				clerkId,
+				email,
+				name,
+				cartItems: {},
+			});
+		}
+
 		response.json({ success: true, user });
 	} catch (error) {
-		console.error("MongoDB Sync Error Detail:", error);
-		response.status(500).json({ success: false, message: error.message });
+		response.json({ success: false, message: error.message });
 	}
 };

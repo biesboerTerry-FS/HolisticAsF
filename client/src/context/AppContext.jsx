@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import KrogerApi from "../services/KrogerApi";
-import { useUser } from "@clerk/clerk-react";
+import { useUser } from "@clerk/clerk-react"; // Import Clerk hook
 // import { dummyProducts } from "../assets/assets";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -49,6 +49,18 @@ export const AppContextProvider = ({ children }) => {
 			console.error("DB User status check failed");
 		}
 	};
+
+	// const fetchUserStatus = async () => {
+	// 	try {
+	// 		const { data } = await axios.get("/api/user/is-auth");
+	// 		if (data.success) {
+	// 			setUser(data.user);
+	// 			setCartItems(data.user.cartItems);
+	// 		}
+	// 	} catch (error) {
+	// 		setUser(null);
+	// 	}
+	// };
 
 	// ^ fetch all products
 	const fetchProducts = async (initialQuery = "healthy") => {
@@ -109,7 +121,7 @@ export const AppContextProvider = ({ children }) => {
 	const getProductsByCategory = async (category) => {
 		try {
 			setLoading(true);
-			console.log(`Loading category: ${category}`);
+			console.log(`📂 Loading category: ${category}`);
 
 			const { data } = await axios.get(
 				`/api/kroger/category/${category}`,
@@ -121,7 +133,7 @@ export const AppContextProvider = ({ children }) => {
 			if (data.success) {
 				setProducts(data.products);
 				console.log(
-					`Loaded ${data.products.length} products in ${category}`,
+					`✅ Loaded ${data.products.length} products in ${category}`,
 				);
 			} else {
 				toast.error("Failed to load category products");
@@ -206,6 +218,7 @@ export const AppContextProvider = ({ children }) => {
 	};
 
 	useEffect(() => {
+		// fetchAdminStatus();
 		fetchProducts();
 	}, []);
 
@@ -214,8 +227,7 @@ export const AppContextProvider = ({ children }) => {
 			if (clerkUser === undefined) return;
 
 			if (isSignedIn && clerkUser?.id) {
-				setIsAuthLoading(true);
-				// console.log("Attempting to sync user:", clerkUser.id);
+				console.log("Attempting to sync user:", clerkUser.id);
 				try {
 					const { data } = await axios.post("/api/user/sync", {
 						clerkId: clerkUser.id,
@@ -228,15 +240,18 @@ export const AppContextProvider = ({ children }) => {
 						setCartItems(data.user.cartItems || {});
 						setIsAdmin(data.user.role === "admin");
 						setShowUserLogin(false);
-						setIsAuthLoading(false);
 						console.log("Sync successful. Role:", data.user.role);
 					}
 				} catch (error) {
 					console.error("Sync error:", error);
+				} finally {
+					setIsAuthLoading(false);
 				}
 			} else {
+				// User is signed out
 				setUser(null);
 				setIsAdmin(false);
+				// setCartItems({});
 				setIsAuthLoading(false);
 			}
 		};
@@ -244,17 +259,16 @@ export const AppContextProvider = ({ children }) => {
 		handleSync();
 	}, [isSignedIn, clerkUser?.id]);
 
+	// Remove BOTH existing useEffects for [cartItems] and replace with this ONE:
 	useEffect(() => {
 		const updateCart = async () => {
-			if (isAuthLoading || !user?.clerkId) return;
-
 			try {
+				// No more manual headers needed!
 				const { data } = await axios.post("/api/cart/update", {
 					cartItems,
 				});
 
 				if (!data.success && data.message) {
-					console.warn("Cart sync delayed:", data.message);
 					toast.error(data.message);
 				}
 			} catch (error) {
@@ -265,20 +279,27 @@ export const AppContextProvider = ({ children }) => {
 		if (user) {
 			updateCart();
 		}
-	}, [cartItems, isAuthLoading, user?.clerkId]);
+	}, [cartItems, user]);
 
 	useEffect(() => {
+		// Create the interceptor
 		const authInterceptor = axios.interceptors.request.use(
 			(config) => {
-				const id = user?.clerkId || user?.id;
+				const identifier = user?.clerkId || user?.id;
 
-				if (id) {
-					config.headers["clerkid"] = id;
+				if (identifier) {
+					config.headers.clerkid = identifier;
 				}
+
 				return config;
 			},
-			(error) => Promise.reject(error),
+			(error) => {
+				return Promise.reject(error);
+			},
 		);
+
+		// Cleanup: Remove the interceptor when the component unmounts or user changes
+		// This prevents memory leaks and duplicate headers
 		return () => {
 			axios.interceptors.request.eject(authInterceptor);
 		};

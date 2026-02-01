@@ -18,6 +18,7 @@ import AdminLogin from "./components/admin/AdminLogin";
 import Inventory from "./pages/admin/Inventory";
 import Orders from "./pages/admin/Orders";
 import Contact from "./pages/Contact";
+import Featured from "./pages/Featured";
 
 const App = () => {
 	const isAdminPath = useLocation().pathname.includes("admin");
@@ -45,6 +46,7 @@ const App = () => {
 						path="/products/:category/:id"
 						element={<ProductDetails />}
 					/>
+					<Route path="/top-sellers" element={<Featured />} />
 					<Route path="/cart" element={<Cart />} />
 					<Route path="/add-address" element={<AddAddress />} />
 					<Route path="/my-orders" element={<MyOrders />} />

@@ -12,8 +12,8 @@ const userRouter = express.Router();
 
 userRouter.post("/register", registerUser);
 userRouter.post("/login", loginUser);
+userRouter.post("/sync", syncClerkUser);
 userRouter.get("/is-auth", authUser, isAuth);
 userRouter.get("/logout", authUser, logoutUser);
-userRouter.post("/sync", syncClerkUser);
 
 export default userRouter;
