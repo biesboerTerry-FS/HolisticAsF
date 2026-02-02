@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useAppContext } from "../context/AppContext";
 import ProductCard from "../components/ProductCard";
-import Categories from "../components/Categories";
+// import Categories from "../components/Categories";
 
 const Products = () => {
 	const { products, searchQuery, setSearchQuery } = useAppContext();
@@ -37,7 +37,7 @@ const Products = () => {
 					<ProductCard key={index} product={item} />
 				))}
 			</div>
-			<Categories />
+			{/* <Categories /> */}
 		</div>
 	);
 };

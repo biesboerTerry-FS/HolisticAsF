@@ -21,7 +21,7 @@ const Cart = () => {
 	const [cartArray, setCartArray] = useState([]);
 	const [addresses, setAddresses] = useState([]);
 	const [showAddress, setShowAddress] = useState(false);
-	const [selectedAddress, setSelectedAddress] = useState(false);
+	const [selectedAddress, setSelectedAddress] = useState(null);
 	const [paymentOption, setPaymentOption] = useState("cod");
 	const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
@@ -50,7 +50,6 @@ const Cart = () => {
 				} else {
 					setAddresses([]);
 					setSelectedAddress(null);
-					toast.info("No addresses found. Please add one.");
 				}
 			} else {
 				setAddresses([]);
@@ -74,12 +73,15 @@ const Cart = () => {
 
 	const placeOrder = async () => {
 		try {
-			if (!selectedAddress) {
-				return toast.error("Please choose an address");
+			if (!user || !user.id) {
+				console.error("User not authenticated");
+				toast.error("Please log in to place an order");
+				navigate("/login");
+				return;
 			}
 
-			if (!selectedAddress._id) {
-				return toast.error("Invalid address selected");
+			if (!selectedAddress || !selectedAddress._id) {
+				return toast.error("Please add and select a delivery address");
 			}
 
 			if (cartArray.length === 0) {
@@ -88,8 +90,9 @@ const Cart = () => {
 
 			setIsPlacingOrder(true);
 
+			console.log("═══════════════════════════════════");
 			console.log("Placing order...");
-			console.log("User ID:", user?.id);
+			console.log("User ID:", user.id);
 			console.log("Items:", cartArray.length);
 			console.log("Address:", selectedAddress._id);
 
@@ -143,6 +146,7 @@ const Cart = () => {
 			toast.error(error.message || "Failed to place order");
 		} finally {
 			setIsPlacingOrder(false);
+			console.log("═══════════════════════════════════\n");
 		}
 	};
 
@@ -158,19 +162,20 @@ const Cart = () => {
 		}
 	}, [user]);
 
-	console.log("selected address in cart:", selectedAddress);
+	console.log("Current user:", user);
+	console.log("Selected address in cart:", selectedAddress);
 
 	if (products.length === 0 || Object.keys(cartItems).length === 0) {
 		return (
 			<div className="text-center mt-20 mb-20">
 				<p className="text-primary-forest-green text-xl">
-					Your cart is empty
+					your cart is empty
 				</p>
 				<button
 					onClick={() => navigate("/products")}
 					className="mt-4 text-secondary-golden-honey hover:underline"
 				>
-					Continue Shopping
+					continue shopping
 				</button>
 			</div>
 		);
@@ -339,7 +344,7 @@ const Cart = () => {
 											setSelectedAddress(address);
 											setShowAddress(false);
 										}}
-										className="text-primary-sage-green p-2 hover:bg-primary-forest-green"
+										className="text-primary-sage-green p-2 hover:bg-primary-forest-green cursor-pointer"
 									>
 										{address.firstName} {address.lastName}
 										<br />
@@ -354,9 +359,9 @@ const Cart = () => {
 								<button
 									type="button"
 									onClick={() => {
-										handleAddNewAddress;
+										handleAddNewAddress();
 									}}
-									className="text-primary-forest-green text-center cursor-pointer p-2 hover:bg-primary-forest-green/10"
+									className="text-primary-forest-green text-center cursor-pointer p-2 hover:bg-primary-forest-green/10 w-full"
 								>
 									add new address
 								</button>
@@ -412,9 +417,17 @@ const Cart = () => {
 
 				<button
 					onClick={placeOrder}
-					className="w-full py-3 mt-6 cursor-pointer bg-primary-sage-green hover:bg-primary-forest-green text-primary-cream font-medium hover:bg-primary-forest-green-dull transition"
+					disabled={!selectedAddress || isPlacingOrder || !user}
+					title={
+						!user
+							? "please log in to place order"
+							: !selectedAddress
+								? "please add an address"
+								: ""
+					}
+					className="w-full py-3 mt-6 cursor-pointer bg-primary-sage-green hover:bg-primary-forest-green text-primary-cream font-medium transition disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary-sage-green"
 				>
-					place order
+					{isPlacingOrder ? "placing order..." : "place order"}
 				</button>
 			</div>
 		</div>

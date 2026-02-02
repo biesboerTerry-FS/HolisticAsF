@@ -26,7 +26,6 @@ const Contact = () => {
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 
-		// Validate form data
 		if (
 			!formData.name ||
 			!formData.email ||
@@ -37,7 +36,6 @@ const Contact = () => {
 			return;
 		}
 
-		// Validate email
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 		if (!emailRegex.test(formData.email)) {
 			toast.error("Please enter a valid email address");

@@ -3,22 +3,15 @@ import { assets } from "../assets/assets";
 import { useAppContext } from "../context/AppContext";
 import toast from "react-hot-toast";
 
-const InputField = ({
-	type,
-	placeholder,
-	name,
-	handleChange,
-	address = {},
-	required = true,
-}) => (
+const InputField = ({ type, placeholder, name, handleChange, address }) => (
 	<input
 		className="w-full px-2 py-2.5 border border-primary-forest-green/30 rounded outline-none text-primary-forest-green focus:border-primary-forest-green transition"
 		type={type}
 		placeholder={placeholder}
 		onChange={handleChange}
 		name={name}
-		value={address?.[name] || ""}
-		required={required}
+		value={address[name]}
+		required
 	/>
 );
 
@@ -34,6 +27,7 @@ const AddAddress = () => {
 		city: "",
 		state: "",
 		zipCode: "",
+		country: "",
 		phone: "",
 	});
 
@@ -46,35 +40,30 @@ const AddAddress = () => {
 			...prevAddress,
 			[name]: value,
 		}));
+		console.log(address);
 	};
 
 	const onSubmitHandler = async (event) => {
 		event.preventDefault();
-
-		console.log("=== Address Form Submission ===");
-		console.log("user from context:", user);
-		console.log("user._id:", user?.id);
-		console.log("address data:", address);
-
-		if (!user || !user.id) {
+		if (!user || !user._id) {
 			toast.error("user not logged in. please sign in.");
 			navigate("/login");
 			return;
 		}
-
-		console.log("User is available, proceeding...");
 		try {
 			setIsLoading(true);
 
 			const { data } = await axios.post(
 				"/api/address/add-address",
 				address,
+				// {
+				// 	withCredentials: true,
+				// },
 			);
-
-			console.log("API Response:", data);
 
 			if (data.success) {
 				toast.success(data.message);
+				navigate("/cart");
 				setAddress({
 					firstName: "",
 					lastName: "",
@@ -89,14 +78,12 @@ const AddAddress = () => {
 				setTimeout(() => {
 					navigate("/cart");
 				}, 500);
+				// return;
 			} else {
 				toast.error(data.message);
 			}
 		} catch (error) {
-			console.error("API Error:", error);
 			toast.error(error.message);
-		} finally {
-			setIsLoading(false);
 		}
 	};
 
@@ -104,16 +91,12 @@ const AddAddress = () => {
 		if (!user) {
 			navigate("/cart");
 		}
-	}, [user, navigate]);
-
-	if (!user) {
-		return null;
-	}
+	}, [user]);
 
 	return (
 		<div className="mt-16 pb-16">
 			<p className="text-2xl md:text-3xl text-primary-forest-green">
-				add{" "}
+				add shipping{" "}
 				<span className="font-semibold text-secondary-golden-honey">
 					address
 				</span>
@@ -131,7 +114,6 @@ const AddAddress = () => {
 								name="firstName"
 								type="text"
 								placeholder="first name"
-								required={true}
 							/>
 							<InputField
 								handleChange={handleChange}
@@ -139,7 +121,6 @@ const AddAddress = () => {
 								name="lastName"
 								type="text"
 								placeholder="last name"
-								required={true}
 							/>
 						</div>
 						<InputField
@@ -148,7 +129,6 @@ const AddAddress = () => {
 							name="streetLine1"
 							type="text"
 							placeholder="street line 1"
-							required={true}
 						/>
 						<InputField
 							handleChange={handleChange}
@@ -156,7 +136,6 @@ const AddAddress = () => {
 							name="streetLine2"
 							type="text"
 							placeholder="street line 2"
-							required={false}
 						/>
 						<div>
 							<InputField
@@ -165,7 +144,6 @@ const AddAddress = () => {
 								name="city"
 								type="text"
 								placeholder="city"
-								required={true}
 							/>
 						</div>
 						<div className="grid grid-cols-2 gap-4">
@@ -175,7 +153,6 @@ const AddAddress = () => {
 								name="state"
 								type="text"
 								placeholder="state"
-								required={true}
 							/>
 							<InputField
 								handleChange={handleChange}
@@ -183,7 +160,6 @@ const AddAddress = () => {
 								name="zipCode"
 								type="text"
 								placeholder="zip/postal code"
-								required={true}
 							/>
 						</div>
 						<InputField
@@ -192,7 +168,6 @@ const AddAddress = () => {
 							name="phone"
 							type="text"
 							placeholder="phone"
-							required={true}
 						/>
 						<InputField
 							handleChange={handleChange}
@@ -200,7 +175,6 @@ const AddAddress = () => {
 							name="email"
 							type="email"
 							placeholder="email"
-							required={true}
 						/>
 						<button
 							type="submit"
@@ -208,7 +182,7 @@ const AddAddress = () => {
 							title={!user ? "Login to add address" : ""}
 							className="w-full mt-6 bg-primary-forest-green text-white py-3 hover:bg-primary-forest-green-dull transition cursor-pointer"
 						>
-							{isLoading ? "saving address..." : "save address"}
+							save address
 						</button>
 					</form>
 				</div>

@@ -43,7 +43,7 @@ const Products = () => {
 			setDisplayedProducts(filtered);
 
 			if (filtered.length === 0) {
-				toast.info(`No products found in ${category}`);
+				toast.error(`No products found in ${category}`);
 			}
 		}
 	};

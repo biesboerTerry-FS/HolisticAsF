@@ -63,7 +63,7 @@ export const AppContextProvider = ({ children }) => {
 	// };
 
 	// ^ fetch all products
-	const fetchProducts = async (initialQuery = "") => {
+	const fetchProducts = async (initialQuery = "healthy") => {
 		try {
 			if (!initialQuery?.trim()) return;
 
@@ -102,7 +102,7 @@ export const AppContextProvider = ({ children }) => {
 				console.log(`Found ${data.products.length} products`);
 
 				if (data.products.length === 0) {
-					toast.info("No products found. Try a different search.");
+					toast.error("No products found. Try a different search.");
 				}
 			} else {
 				toast.error(data.message || "Search failed");
@@ -259,7 +259,6 @@ export const AppContextProvider = ({ children }) => {
 		handleSync();
 	}, [isSignedIn, clerkUser?.id]);
 
-	// Remove BOTH existing useEffects for [cartItems] and replace with this ONE:
 	useEffect(() => {
 		const updateCart = async () => {
 			try {
@@ -282,7 +281,6 @@ export const AppContextProvider = ({ children }) => {
 	}, [cartItems, user]);
 
 	useEffect(() => {
-		// Create the interceptor
 		const authInterceptor = axios.interceptors.request.use(
 			(config) => {
 				const identifier = user?.clerkId || user?.id;
@@ -298,8 +296,6 @@ export const AppContextProvider = ({ children }) => {
 			},
 		);
 
-		// Cleanup: Remove the interceptor when the component unmounts or user changes
-		// This prevents memory leaks and duplicate headers
 		return () => {
 			axios.interceptors.request.eject(authInterceptor);
 		};
