@@ -6,6 +6,24 @@ const Inventory = () => {
 	const { products, currency, axios, fetchProducts, loading } =
 		useAppContext();
 
+	// ^ for using with local data, not kroger
+	// const toggleStock = async (id, inStock) => {
+	// 	try {
+	// 		const { data } = await axios.post("/api/inventory/stock", {
+	// 			id,
+	// 			inStock,
+	// 		});
+	// 		if (data.success) {
+	// 			fetchProducts();
+	// 			toast.success(data.message);
+	// 		} else {
+	// 			toast.error(data.message);
+	// 		}
+	// 	} catch (error) {
+	// 		toast.error(error.message);
+	// 	}
+	// };
+
 	useEffect(() => {
 		fetchProducts("healthy");
 	}, []);

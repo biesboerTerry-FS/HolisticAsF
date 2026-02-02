@@ -10,11 +10,11 @@ const AdminLayout = () => {
 	const { axios, navigate, isAdmin, isAuthLoading } = useAppContext();
 
 	const sidebarLinks = [
-		{
-			name: "add inventory",
-			path: "/admin/add-inventory",
-			icon: assets.addIcon,
-		},
+		// {
+		// 	name: "add inventory",
+		// 	path: "/admin/add-inventory",
+		// 	icon: assets.addIcon,
+		// },
 		{
 			name: "inventory",
 			path: "/admin/inventory",

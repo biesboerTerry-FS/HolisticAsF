@@ -5,7 +5,7 @@ import { getKrogerAccessToken } from "./krogerAuth.js";
 const PLACEHOLDER_IMAGE = "https://via.placeholder.com/300x300?text=No+Image";
 
 export const fetchAndSaveKrogerProducts = async (
-	term = "healthy",
+	term = "",
 	locationId = "01400943",
 	limit = 50,
 ) => {

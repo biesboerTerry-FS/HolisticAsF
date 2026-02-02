@@ -63,7 +63,7 @@ export const AppContextProvider = ({ children }) => {
 	// };
 
 	// ^ fetch all products
-	const fetchProducts = async (initialQuery = "healthy") => {
+	const fetchProducts = async (initialQuery = "") => {
 		try {
 			if (!initialQuery?.trim()) return;
 
