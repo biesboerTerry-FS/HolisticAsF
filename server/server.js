@@ -13,6 +13,7 @@ import connectCloudinary from "./configs/cloudinary.js";
 import krogerRouter from "./routes/krogerRoutes.js";
 import newsletterRouter from "./routes/newsletterRoute.js";
 import contactRouter from "./routes/contactRoutes.js";
+import employeeRouter from "./routes/employeeRoutes.js";
 import fetch from "node-fetch";
 
 const app = express();
@@ -22,7 +23,12 @@ const port = process.env.PORT || 4000;
 await connectDb();
 await connectCloudinary();
 
-const allowedOrigins = ["http://localhost:5173"];
+const allowedOrigins = [
+	"http://localhost:5173",
+	"http://localhost:5176",
+	"http://127.0.0.1:5173",
+	"http://127.0.0.1:5176",
+];
 
 app.use(express.json());
 app.use(cookieParser());
@@ -38,6 +44,7 @@ app.use("/api/order", orderRouter);
 app.use("/api/kroger", krogerRouter);
 app.use("/api/newsletter", newsletterRouter);
 app.use("/api/contact", contactRouter);
+app.use("/api/employees", employeeRouter);
 
 app.get("/api/media/image", async (req, res) => {
 	try {

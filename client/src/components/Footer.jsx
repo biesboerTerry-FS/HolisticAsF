@@ -6,9 +6,9 @@ const Footer = () => {
 		<div className="px-6 md:px-16 lg:px-24 xl:px-32 mt-24 bg-gradient-to-b from-secondary-soft-beige to-primary-sage-green">
 			<div className="flex flex-col md:flex-row items-start justify-between gap-10 py-10 border-b border-secondary-deep-forest text-secondary-deep-forest font-semibold">
 				<div>
-					<h1 className="text-6xl text-secondary-golden-honey font-bold">
-						holisticAf
-					</h1>
+					<div className="text-6xl text-secondary-golden-honey font-bold">
+						holisticAF
+					</div>
 					<p className="max-w-[410px] mt-6">
 						Nourishing bodies, uplifting spirits, and honoring the
 						earth—one mindful bite at a time. We source the finest

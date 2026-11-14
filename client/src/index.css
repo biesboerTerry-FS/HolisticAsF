@@ -1,15 +1,17 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Merriweather:ital,opsz,wght@0,18..144,300..900;1,18..144,300..900&display=swap");
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
-	--color-primary-forest-green: #2d5b3e;
-	--color-primary-sage-green: #8cae8c;
-	--color-primary-warm-white: #fefefe;
-	--color-primary-cream: #f7f5f2;
-	--color-secondary-earthy-brown: #8b4513;
-	--color-secondary-golden-honey: #daa520;
-	--color-secondary-soft-beige: #f5f5dc;
-	--color-secondary-deep-forest: #1b3b28;
+	--color-primary-forest-green: #1e4d43;
+	--color-primary-sage-green: #9dbfaf;
+	--color-primary-warm-white: #ffffff;
+	--color-primary-cream: #f5f3ee;
+	--color-secondary-earthy-brown: #a8552a;
+	--color-secondary-golden-honey: #e0a030;
+	--color-secondary-soft-beige: #faf8f4;
+	--color-secondary-deep-forest: #0f2b26;
 	--color-semantic-success: #4caf50;
 	--color-semantic-warning: #ff9800;
 	--color-semantic-error: #f44336;
@@ -18,6 +20,21 @@
 	--color-neutral-medium-gray: #666666;
 	--color-neutral-light-gray: #cccccc;
 	--color-neutral-off-white: #f9f9f9;
+}
+
+.dark {
+	--color-primary-forest-green: #6cc3aa;
+	--color-primary-sage-green: #2b4a43;
+	--color-primary-warm-white: #162622;
+	--color-primary-cream: #1d322d;
+	--color-secondary-earthy-brown: #d08a5a;
+	--color-secondary-golden-honey: #e9b04a;
+	--color-secondary-soft-beige: #0e1816;
+	--color-secondary-deep-forest: #e3f1ec;
+	--color-neutral-medium-gray: #9ca3a1;
+	--color-neutral-light-gray: #3a4a46;
+	--color-neutral-off-white: #121e1b;
+	color-scheme: dark;
 }
 
 * {

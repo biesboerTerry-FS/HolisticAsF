@@ -72,7 +72,7 @@ const Products = () => {
 	}
 
 	return (
-		<div className="min-h-screen bg-white">
+		<div className="min-h-screen bg-primary-warm-white">
 			<ProductSearch />
 
 			<div className="max-w-7xl mx-auto px-4 py-12">
@@ -86,7 +86,7 @@ const Products = () => {
 								onClick={() => handleCategoryChange("all")}
 								className={`px-4 py-2 rounded transition ${
 									selectedCategory === "all"
-										? "bg-primary-forest-green text-white"
+										? "bg-primary-forest-green text-primary-warm-white"
 										: "bg-gray-200 text-primary-forest-green hover:bg-gray-300"
 								}`}
 							>
@@ -101,7 +101,7 @@ const Products = () => {
 									}
 									className={`px-4 py-2 rounded transition ${
 										selectedCategory === category
-											? "bg-primary-forest-green text-white"
+											? "bg-primary-forest-green text-primary-warm-white"
 											: "bg-gray-200 text-primary-forest-green hover:bg-gray-300"
 									}`}
 								>
@@ -126,7 +126,7 @@ const Products = () => {
 								setSelectedCategory("all");
 								setDisplayedProducts(products);
 							}}
-							className="px-6 py-2 bg-primary-forest-green text-white rounded hover:bg-primary-forest-green-dull transition"
+							className="px-6 py-2 bg-primary-forest-green text-primary-warm-white rounded hover:bg-primary-forest-green-dull transition"
 						>
 							View All Products
 						</button>

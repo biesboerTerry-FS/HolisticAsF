@@ -72,7 +72,6 @@ import organic_vegitable_image from "./organic_vegitable_image.png";
 import grain_image from "./grain_image.png";
 import fresh_fruits_image from "./fresh_fruits_image.png";
 import bottles_image from "./bottles_image.png";
-import dairy_product_image from "./dairy_product_image.png";
 import bakery_image from "./bakery_image.png";
 
 export const assets = {

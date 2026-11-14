@@ -63,10 +63,10 @@ const Newsletter = () => {
 	};
 
 	return (
-		<div className="flex flex-col items-center justify-center text-center space-y-2 mt-24 pb-14">
-			<h1 className="md:text-4xl text-2xl font-semibold text-primary-forest-green">
+		<section className="flex flex-col items-center justify-center text-center space-y-2 mt-24 pb-14">
+			<h2 className="md:text-4xl text-2xl font-semibold text-primary-forest-green">
 				stay in the know
-			</h1>
+			</h2>
 			<p className="md:text-lg text-primary-forest-green pb-8">
 				subscribe to get the latest offers, new arrivals, and exclusive
 				discounts
@@ -87,12 +87,12 @@ const Newsletter = () => {
 				<button
 					type="submit"
 					disabled={loading}
-					className="md:px-12 px-8 h-full bg-primary-sage-green hover:bg-primary-forest-green text-primary-warm-white transition-all cursor-pointer rounded-md rounded-l-none disabled:opacity-50 disabled:cursor-not-allowed"
+					className="md:px-12 px-8 h-full bg-primary-forest-green hover:bg-secondary-deep-forest text-primary-warm-white transition-all cursor-pointer rounded-md rounded-l-none disabled:opacity-50 disabled:cursor-not-allowed"
 				>
 					{loading ? "subscribing..." : "subscribe"}
 				</button>
 			</form>
-		</div>
+		</section>
 	);
 };
 

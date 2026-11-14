@@ -5,14 +5,14 @@ import {
 	inventoryList,
 	productById,
 } from "../controllers/productController.js";
-import authAdmin from "../middleware/authAdmin.js";
+// import authAdmin from "../middleware/authAdmin.js";
 
 const productRouter = express.Router();
 
 productRouter.post(
 	"/add-inventory",
 	upload.array(["images"]),
-	authAdmin,
+	// authAdmin,
 	addProduct,
 );
 productRouter.get("/inventory", inventoryList);

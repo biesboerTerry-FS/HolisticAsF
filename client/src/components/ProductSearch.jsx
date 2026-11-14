@@ -64,12 +64,12 @@ const ProductSearch = () => {
 						value={searchQuery}
 						onChange={(e) => setSearchQuery(e.target.value)}
 						disabled={isSearching || loading}
-						className="flex-1 px-4 py-3 border-2 border-primary-forest-green rounded outline-none focus:border-secondary-golden-honey transition bg-white text-primary-forest-green placeholder-gray-500 disabled:opacity-50"
+						className="flex-1 px-4 py-3 border-2 border-primary-forest-green rounded outline-none focus:border-secondary-golden-honey transition bg-primary-warm-white text-primary-forest-green placeholder-gray-500 disabled:opacity-50"
 					/>
 					<button
 						type="submit"
 						disabled={isSearching || loading}
-						className="px-8 py-3 bg-primary-forest-green text-white rounded font-medium hover:bg-primary-forest-green-dull transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+						className="px-8 py-3 bg-primary-forest-green text-primary-warm-white rounded font-medium hover:bg-primary-forest-green-dull transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
 					>
 						{isSearching || loading ? (
 							<>
@@ -93,7 +93,7 @@ const ProductSearch = () => {
 							key={suggestion}
 							onClick={() => handleSuggestionClick(suggestion)}
 							disabled={isSearching || loading}
-							className="px-4 py-2 bg-white border border-primary-forest-green text-primary-forest-green rounded hover:bg-primary-forest-green hover:text-white transition text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+							className="px-4 py-2 bg-primary-warm-white border border-primary-forest-green text-primary-forest-green rounded hover:bg-primary-forest-green hover:text-primary-warm-white transition text-sm disabled:opacity-50 disabled:cursor-not-allowed"
 						>
 							{suggestion}
 						</button>

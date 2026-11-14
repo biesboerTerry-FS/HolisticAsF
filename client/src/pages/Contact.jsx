@@ -223,7 +223,7 @@ const Contact = () => {
 						<button
 							type="submit"
 							disabled={isLoading}
-							className="flex items-center justify-center gap-2 w-full bg-primary-forest-green hover:bg-primary-sage-green text-white font-medium py-3 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+							className="flex items-center justify-center gap-2 w-full bg-primary-forest-green hover:bg-primary-sage-green text-primary-warm-white font-medium py-3 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
 						>
 							<Send size={18} />
 							{isLoading ? "sending..." : "send message"}

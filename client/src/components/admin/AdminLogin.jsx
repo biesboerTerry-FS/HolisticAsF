@@ -35,43 +35,57 @@ const AdminLogin = () => {
 		!isAdmin && (
 			<form
 				onSubmit={onSubmitHandler}
-				className="min-h-screen flex items-center text-sm text-primary-forest-green"
+				className="min-h-screen flex items-center justify-center bg-secondary-soft-beige px-4 text-sm text-primary-forest-green"
 			>
-				<div
-					className="flex flex-col gap-5 m-auto items-start p-8 py-12 min-w-80 sm:min-w-88 rounded-lg shadow-xl border border-primary-forest-green bg-primary-sage-green/50
-				"
-				>
-					<p className="text-2xl font-medium m-auto">
+				<div className="flex flex-col gap-5 w-full max-w-sm items-start p-8 rounded-lg shadow-xl border border-primary-forest-green/30 bg-primary-warm-white">
+					<p className="text-3xl font-bold text-secondary-golden-honey">
+						holisticAF
+					</p>
+					<p className="text-2xl font-medium">
 						admin{" "}
 						<span className="text-secondary-golden-honey">
 							login
 						</span>
 					</p>
 					<div className="w-full">
-						<p className="text-primary-forest-green">email</p>
+						<label
+							htmlFor="admin-email"
+							className="text-primary-forest-green"
+						>
+							email
+						</label>
 						<input
+							id="admin-email"
 							onChange={(event) => setEmail(event.target.value)}
 							value={email}
-							placeholder="type here"
-							className="border outline-primary-cream bg-primary-cream rounded w-full p-2 mt-1 "
+							placeholder="you@example.com"
+							className="border border-primary-forest-green/40 outline-primary-sage-green bg-primary-cream rounded w-full p-2 mt-1 focus:border-primary-forest-green"
 							type="email"
+							autoComplete="username"
 							required
 						/>
 					</div>
 					<div className="w-full">
-						<p className="text-primary-forest-green">password</p>
+						<label
+							htmlFor="admin-password"
+							className="text-primary-forest-green"
+						>
+							password
+						</label>
 						<input
+							id="admin-password"
 							onChange={(event) =>
 								setPassword(event.target.value)
 							}
 							value={password}
-							placeholder="type here"
-							className="border outline-primary-cream bg-primary-cream rounded w-full p-2 mt-1 "
+							placeholder="enter your password"
+							className="border border-primary-forest-green/40 outline-primary-sage-green bg-primary-cream rounded w-full p-2 mt-1 focus:border-primary-forest-green"
 							type="password"
+							autoComplete="current-password"
 							required
 						/>
 					</div>
-					<button className="bg-primary-forest-green text-primary-cream w-full py-2 rounded-md cursor-pointer">
+					<button className="bg-primary-forest-green text-primary-cream w-full py-2 rounded-md cursor-pointer transition hover:bg-secondary-deep-forest focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-golden-honey">
 						login
 					</button>
 				</div>

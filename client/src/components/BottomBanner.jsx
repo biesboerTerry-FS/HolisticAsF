@@ -29,20 +29,22 @@ const BottomBanner = () => {
 	];
 
 	return (
-		<div className="relative mt-24">
+		<div className="relative mt-24 rounded-3xl overflow-hidden border border-primary-forest-green/30 shadow-lg bg-gradient-to-b from-[#1e4d43] to-[#9dbfaf]">
 			<img
 				src={assets.bottomBanner}
 				alt="banner"
-				className="w-full max-h-140 hidden lg:block object-cover object-right bg-gradient-to-r from-primary-forest-green to-primary-sage-green"
+				className="absolute inset-0 w-full h-full hidden lg:block object-cover object-right"
 			/>
 
 			<img
 				src={assets.bottomBannerSmall}
 				alt="banner"
-				className="w-full hidden md:block lg:hidden object-cover object-bottom bg-gradient-to-b from-primary-forest-green to-primary-sage-green"
+				className="absolute inset-0 w-full h-full hidden md:block lg:hidden object-cover object-bottom"
 			/>
 
-			<div className="md:absolute md:inset-0 md:flex md:items-end lg:items-center md:justify-start bg-gradient-to-b from-primary-forest-green to-primary-sage-green md:bg-none px-4 md:px-8 lg:px-16 py-8 md:pb-8 lg:pb-0">
+			<div className="absolute inset-0 hidden md:block bg-gradient-to-r from-[#1e4d43] via-[#1e4d43]/70 to-transparent" />
+
+			<div className="relative px-4 md:px-8 lg:px-16 py-10 md:py-16 lg:py-20">
 				<div className="flex flex-col gap-3 sm:gap-4 md:gap-6 lg:gap-8 w-full md:max-w-[40%]">
 					{features.map((feature, index) => (
 						<div
@@ -52,14 +54,14 @@ const BottomBanner = () => {
 							<img
 								src={feature.icon}
 								alt={feature.title}
-								className="w-8 h-8 sm:w-10 sm:h-10 md:w-14 md:h-14 lg:w-16 lg:h-16 flex-shrink-0 mt-0.5"
+								className="w-8 h-8 sm:w-10 sm:h-10 md:w-14 md:h-14 lg:w-16 lg:h-16 flex-shrink-0 mt-0.5 rounded-xl"
 							/>
 
 							<div className="flex flex-col">
 								<h3 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-secondary-golden-honey mb-0.5 md:mb-1">
 									{feature.title}
 								</h3>
-								<p className="text-xs sm:text-sm md:text-base lg:text-lg text-secondary-soft-beige leading-snug">
+								<p className="text-xs sm:text-sm md:text-base lg:text-lg text-[#ffffff] leading-snug">
 									{feature.description}
 								</p>
 							</div>

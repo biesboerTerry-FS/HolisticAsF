@@ -1,107 +1,144 @@
-import React, { useEffect } from "react";
-import { Link, NavLink, Outlet } from "react-router-dom";
+import React from "react";
+import { Link, NavLink, Outlet, Navigate } from "react-router-dom";
+import { useClerk } from "@clerk/clerk-react";
 import { assets } from "../../assets/assets";
 import { useAppContext } from "../../context/AppContext";
+import ThemeToggle from "../../components/ThemeToggle";
 import toast from "react-hot-toast";
-import { useClerk } from "@clerk/clerk-react";
+
+const clerkEnabled = Boolean(import.meta.env.VITE_CLERK_PUBLISHABLE_KEY);
 
 const AdminLayout = () => {
-	const { signOut } = useClerk();
-	const { axios, navigate, isAdmin, isAuthLoading } = useAppContext();
+	const clerk = clerkEnabled ? useClerk() : null;
+	const { navigate, isAdmin, isAuthLoading, setUser, setIsAdmin } = useAppContext();
 
 	const sidebarLinks = [
-		// {
-		// 	name: "add inventory",
-		// 	path: "/admin/add-inventory",
-		// 	icon: assets.addIcon,
-		// },
-		{
-			name: "inventory",
-			path: "/admin/inventory",
-			icon: assets.list,
-		},
-		{
-			name: "all orders",
-			path: "/admin/orders",
-			icon: assets.search,
-		},
+		{ name: "dashboard", path: "/admin", icon: assets.list },
+		{ name: "schedule", path: "/admin/schedule", icon: assets.list },
+		{ name: "add inventory", path: "/admin/add-inventory", icon: assets.addIcon },
+		{ name: "inventory", path: "/admin/inventory", icon: assets.list },
+		{ name: "orders", path: "/admin/orders", icon: assets.search },
 	];
 
-	useEffect(() => {
-		if (!isAuthLoading && isAdmin === false) {
-			toast.error("Access Denied: Admin only");
+	const logout = async () => {
+		try {
+			if (clerk?.signOut) await clerk.signOut();
+			setUser(null);
+			setIsAdmin(false);
+			toast.success("Logged out");
+		} catch {
+			// ignore
+		} finally {
 			navigate("/");
 		}
-	}, [isAdmin, isAuthLoading, navigate]);
+	};
 
-	if (isAuthLoading) {
+	if (clerkEnabled && isAuthLoading) {
 		return (
-			<div className="h-screen flex items-center justify-center text-primary-forest-green">
-				Verifying Admin...
+			<div className="min-h-screen flex items-center justify-center bg-secondary-soft-beige text-primary-forest-green">
+				Verifying access...
 			</div>
 		);
 	}
 
-	if (!isAdmin) return null;
-
-	const logout = async () => {
-		await signOut();
-		navigate("/");
-	};
+	if (clerkEnabled && !isAdmin) {
+		return <Navigate to="/" replace />;
+	}
 
 	return (
-		<>
-			<div className="flex items-center justify-between px-4 md:px-8 border-b border-primary-forest-green py-3 bg-primary-sage-green/40">
-				<Link to="/" className="flex items-center gap-3">
-					<img
-						className="cursor-pointer w-34 md:w-38"
-						src={assets.holisticAfLogoNoBg}
-						alt="logo"
-					/>
-					<h1 className="hidden sm:block text-primary-forest-green">
-						admin{" "}
-						<span className="text-secondary-golden-honey">
-							{" "}
-							portal
-						</span>
-					</h1>
-				</Link>
-				<div className="flex items-center gap-5 text-primary-forest-green">
-					<p>hello admin!</p>
-					<button
-						onClick={logout}
-						className="border rounded-full text-sm px-4 py-1"
-					>
-						logout
-					</button>
-				</div>
-			</div>
-			<div className="flex">
-				<div className="md:w-64 w-16 border-r h-[100vh] text-primary-forest-green border-primary-forest-green pt-4 flex flex-col transition-all duration-300 bg-primary-sage-green/40">
-					{sidebarLinks.map((item) => (
-						<NavLink
-							to={item.path}
-							key={item.name}
-							end={item.path === "/admin"}
-							className={({
-								isActive,
-							}) => `flex items-center py-3 px-4 gap-3 
-                            ${
-								isActive
-									? "border-r-4 md:border-r-[6px]  border-primary-forest-green text-primary-forest-green"
-									: "hover:bg-primary-sage-green border-primary-cream "
-							}`}
+		<div className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(157,191,175,0.18),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(224,160,48,0.10),transparent_30%)] bg-secondary-soft-beige text-primary-forest-green">
+			<header className="sticky top-0 z-30 border-b border-primary-forest-green/10 bg-primary-warm-white/75 backdrop-blur-xl">
+				<div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-6 lg:px-8">
+					<Link to="/" className="group flex items-center gap-3">
+						<div className="rounded-xl p-1.5 transition">
+							<img className="h-8 w-auto" src={assets.holisticAfLogoNoBg} alt="holisticAF logo" />
+						</div>
+						<div className="leading-tight">
+							<h1 className="text-sm font-semibold tracking-tight md:text-base">
+								admin <span className="text-secondary-golden-honey">portal</span>
+							</h1>
+							<p className="text-xs text-primary-forest-green/55">Operations dashboard</p>
+						</div>
+					</Link>
+					<div className="flex items-center gap-2 md:gap-3">
+						<div className="hidden items-center rounded-full border border-primary-forest-green/10 bg-secondary-soft-beige/70 px-3 py-1.5 text-xs text-primary-forest-green/70 sm:flex">
+							{clerkEnabled ? "Clerk enabled" : "Local dev mode"}
+						</div>
+						<ThemeToggle />
+						<button
+							onClick={logout}
+							className="rounded-full border border-primary-forest-green/15 bg-primary-warm-white/70 px-3.5 py-1.5 text-sm font-medium shadow-sm transition hover:-translate-y-0.5 hover:bg-primary-sage-green/15 hover:shadow"
 						>
-							<img className="w-8 h-8" src={item.icon} alt="" />
-							<p className="hidden md:block text-center">
-								{item.name}
-							</p>
-						</NavLink>
-					))}
+							Logout
+						</button>
+					</div>
 				</div>
-				<Outlet />
+			</header>
+
+			<div className="mx-auto flex min-h-[calc(100vh-65px)] max-w-7xl">
+				<aside className="sticky top-[65px] hidden h-[calc(100vh-65px)] w-64 shrink-0 border-r border-primary-forest-green/10 bg-primary-warm-white/45 p-4 backdrop-blur md:block">
+					<nav className="flex flex-col gap-1.5">
+						{sidebarLinks.map((item) => (
+							<NavLink
+								to={item.path}
+								key={item.name}
+								end={item.path === "/admin"}
+								className={({ isActive }) =>
+									`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all ${
+										isActive
+											? "bg-primary-forest-green text-primary-cream shadow-sm"
+											: "text-primary-forest-green/75 hover:bg-primary-sage-green/15 hover:text-primary-forest-green"
+									}`
+								}
+							>
+								{({ isActive }) => (
+									<>
+										<span className={`flex h-8 w-8 items-center justify-center rounded-lg border ${isActive ? "border-primary-cream/20 bg-primary-cream/10" : "border-primary-forest-green/10 bg-secondary-soft-beige/70"}`}>
+											<img className={`h-4 w-4 ${isActive ? "brightness-0 invert" : "opacity-75"}`} src={item.icon} alt="" />
+										</span>
+										<span className="capitalize font-medium">{item.name}</span>
+									</>
+								)}
+							</NavLink>
+						))}
+					</nav>
+					<div className="mt-6 rounded-2xl border border-primary-forest-green/10 bg-gradient-to-br from-primary-sage-green/15 to-secondary-golden-honey/10 p-4 text-xs text-primary-forest-green/70 shadow-sm">
+						<p className="font-semibold text-primary-forest-green">Admin tips</p>
+						<ul className="mt-2 space-y-1.5">
+							<li>• Monitor pending orders daily</li>
+							<li>• Keep employee schedules current</li>
+							<li>• Use dark mode for low-light work</li>
+						</ul>
+					</div>
+				</aside>
+
+				<div className="min-w-0 flex-1">
+					<div className="border-b border-primary-forest-green/10 bg-primary-warm-white/40 px-2 py-2 backdrop-blur md:hidden">
+						<nav className="flex gap-2 overflow-x-auto px-2 pb-1">
+							{sidebarLinks.map((item) => (
+								<NavLink
+									to={item.path}
+									key={item.name}
+									end={item.path === "/admin"}
+									className={({ isActive }) =>
+										`whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium capitalize transition ${
+											isActive
+												? "bg-primary-forest-green text-primary-cream"
+												: "border border-primary-forest-green/10 bg-primary-warm-white/70 text-primary-forest-green/75"
+										}`
+									}
+								>
+									{item.name}
+								</NavLink>
+							))}
+						</nav>
+					</div>
+					<main className="min-w-0">
+						<Outlet />
+					</main>
+				</div>
 			</div>
-		</>
+		</div>
 	);
 };
 

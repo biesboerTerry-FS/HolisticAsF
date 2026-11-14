@@ -17,6 +17,8 @@ import AdminLayout from "./pages/admin/AdminLayout";
 import AdminLogin from "./components/admin/AdminLogin";
 import Inventory from "./pages/admin/Inventory";
 import Orders from "./pages/admin/Orders";
+import Dashboard from "./pages/admin/Dashboard";
+import Schedule from "./pages/admin/Schedule";
 import Contact from "./pages/Contact";
 import Featured from "./pages/Featured";
 
@@ -32,7 +34,7 @@ const App = () => {
 
 			<div
 				className={`${
-					isAdminPath ? "" : "px-6 md:px-16 lg:px-24 xl:px-32 flex-1"
+					isAdminPath ? "" : "px-4 sm:px-8 lg:px-16 xl:px-24 flex-1"
 				}`}
 			>
 				<Routes>
@@ -53,11 +55,13 @@ const App = () => {
 					<Route path="/contact" element={<Contact />} />
 					<Route path="/login" element={<Login />} />
 
-					{/* //^ Admin routes */}
+					{/* //^ Admin routes (auth disabled for now) */}
 					<Route
 						path="/admin"
-						element={isAdmin ? <AdminLayout /> : <AdminLogin />}
+						element={<AdminLayout />}
 					>
+						<Route index element={<Dashboard />} />
+						<Route path="schedule" element={<Schedule />} />
 						<Route
 							path="add-inventory"
 							element={<AddInventory />}

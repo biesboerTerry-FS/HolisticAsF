@@ -180,7 +180,7 @@ const AddAddress = () => {
 							type="submit"
 							disabled={!user}
 							title={!user ? "Login to add address" : ""}
-							className="w-full mt-6 bg-primary-forest-green text-white py-3 hover:bg-primary-forest-green-dull transition cursor-pointer"
+							className="w-full mt-6 bg-primary-forest-green text-primary-warm-white py-3 hover:bg-primary-forest-green-dull transition cursor-pointer"
 						>
 							save address
 						</button>

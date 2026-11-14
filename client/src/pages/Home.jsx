@@ -7,13 +7,13 @@ import Newsletter from "../components/Newsletter";
 
 const Home = () => {
 	return (
-		<div className="mt-10">
+		<main className="mt-10">
 			<MainBanner />
 			{/* <Categories /> */}
 			<TopSellers />
 			<BottomBanner />
 			<Newsletter />
-		</div>
+		</main>
 	);
 };
 

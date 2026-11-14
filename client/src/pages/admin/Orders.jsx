@@ -2,43 +2,65 @@ import React, { useEffect, useState } from "react";
 import { useAppContext } from "../../context/AppContext";
 import { assets, dummyOrders } from "../../assets/assets";
 import toast from "react-hot-toast";
+import { getHttpErrorMessage } from "../../utils/http";
 
 const Orders = () => {
 	const { currency, axios } = useAppContext();
 	const [orders, setOrders] = useState([]);
 	const [searchTerm, setSearchTerm] = useState("");
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState("");
+	const [updatingId, setUpdatingId] = useState(null);
 
 	const fetchOrders = async () => {
+		setLoading(true);
+		setError("");
 		try {
-			const { data } = await axios.get("/api/order/admin");
+			const { data } = await axios.get("/api/order/admin", { suppressGlobalErrorToast: true });
 			if (data.success) {
-				setOrders(data.orders);
+				setOrders(Array.isArray(data.orders) ? data.orders : []);
 			} else {
-				toast.error(data.message);
+				const message = data.message || "Failed to load orders";
+				setError(message);
+				toast.error(message);
+				setOrders([]);
 			}
-		} catch (error) {
-			console.error(error);
+		} catch (err) {
+			console.error(err);
+			const message = getHttpErrorMessage(err, "Failed to load orders");
+			setError(`${message} Showing sample data if available.`);
+			toast.error(message);
 			setOrders(dummyOrders || []);
+		} finally {
+			setLoading(false);
 		}
 	};
 
 	const statusHandler = async (event, orderId) => {
+		const newStatus = event.target.value;
+		const prev = orders;
+		setUpdatingId(orderId);
+		setOrders((curr) => curr.map((o) => (o._id === orderId ? { ...o, status: newStatus } : o)));
 		try {
-			const newStatus = event.target.value;
-			const { data } = await axios.post("/api/order/status", {
-				orderId,
-				status: newStatus,
-			});
+			const { data } = await axios.post(
+				"/api/order/status",
+				{ orderId, status: newStatus },
+				{ suppressGlobalErrorToast: true },
+			);
 
 			if (data.success) {
+				toast.success("Order status updated");
 				await fetchOrders();
-				toast.success("Status updated");
 			} else {
-				toast.error(data.message);
+				setOrders(prev);
+				toast.error(data.message || "Failed to update status");
 			}
-		} catch (error) {
-			console.error(error);
-			toast.error(error.message);
+		} catch (err) {
+			console.error(err);
+			setOrders(prev);
+			toast.error(getHttpErrorMessage(err, "Failed to update status"));
+		} finally {
+			setUpdatingId(null);
 		}
 	};
 
@@ -48,122 +70,118 @@ const Orders = () => {
 
 	const filteredOrders = orders.filter((order) => {
 		const search = searchTerm.toLowerCase();
-		const matchesId = order._id.toLowerCase().includes(search);
-		const matchesProduct = order.items.some((item) =>
-			item.name.toLowerCase().includes(search),
+		const orderId = String(order?._id || "").toLowerCase();
+		const items = Array.isArray(order?.items) ? order.items : [];
+		const matchesId = orderId.includes(search);
+		const matchesProduct = items.some((item) =>
+			String(item?.name || item?.product || "").toLowerCase().includes(search),
 		);
 		return matchesId || matchesProduct;
 	});
 
 	return (
-		<div className="no-scrollbar flex-1 h-[95vh] overflow-y-scroll">
-			<div className="md:p-10 p-4 space-y-4">
-				<h2 className="text-lg font-medium text-primary-forest-green">
-					orders{" "}
-					<span className="text-secondary-golden-honey">list</span>
-				</h2>
-				<div className="max-w-6xl w-full">
+		<div className="p-4 md:p-6 lg:p-8 text-primary-forest-green">
+			<div className="mx-auto max-w-6xl space-y-5">
+				<div className="flex flex-col gap-3 rounded-3xl border border-primary-forest-green/10 bg-primary-warm-white/75 p-5 shadow-sm backdrop-blur md:flex-row md:items-end md:justify-between">
+					<div>
+						<p className="text-xs font-medium uppercase tracking-[0.16em] text-primary-forest-green/50">Fulfillment</p>
+						<h2 className="mt-1 text-2xl font-semibold tracking-tight">
+							Orders <span className="text-secondary-golden-honey">management</span>
+						</h2>
+						<p className="mt-1 text-sm text-primary-forest-green/65">
+							Search orders, review payments, and update delivery status.
+						</p>
+					</div>
+					<button
+						onClick={fetchOrders}
+						className="rounded-full border border-primary-forest-green/15 bg-secondary-soft-beige/70 px-4 py-2 text-sm font-medium transition hover:bg-primary-sage-green/15"
+					>
+						Refresh
+					</button>
+				</div>
+
+				{error ? (
+					<div className="rounded-2xl border border-semantic-error/20 bg-semantic-error/10 p-4 text-sm text-semantic-error shadow-sm">
+						{error}
+					</div>
+				) : null}
+
+				<div className="rounded-2xl border border-primary-forest-green/10 bg-primary-warm-white/75 p-3 shadow-sm backdrop-blur md:p-4">
 					<input
 						type="text"
-						placeholder="Search by Order ID or Product Name..."
+						placeholder="Search by order ID or product name..."
 						value={searchTerm}
 						onChange={(e) => setSearchTerm(e.target.value)}
-						className="w-full p-3 border border-primary-forest-green rounded-md outline-none focus:ring-1 focus:ring-secondary-golden-honey"
+						className="w-full rounded-xl border border-primary-forest-green/10 bg-secondary-soft-beige/80 px-4 py-3 text-sm outline-none transition focus:border-secondary-golden-honey/60 focus:ring-4 focus:ring-secondary-golden-honey/10"
 					/>
 				</div>
 
-				{filteredOrders && filteredOrders.length > 0 ? (
+				{loading ? (
+					<div className="space-y-3">
+						{[1, 2, 3].map((i) => (
+							<div key={i} className="h-28 animate-pulse rounded-2xl border border-primary-forest-green/10 bg-primary-warm-white/60" />
+						))}
+					</div>
+				) : filteredOrders.length > 0 ? (
 					filteredOrders.map((order, index) => (
-						<div
-							key={order._id || index}
-							className="flex flex-col max-w-6xl space-y-1 mb-4"
-						>
-							<span className="text-[10px] font-mono text-primary-forest-green/40 ml-1 uppercase">
-								Order ID: {order._id}
-							</span>
+						<div key={order._id || index} className="rounded-2xl border border-primary-forest-green/10 bg-primary-warm-white/75 p-4 shadow-sm backdrop-blur transition hover:shadow-md md:p-5">
+							<div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+								<p className="font-mono text-xs text-primary-forest-green/55">Order #{String(order._id || "").slice(-8) || "—"}</p>
+								<span className={`rounded-full px-2.5 py-1 text-xs font-medium ${order.isPaid ? "bg-semantic-success/12 text-semantic-success" : "bg-semantic-warning/12 text-semantic-warning"}`}>
+									{order.isPaid ? "Paid" : "Payment pending"}
+								</span>
+							</div>
 
-							<div className="flex flex-col md:items-center md:flex-row justify-between gap-5 p-5 rounded-md border border-primary-forest-green bg-primary-sage-green/30 shadow-sm">
-								<div className="flex gap-5 min-w-80">
-									<img
-										className="w-12 h-12 object-cover"
-										src={assets.boxIcon}
-										alt="boxIcon"
-									/>
-									<div>
-										{order.items.map((item, i) => (
-											<div
-												key={i}
-												className="flex flex-col justify-center"
-											>
-												<p className="font-medium text-primary-forest-green">
-													{item.name}{" "}
-													<span className="text-primary-forest-green/60 text-sm">
-														x {item.quantity}
-													</span>
-												</p>
-											</div>
+							<div className="grid gap-4 lg:grid-cols-[1.5fr_auto_auto_auto] lg:items-center">
+								<div className="flex min-w-0 gap-3">
+									<div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-primary-forest-green/10 bg-secondary-soft-beige/70">
+										<img className="h-7 w-7 object-contain opacity-80" src={assets.boxIcon} alt="" />
+									</div>
+									<div className="min-w-0 space-y-1">
+										{(order.items || []).map((item, i) => (
+											<p key={i} className="truncate text-sm font-medium">
+												{item.name || "Item"} <span className="text-primary-forest-green/55">× {item.quantity || 0}</span>
+											</p>
 										))}
 									</div>
 								</div>
 
-								<p className="font-semibold text-lg text-primary-forest-green">
-									{currency}
-									{typeof order.amount === "object"
-										? order.amount.total
-										: order.amount}
-								</p>
-
-								<div className="flex flex-col text-sm text-primary-forest-green/60 gap-1">
-									<p>
-										Method:{" "}
-										<span className="uppercase">
-											{order.paymentType}
-										</span>
-									</p>
-									<p>
-										Date:{" "}
-										{new Date(
-											order.createdAt,
-										).toLocaleDateString()}
-									</p>
-									<p>
-										Payment:{" "}
-										<span
-											className={
-												order.isPaid
-													? "text-primary-forest-green"
-													: "text-semantic-error"
-											}
-										>
-											{order.isPaid ? "Paid" : "Pending"}
-										</span>
+								<div className="rounded-xl border border-primary-forest-green/8 bg-secondary-soft-beige/50 px-3 py-2 text-sm">
+									<p className="text-xs text-primary-forest-green/55">Amount</p>
+									<p className="text-lg font-semibold tracking-tight">
+										{currency}
+										{Number(typeof order.amount === "object" ? order.amount?.total : order.amount || 0).toFixed(2)}
 									</p>
 								</div>
 
-								<select
-									onChange={(e) =>
-										statusHandler(e, order._id)
-									}
-									value={order.status}
-									className="p-2 text-sm font-semibold border border-primary-forest-green rounded-md bg-secondary-soft-beige text-primary-forest-green outline-none cursor-pointer"
-								>
-									<option value="pending">Pending</option>
-									<option value="processing">
-										Processing
-									</option>
-									<option value="shipped">Shipped</option>
-									<option value="delivered">Delivered</option>
-									<option value="cancelled">Cancelled</option>
-								</select>
+								<div className="space-y-1 text-sm text-primary-forest-green/70">
+									<p>Method <span className="ml-1 font-medium uppercase text-primary-forest-green">{order.paymentType || "—"}</span></p>
+									<p>Date <span className="ml-1 font-medium text-primary-forest-green">{order.createdAt ? new Date(order.createdAt).toLocaleDateString() : "—"}</span></p>
+								</div>
+
+								<div className="flex flex-col gap-1.5">
+									<label className="text-xs font-medium text-primary-forest-green/55" htmlFor={`status-${order._id}`}>Status</label>
+									<select
+										id={`status-${order._id}`}
+										onChange={(e) => statusHandler(e, order._id)}
+										value={order.status || "pending"}
+										disabled={updatingId === order._id}
+										className="rounded-xl border border-primary-forest-green/10 bg-secondary-soft-beige/80 px-3 py-2.5 text-sm font-medium outline-none transition focus:border-secondary-golden-honey/60 focus:ring-4 focus:ring-secondary-golden-honey/10 disabled:opacity-60"
+									>
+										<option value="pending">Pending</option>
+										<option value="processing">Processing</option>
+										<option value="shipped">Shipped</option>
+										<option value="delivered">Delivered</option>
+										<option value="cancelled">Cancelled</option>
+									</select>
+								</div>
 							</div>
 						</div>
 					))
 				) : (
-					<div className="text-center py-10">
-						<p className="text-primary-forest-green/50">
-							{searchTerm
-								? "No orders match your search."
-								: "No orders found in database."}
+					<div className="rounded-3xl border border-dashed border-primary-forest-green/20 bg-primary-warm-white/60 p-10 text-center shadow-sm">
+						<p className="text-primary-forest-green/65">
+							{searchTerm ? "No orders match your search." : "No orders found."}
 						</p>
 					</div>
 				)}
