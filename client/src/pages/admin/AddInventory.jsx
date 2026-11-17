@@ -91,7 +91,7 @@ const AddInventory = () => {
 								<p className="mt-1 text-xs text-primary-forest-green/55">Upload up to 4 images. First image is typically used as the primary thumbnail.</p>
 							</div>
 						</div>
-						<div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+						<div className="mt-4 grid max-w-md grid-cols-4 gap-2 sm:gap-3">
 							{Array(4)
 								.fill("")
 								.map((_, index) => (
