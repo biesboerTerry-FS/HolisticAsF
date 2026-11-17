@@ -2,6 +2,7 @@ import express from "express";
 import axios from "axios";
 import dotenv from "dotenv";
 import { fetchAndSaveKrogerProducts } from "../utils/krogerProducts.js";
+import { fetchHolisticMealProducts, mergeWithMealDbProducts } from "../utils/themealdbProducts.js";
 
 dotenv.config();
 const krogerRouter = express.Router();
@@ -115,17 +116,28 @@ krogerRouter.get("/search", async (request, response) => {
 				.json({ success: false, message: "Query required" });
 		}
 
-		const products = await fetchAndSaveKrogerProducts(
-			trimmedQuery,
-			DEFAULT_LOCATION_ID,
-			Number(limit),
+		const [krogerProducts, mealProducts] = await Promise.all([
+			fetchAndSaveKrogerProducts(
+				trimmedQuery,
+				DEFAULT_LOCATION_ID,
+				Number(limit),
+			),
+			fetchHolisticMealProducts({ query: trimmedQuery, limit: 8 }),
+		]);
+
+		const products = mergeWithMealDbProducts(krogerProducts, mealProducts);
+		console.log(
+			`Returning ${products.length} products to frontend (kroger: ${krogerProducts.length}, themealdb: ${mealProducts.length})`,
 		);
-		console.log(`Returning ${products.length} products to frontend`);
 
 		response.json({
 			success: true,
-			products: products,
+			products,
 			total: products.length,
+			sources: {
+				kroger: krogerProducts.length,
+				themealdb: mealProducts.length,
+			},
 		});
 		console.log("Search query:", trimmedQuery);
 	} catch (error) {
@@ -143,16 +155,37 @@ krogerRouter.get("/category/:category", async (request, response) => {
 		const { limit = 50 } = request.query;
 		console.log("Category query:", category);
 
-		const products = await fetchAndSaveKrogerProducts(
-			category,
-			DEFAULT_LOCATION_ID,
-			Number(limit),
-		);
+		const mealCategoryMap = {
+			vegetables: "Vegetarian",
+			vegan: "Vegan",
+			vegetarian: "Vegetarian",
+			seafood: "Seafood",
+			salads: "Side",
+			grains: "Side",
+		};
+		const mealCategory = mealCategoryMap[String(category || "").toLowerCase()] || "";
+
+		const [krogerProducts, mealProducts] = await Promise.all([
+			fetchAndSaveKrogerProducts(
+				category,
+				DEFAULT_LOCATION_ID,
+				Number(limit),
+			),
+			mealCategory
+				? fetchHolisticMealProducts({ category: mealCategory, limit: 8 })
+				: fetchHolisticMealProducts({ query: category, limit: 6 }),
+		]);
+
+		const products = mergeWithMealDbProducts(krogerProducts, mealProducts);
 
 		response.json({
 			success: true,
-			products: products,
+			products,
 			total: products.length,
+			sources: {
+				kroger: krogerProducts.length,
+				themealdb: mealProducts.length,
+			},
 		});
 	} catch (error) {
 		console.error("Category error:", error.message);
@@ -165,15 +198,19 @@ krogerRouter.get("/category/:category", async (request, response) => {
 
 krogerRouter.get("/featured", async (_request, response) => {
 	try {
-		const products = await fetchAndSaveKrogerProducts(
-			"milk",
-			DEFAULT_LOCATION_ID,
-			20,
-		);
+		const [krogerProducts, mealProducts] = await Promise.all([
+			fetchAndSaveKrogerProducts("organic", DEFAULT_LOCATION_ID, 20),
+			fetchHolisticMealProducts({ query: "vegetarian", limit: 8 }),
+		]);
+		const products = mergeWithMealDbProducts(krogerProducts, mealProducts);
 		response.json({
 			success: true,
-			products: products,
+			products,
 			total: products.length,
+			sources: {
+				kroger: krogerProducts.length,
+				themealdb: mealProducts.length,
+			},
 		});
 	} catch (error) {
 		console.error("Featured error:", error.message);
