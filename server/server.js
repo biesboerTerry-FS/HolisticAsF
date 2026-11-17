@@ -20,10 +20,23 @@ const app = express();
 
 const port = process.env.PORT || 4000;
 
-await connectDb();
-await connectCloudinary();
+let dbConnected = false;
+const ensureDb = async () => {
+	if (!dbConnected) {
+		await connectDb();
+		dbConnected = true;
+	}
+};
 
-const allowedOrigins = [
+let cloudinaryConnected = false;
+const ensureCloudinary = async () => {
+	if (!cloudinaryConnected) {
+		await connectCloudinary();
+		cloudinaryConnected = true;
+	}
+};
+
+const allowedOrigin = process.env.CORS_ORIGIN || [
 	"http://localhost:5173",
 	"http://localhost:5176",
 	"http://127.0.0.1:5173",
@@ -32,7 +45,7 @@ const allowedOrigins = [
 
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({ origin: allowedOrigins, credentials: true }));
+app.use(cors({ origin: allowedOrigin, credentials: true }));
 
 app.get("/", (request, response) => response.send("API connected"));
 app.use("/api/user", userRouter);
@@ -78,6 +91,16 @@ app.use((error, request, response, next) => {
 	});
 });
 
-app.listen(port, () => {
-	console.log(`Server is running on http://localhost:${port}`);
-});
+if (process.env.NODE_ENV !== "production" || process.env.VERCEL !== "1") {
+	ensureDb().then(() => {
+		app.listen(port, () => {
+			console.log(`Server is running on http://localhost:${port}`);
+		});
+	});
+}
+
+export default async function handler(request, response) {
+	await ensureDb();
+	await ensureCloudinary();
+	return app(request, response);
+}
