@@ -25,7 +25,7 @@ const useAppState = () => {
 		try {
 			if (!initialQuery?.trim()) return;
 			setLoading(true);
-			const { data } = await axios.get("/api/kroger/search", {
+			const { data } = await axios.get("/api/products/search", {
 				params: { query: initialQuery, limit: 50 },
 			});
 			if (data.success) {
@@ -44,7 +44,7 @@ const useAppState = () => {
 	const searchProducts = async (query) => {
 		try {
 			setLoading(true);
-			const { data } = await axios.get("/api/kroger/search", {
+			const { data } = await axios.get("/api/products/search", {
 				params: { query, limit: 50 },
 			});
 			if (data.success) {
@@ -68,7 +68,7 @@ const useAppState = () => {
 	const getProductsByCategory = async (category) => {
 		try {
 			setLoading(true);
-			const { data } = await axios.get(`/api/kroger/category/${category}`, {
+			const { data } = await axios.get(`/api/products/category/${category}`, {
 				params: { limit: 50 },
 			});
 			if (data.success) {

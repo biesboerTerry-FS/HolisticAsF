@@ -1,12 +1,24 @@
 import axios from "axios";
 
 const BASE_URL = "https://www.themealdb.com/api/json/v1/1";
+const PLACEHOLDER_IMAGE =
+	"https://via.placeholder.com/300x300?text=Holistic";
 
+// Words that describe a holistic / clean / health-focused product.
 const HOLISTIC_KEYWORDS = [
 	"organic",
+	"holistic",
+	"clean",
+	"healthy",
+	"natural",
+	"wholesome",
+	"nourishing",
+	"wellness",
+	"whole food",
+	"wholefood",
+	"plant",
 	"vegan",
 	"vegetarian",
-	"plant",
 	"salad",
 	"grain",
 	"quinoa",
@@ -33,16 +45,47 @@ const HOLISTIC_KEYWORDS = [
 	"detox",
 	"green",
 	"fiber",
+	"fresh",
 ];
 
-const PREFERRED_CATEGORIES = new Set([
+// Generic search terms should never be used as a literal meal-name filter —
+// meals are not named "healthy" or "organic", but their contents qualify.
+const GENERIC_HOLISTIC_TERMS = [
+	"organic",
+	"holistic",
+	"clean",
+	"healthy",
+	"natural",
+	"wholesome",
+	"wellness",
+	"detox",
+	"fresh",
+	"whole",
+];
+
+const CATEGORIES = [
 	"Vegetarian",
 	"Vegan",
 	"Side",
 	"Seafood",
-	"Miscellaneous",
 	"Starter",
-]);
+	"Miscellaneous",
+];
+
+const CATEGORY_ALIASES = {
+	vegetables: "Vegetarian",
+	vegetable: "Vegetarian",
+	vegan: "Vegan",
+	vegetarian: "Vegetarian",
+	seafood: "Seafood",
+	salads: "Vegetarian",
+	salad: "Vegetarian",
+	grains: "Side",
+	grain: "Side",
+	fruit: "Miscellaneous",
+	snacks: "Starter",
+	dairy: "Miscellaneous",
+};
 
 const EXCLUDED_TERMS = [
 	"beef",
@@ -56,6 +99,8 @@ const EXCLUDED_TERMS = [
 	"pepperoni",
 ];
 
+const norm = (value) => String(value || "").toLowerCase().trim();
+
 function hashString(str) {
 	let hash = 0;
 	for (let i = 0; i < str.length; i++) {
@@ -68,16 +113,16 @@ function hashString(str) {
 function extractIngredients(meal) {
 	const ingredients = [];
 	for (let i = 1; i <= 20; i++) {
-		const name = (meal[`strIngredient${i}`] || "").trim();
-		const measure = (meal[`strMeasure${i}`] || "").trim();
+		const name = norm(meal[`strIngredient${i}`]);
+		const measure = norm(meal[`strMeasure${i}`]);
 		if (!name) continue;
 		ingredients.push(measure ? `${measure} ${name}`.trim() : name);
 	}
 	return ingredients;
 }
 
-function isHolisticMeal(meal, query = "") {
-	const text = [
+function mealText(meal) {
+	return [
 		meal.strMeal,
 		meal.strCategory,
 		meal.strArea,
@@ -88,150 +133,186 @@ function isHolisticMeal(meal, query = "") {
 		.filter(Boolean)
 		.join(" ")
 		.toLowerCase();
+}
 
-	const q = String(query || "").toLowerCase();
-	const hasExcluded = EXCLUDED_TERMS.some((term) => text.includes(term));
-	const hasPreferredCategory = PREFERRED_CATEGORIES.has(meal.strCategory);
-	const keywordHits = HOLISTIC_KEYWORDS.filter((k) => text.includes(k)).length;
-	const queryLooksHolistic = HOLISTIC_KEYWORDS.some((k) => q.includes(k));
+function isGenericTerm(query) {
+	const q = norm(query);
+	if (!q) return true;
+	return GENERIC_HOLISTIC_TERMS.some((term) => q === term || q.includes(term));
+}
 
-	if (q && HOLISTIC_KEYWORDS.some((k) => k === q || q.includes(k)) && text.includes(q)) {
-		return !hasExcluded;
-	}
-
-	if (hasExcluded && keywordHits < 2) return false;
-	if (hasPreferredCategory && keywordHits >= 1) return true;
-	if (keywordHits >= 2) return true;
-	if (queryLooksHolistic && keywordHits >= 1) return true;
-	return false;
+function isHolisticMeal(meal) {
+	const text = mealText(meal);
+	if (EXCLUDED_TERMS.some((term) => text.includes(term))) return false;
+	return HOLISTIC_KEYWORDS.some((keyword) => text.includes(keyword));
 }
 
 function transformMeal(meal) {
 	const ingredients = extractIngredients(meal);
 	const seed = hashString(String(meal.idMeal || meal.strMeal || "meal"));
-	const regularPrice = Number((10 + (seed % 1200) / 100).toFixed(2)); // $10.00 - $21.99
+	const regularPrice = Number((10 + (seed % 1200) / 100).toFixed(2));
 	const offerPrice = Number((regularPrice * 0.9).toFixed(2));
 	const category = meal.strCategory || "Holistic";
-	const tags = (meal.strTags || "")
+	const tags = norm(meal.strTags)
 		.split(",")
-		.map((t) => t.trim())
+		.map((tag) => tag.trim())
 		.filter(Boolean);
 
 	return {
 		productId: `mealdb-${meal.idMeal}`,
 		externalId: `mealdb-${meal.idMeal}`,
 		upc: `mealdb-${meal.idMeal}`,
-		name: meal.strMeal,
+		name: meal.strMeal || "Holistic meal",
 		brand: "TheMealDB",
-		description:
-			ingredients.length > 0
-				? `Holistic meal inspiration with ingredients: ${ingredients.slice(0, 8).join(", ")}.`
-				: meal.strInstructions
-					? `${String(meal.strInstructions).slice(0, 140)}...`
-					: "Holistic meal inspiration.",
+		description: ingredients.length
+			? `Holistic, clean eating inspiration made with ${ingredients
+					.slice(0, 8)
+					.join(", ")}.`
+			: norm(meal.strInstructions)
+				? `${String(meal.strInstructions).slice(0, 140)}...`
+				: "Holistic, clean eating inspiration.",
 		regularPrice,
 		offerPrice,
 		price: { regular: regularPrice, sale: offerPrice },
-		image: [meal.strMealThumb || "https://via.placeholder.com/300x300?text=Meal"],
-		category: ["Vegetarian", "Vegan", "Side"].includes(category) ? "Holistic Meals" : category,
+		image: [meal.strMealThumb || PLACEHOLDER_IMAGE],
+		category:
+			category === "Vegetarian" ||
+			category === "Vegan" ||
+			category === "Side"
+				? "Holistic Meals"
+				: category,
 		subCategory: meal.strArea || "Recipe",
 		size: ingredients.length ? `${ingredients.length} ingredients` : "",
 		source: "themealdb",
 		isMealDbProduct: true,
 		stock: 100,
-		tags,
+		tags: [...tags, ...HOLISTIC_KEYWORDS.filter((k) => mealText(meal).includes(k)).slice(0, 4)],
 		ingredients,
 	};
 }
 
 async function fetchMeals(url) {
-	const { data } = await axios.get(url, { timeout: 10000 });
+	const { data } = await axios.get(url, { timeout: 12000 });
 	return Array.isArray(data?.meals) ? data.meals : [];
 }
 
-export async function fetchHolisticMealProducts({ query = "", category = "", limit = 12 } = {}) {
+async function lookupMeals(ids) {
+	const results = [];
+	// Small batches keep TheMealDB happy while staying fast enough for a function.
+	for (let i = 0; i < ids.length; i += 10) {
+		const batch = ids.slice(i, i + 10);
+		const meals = await Promise.all(
+			batch.map(async (id) => {
+				try {
+					const found = await fetchMeals(`${BASE_URL}/lookup.php?i=${encodeURIComponent(id)}`);
+					return found[0] || null;
+				} catch {
+					return null;
+				}
+			}),
+		);
+		results.push(...meals.filter(Boolean));
+	}
+	return results;
+}
+
+/**
+ * Returns ONLY holistic / clean / healthy meals sourced from TheMealDB.
+ * TheMealDB keyword searches such as "healthy" return no results, so we work
+ * from category listings, pre-filter by name, then verify full meal details.
+ */
+async function fetchHolisticMealProductsUncached({ query = "", category = "", limit = 12 } = {}) {
 	try {
-		const max = Math.max(1, Math.min(Number(limit) || 12, 24));
-		let meals = [];
+		const max = Math.max(1, Math.min(Number(limit) || 12, 48));
+		const requestedCategory =
+			CATEGORY_ALIASES[norm(category)] || (CATEGORIES.includes(category) ? category : "");
+		const categories = requestedCategory ? [requestedCategory] : CATEGORIES;
 
-		if (query) {
-			meals = await fetchMeals(`${BASE_URL}/search.php?s=${encodeURIComponent(query)}`);
-			if (meals.length === 0) {
-				// try ingredient filter when search returns nothing
-				meals = await fetchMeals(`${BASE_URL}/filter.php?i=${encodeURIComponent(query)}`);
-				// filter endpoint returns partial meal objects; fetch details for a few
-				const detailed = await Promise.all(
-					meals.slice(0, max).map(async (m) => {
-						try {
-							const full = await fetchMeals(`${BASE_URL}/lookup.php?i=${encodeURIComponent(m.idMeal)}`);
-							return full[0] || null;
-						} catch {
-							return null;
-						}
-					}),
-				);
-				meals = detailed.filter(Boolean);
+		const listings = await Promise.all(
+			categories.map(async (name) => {
+				try {
+					return await fetchMeals(
+						`${BASE_URL}/filter.php?c=${encodeURIComponent(name)}`,
+					);
+				} catch {
+					return [];
+				}
+			}),
+		);
+
+		const candidates = new Map();
+		for (const meal of listings.flat()) {
+			if (meal?.idMeal) candidates.set(meal.idMeal, meal);
+		}
+
+		const q = norm(query);
+		const useLiteralQuery = q && !isGenericTerm(q);
+		const scored = [];
+
+		for (const meal of candidates.values()) {
+			const name = norm(meal.strMeal);
+			const queryHit = useLiteralQuery && name.includes(q);
+			const keywordHit = HOLISTIC_KEYWORDS.some((keyword) => name.includes(keyword));
+			if (queryHit || keywordHit || (!useLiteralQuery && !q)) {
+				scored.push({ meal, score: queryHit ? 2 : keywordHit ? 1 : 0 });
 			}
-		} else if (category) {
-			meals = await fetchMeals(`${BASE_URL}/filter.php?c=${encodeURIComponent(category)}`);
-			const detailed = await Promise.all(
-				meals.slice(0, max * 2).map(async (m) => {
-					try {
-						const full = await fetchMeals(`${BASE_URL}/lookup.php?i=${encodeURIComponent(m.idMeal)}`);
-						return full[0] || null;
-					} catch {
-						return null;
-					}
-				}),
-			);
-			meals = detailed.filter(Boolean);
-		} else {
-			const categories = ["Vegetarian", "Vegan", "Seafood", "Side"];
-			const results = await Promise.all(
-				categories.map(async (c) => {
-					try {
-						return await fetchMeals(`${BASE_URL}/filter.php?c=${encodeURIComponent(c)}`);
-					} catch {
-						return [];
-					}
-				}),
-			);
-			const flat = results.flat();
-			const detailed = await Promise.all(
-				flat.slice(0, max * 3).map(async (m) => {
-					try {
-						const full = await fetchMeals(`${BASE_URL}/lookup.php?i=${encodeURIComponent(m.idMeal)}`);
-						return full[0] || null;
-					} catch {
-						return null;
-					}
-				}),
-			);
-			meals = detailed.filter(Boolean);
 		}
 
-		const unique = [];
+		scored.sort((a, b) => b.score - a.score);
+		const lookupLimit = Math.min(candidates.size, Math.max(max * 3, 60));
+		const details = await lookupMeals(
+			scored.slice(0, lookupLimit).map((entry) => entry.meal.idMeal),
+		);
+
 		const seen = new Set();
-		for (const meal of meals) {
-			const id = meal?.idMeal;
-			if (!id || seen.has(id)) continue;
-			seen.add(id);
-			if (isHolisticMeal(meal, query || category)) unique.push(meal);
+		const products = [];
+		for (const meal of details) {
+			if (seen.has(meal.idMeal)) continue;
+			seen.add(meal.idMeal);
+			if (!isHolisticMeal(meal)) continue;
+			products.push(transformMeal(meal));
+			if (products.length >= max) break;
 		}
 
-		return unique.slice(0, max).map(transformMeal);
+		return products;
 	} catch (error) {
 		console.error("TheMealDB fetch error:", error.message);
 		return [];
 	}
 }
 
-export function mergeWithMealDbProducts(primaryProducts = [], mealProducts = []) {
-	if (!Array.isArray(mealProducts) || mealProducts.length === 0) return primaryProducts;
-	if (!Array.isArray(primaryProducts) || primaryProducts.length === 0) return mealProducts;
-	// interleave some meal products near top for visibility
-	const out = [...primaryProducts];
-	const insertAt = Math.min(3, out.length);
-	out.splice(insertAt, 0, ...mealProducts.slice(0, 6));
-	return out.concat(mealProducts.slice(6));
+// TheMealDB is a free public API. Cache results and share in-flight requests
+// so the several product calls made on page load don't get rate-limited.
+const CACHE_TTL_MS = 30 * 60 * 1000;
+const productCache = new Map();
+const inFlight = new Map();
+
+export async function fetchHolisticMealProducts(options = {}) {
+	const key = [
+		norm(options.query),
+		norm(options.category),
+		Math.max(1, Math.min(Number(options.limit) || 12, 48)),
+	].join("|");
+
+	const cached = productCache.get(key);
+	if (cached && Date.now() - cached.at < CACHE_TTL_MS) {
+		return cached.products;
+	}
+	if (inFlight.has(key)) {
+		return inFlight.get(key);
+	}
+
+	const request = fetchHolisticMealProductsUncached(options)
+		.then((products) => {
+			if (products.length) productCache.set(key, { at: Date.now(), products });
+			return products;
+		})
+		.finally(() => inFlight.delete(key));
+
+	inFlight.set(key, request);
+	return request;
+}
+
+export function mealDbCategories() {
+	return ["Holistic Meals", "Vegetarian", "Vegan", "Side", "Seafood", "Starter", "Miscellaneous"];
 }

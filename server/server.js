@@ -10,7 +10,7 @@ import cartRouter from "./routes/cartRoutes.js";
 import addressRouter from "./routes/addressRoutes.js";
 import orderRouter from "./routes/orderRoutes.js";
 import connectCloudinary from "./configs/cloudinary.js";
-import krogerRouter from "./routes/krogerRoutes.js";
+import productsRouter from "./routes/productsRoutes.js";
 import newsletterRouter from "./routes/newsletterRoute.js";
 import contactRouter from "./routes/contactRoutes.js";
 import employeeRouter from "./routes/employeeRoutes.js";
@@ -54,7 +54,9 @@ app.use("/api/inventory", productRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/address", addressRouter);
 app.use("/api/order", orderRouter);
-app.use("/api/kroger", krogerRouter);
+app.use("/api/products", productsRouter);
+// Legacy alias — the product source is TheMealDB only.
+app.use("/api/kroger", productsRouter);
 app.use("/api/newsletter", newsletterRouter);
 app.use("/api/contact", contactRouter);
 app.use("/api/employees", employeeRouter);
@@ -64,13 +66,22 @@ app.get("/api/media/image", async (req, res) => {
 		const { upc } = req.query;
 
 		if (!upc) {
-			return res.status(400).send("Missing UPC");
+			return res.status(400).send("Missing product id");
 		}
 
-		const imageUrl = `https://www.kroger.com/product/images/large/front/${upc}`;
+		// Products now come from TheMealDB. IDs are stored as "mealdb-<id>".
+		const mealId = String(upc).replace(/^mealdb-/, "");
+		const lookup = await fetch(
+			`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${encodeURIComponent(mealId)}`,
+		);
+		const data = await lookup.json();
+		const imageUrl = data?.meals?.[0]?.strMealThumb;
+
+		if (!imageUrl) {
+			return res.redirect("/fallback.png");
+		}
 
 		const response = await fetch(imageUrl);
-
 		if (!response.ok) {
 			return res.redirect("/fallback.png");
 		}

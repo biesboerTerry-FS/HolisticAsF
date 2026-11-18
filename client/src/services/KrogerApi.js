@@ -7,21 +7,21 @@ const API = axios.create({
 
 const KrogerApi = {
 	searchProducts: async (query, limit = 50) => {
-		const { data } = await API.get("/api/kroger/search", {
+		const { data } = await API.get("/api/products/search", {
 			params: { query, limit },
 		});
 		return data;
 	},
 
 	getProductsByCategory: async (category, limit = 50) => {
-		const { data } = await API.get(`/api/kroger/category/${category}`, {
+		const { data } = await API.get(`/api/products/category/${category}`, {
 			params: { limit },
 		});
 		return data;
 	},
 
 	getFeaturedProducts: async () => {
-		const { data } = await API.get("/api/kroger/featured");
+		const { data } = await API.get("/api/products/featured");
 		return data;
 	},
 };
