@@ -14,12 +14,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "../theme/ThemeContext";
 import ThemeToggle from "../components/ThemeToggle";
 import { products } from "../data/catalog";
+import ProductModal from "../components/ProductModal";
 
 export default function ProductsScreen({ navigation }) {
   const { dark, theme } = useTheme();
   const themed = styles(theme, dark);
   const [query, setQuery] = useState("");
   const [cart, setCart] = useState([]);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   const filtered = products.filter((product) =>
     `${product.name} ${product.category}`.toLowerCase().includes(query.toLowerCase()),
@@ -61,7 +63,7 @@ export default function ProductsScreen({ navigation }) {
         keyExtractor={(item) => item.id}
         contentContainerStyle={themed.list}
         renderItem={({ item }) => (
-          <View style={themed.card}>
+          <TouchableOpacity style={themed.card} onPress={() => setSelectedProduct(item)}>
             <Image source={{ uri: item.image }} style={themed.image} resizeMode="cover" />
             <View style={themed.cardBody}>
               <Text style={themed.cardCategory}>{item.category}</Text>
@@ -73,7 +75,7 @@ export default function ProductsScreen({ navigation }) {
                 </TouchableOpacity>
               </View>
             </View>
-          </View>
+          </TouchableOpacity>
         )}
         ListEmptyComponent={
           <View style={themed.empty}>
@@ -81,6 +83,15 @@ export default function ProductsScreen({ navigation }) {
             <Text style={themed.hint}>Try a different search term.</Text>
           </View>
         }
+      />
+
+      <ProductModal
+        product={selectedProduct}
+        visible={!!selectedProduct}
+        onClose={() => setSelectedProduct(null)}
+        onAddToCart={addToCart}
+        theme={theme}
+        dark={dark}
       />
     </SafeAreaView>
   );

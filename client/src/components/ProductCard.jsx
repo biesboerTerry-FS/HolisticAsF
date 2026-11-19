@@ -47,9 +47,9 @@ const ProductCard = ({ product }) => {
 			onClick={handleNavigation}
 			className="border border-primary-forest-green bg-primary-sage-green/40 rounded-md md:px-4 px-3 py-2 min-w-28 max-w-52 w-full cursor-pointer"
 		>
-			<div className="group flex items-center justify-center px-2">
+			<div className="group w-full h-32 md:h-40 overflow-hidden rounded-md bg-primary-warm-white">
 				<img
-					className="group-hover:scale-105 transition max-w-26 md:max-w-36"
+					className="w-full h-full object-cover group-hover:scale-105 transition"
 					src={imageSrc}
 					alt={product.name || "product image"}
 					onError={(event) => {
@@ -59,7 +59,7 @@ const ProductCard = ({ product }) => {
 			</div>
 
 			<div className="text-primary-forest-green/60 text-sm mt-2">
-				{product.category && <p>{product.category}</p>}
+				{product.category && <p className="truncate">{product.category}</p>}
 
 				<p className="text-primary-forest-green font-medium text-lg truncate w-full">
 					{product.brand?.toLowerCase() || "Brand"}

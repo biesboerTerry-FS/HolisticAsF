@@ -1,12 +1,15 @@
-import { FlatList, Image, StatusBar, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useState } from "react";
+import { Alert, FlatList, Image, StatusBar, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "../theme/ThemeContext";
 import ThemeToggle from "../components/ThemeToggle";
 import { categories, products } from "../data/catalog";
+import ProductModal from "../components/ProductModal";
 
 export default function CategoryScreen({ navigation, route }) {
   const { dark, theme } = useTheme();
   const themed = styles(theme);
+  const [selectedProduct, setSelectedProduct] = useState(null);
   const categoryName = route.params?.category || "Category";
   const category = categories.find((item) => item.name === categoryName);
   const items = products.filter((product) => product.category === categoryName);
@@ -44,7 +47,7 @@ export default function CategoryScreen({ navigation, route }) {
         renderItem={({ item }) => (
           <TouchableOpacity
             style={themed.item}
-            onPress={() => navigation.navigate("Products")}
+            onPress={() => setSelectedProduct(item)}
           >
             <Image source={{ uri: item.image }} style={themed.image} resizeMode="cover" />
             <View>
@@ -59,6 +62,18 @@ export default function CategoryScreen({ navigation, route }) {
             <Text style={themed.hint}>Browse all products to see more.</Text>
           </View>
         }
+      />
+
+      <ProductModal
+        product={selectedProduct}
+        visible={!!selectedProduct}
+        onClose={() => setSelectedProduct(null)}
+        onAddToCart={(product) => {
+          setSelectedProduct(null);
+          Alert.alert("Added to cart", `${product.name} was added to your cart.`);
+        }}
+        theme={theme}
+        dark={dark}
       />
     </SafeAreaView>
   );
