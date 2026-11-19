@@ -14,12 +14,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "../theme/ThemeContext";
 import ThemeToggle from "../components/ThemeToggle";
 import { categories, products } from "../data/catalog";
+import { useCart } from "../context/CartContext";
 
 const HERO_IMAGE =
   "https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=1400&q=80";
 
 export default function HomeScreen({ navigation }) {
   const { dark, theme } = useTheme();
+  const { count: cartCount } = useCart();
   const themed = styles(theme, dark);
   const [email, setEmail] = useState("");
 
@@ -43,8 +45,20 @@ export default function HomeScreen({ navigation }) {
         <View style={themed.navActions}>
           <ThemeToggle />
           <TouchableOpacity
+            style={themed.cartBtn}
+            accessibilityLabel={`Cart, ${cartCount} items`}
+            onPress={() => navigation.navigate("Cart")}
+          >
+            <Text style={themed.cartIcon}>cart</Text>
+            {cartCount > 0 && (
+              <View style={themed.cartCount}>
+                <Text style={themed.cartCountText}>{cartCount}</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity
             style={themed.loginBtn}
-            onPress={() => navigation.navigate("Admin")}
+            onPress={() => navigation.navigate("Login")}
           >
             <Text style={themed.loginText}>login</Text>
           </TouchableOpacity>
@@ -160,6 +174,24 @@ const styles = (theme, dark) =>
     },
     logo: { fontSize: 22, fontWeight: "700", color: theme.secondaryGoldenHoney },
     navActions: { flexDirection: "row", alignItems: "center", gap: 10 },
+    cartBtn: {
+      paddingHorizontal: 8,
+      paddingVertical: 6,
+      position: "relative",
+    },
+    cartIcon: { color: theme.primaryForestGreen, fontWeight: "700", fontSize: 13 },
+    cartCount: {
+      position: "absolute",
+      right: 0,
+      top: 0,
+      minWidth: 16,
+      height: 16,
+      borderRadius: 8,
+      backgroundColor: theme.primaryForestGreen,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    cartCountText: { color: theme.primaryWarmWhite, fontSize: 9, fontWeight: "700" },
     loginBtn: {
       backgroundColor: theme.secondaryGoldenHoney,
       paddingHorizontal: 16,

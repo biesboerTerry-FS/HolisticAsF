@@ -15,12 +15,13 @@ import { useTheme } from "../theme/ThemeContext";
 import ThemeToggle from "../components/ThemeToggle";
 import { products } from "../data/catalog";
 import ProductModal from "../components/ProductModal";
+import { useCart } from "../context/CartContext";
 
 export default function ProductsScreen({ navigation }) {
   const { dark, theme } = useTheme();
   const themed = styles(theme, dark);
   const [query, setQuery] = useState("");
-  const [cart, setCart] = useState([]);
+  const { count: cartCount, addItem } = useCart();
   const [selectedProduct, setSelectedProduct] = useState(null);
 
   const filtered = products.filter((product) =>
@@ -28,7 +29,7 @@ export default function ProductsScreen({ navigation }) {
   );
 
   const addToCart = (product) => {
-    setCart((current) => [...current, product.id]);
+    addItem(product);
     Alert.alert("Added to cart", `${product.name} was added to your cart.`);
   };
 
@@ -51,9 +52,9 @@ export default function ProductsScreen({ navigation }) {
           value={query}
           onChangeText={setQuery}
         />
-        {cart.length > 0 && (
+        {cartCount > 0 && (
           <View style={themed.cartBadge}>
-            <Text style={themed.cartText}>{cart.length}</Text>
+            <Text style={themed.cartText}>{cartCount}</Text>
           </View>
         )}
       </View>

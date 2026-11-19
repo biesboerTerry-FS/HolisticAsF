@@ -5,9 +5,11 @@ import { useTheme } from "../theme/ThemeContext";
 import ThemeToggle from "../components/ThemeToggle";
 import { categories, products } from "../data/catalog";
 import ProductModal from "../components/ProductModal";
+import { useCart } from "../context/CartContext";
 
 export default function CategoryScreen({ navigation, route }) {
   const { dark, theme } = useTheme();
+  const { addItem } = useCart();
   const themed = styles(theme);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const categoryName = route.params?.category || "Category";
@@ -69,6 +71,7 @@ export default function CategoryScreen({ navigation, route }) {
         visible={!!selectedProduct}
         onClose={() => setSelectedProduct(null)}
         onAddToCart={(product) => {
+          addItem(product);
           setSelectedProduct(null);
           Alert.alert("Added to cart", `${product.name} was added to your cart.`);
         }}
