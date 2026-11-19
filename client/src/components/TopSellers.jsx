@@ -8,7 +8,7 @@ const TopSellers = () => {
 
 	useEffect(() => {
 		if (products && products.length > 0) {
-			setFeaturedProducts(products.slice(0, 5));
+			setFeaturedProducts(products.slice(0, 12));
 		}
 	}, [products]);
 
