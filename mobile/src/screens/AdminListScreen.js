@@ -11,6 +11,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "../theme/ThemeContext";
 import ThemeToggle from "../components/ThemeToggle";
 import { fetchAdminList } from "../api/admin";
+import { products as catalogProducts } from "../data/catalog";
+
+const resolveItems = (data, endpoint) =>
+  data.length === 0 && String(endpoint || "").includes("inventory")
+    ? catalogProducts
+    : data;
 
 const titleOf = (item) =>
   item.name || item.title || item.email || item.subject || item._id || "Item";
@@ -20,8 +26,12 @@ const detailOf = (item) => {
   if (item.category) parts.push(item.category);
   if (item.email) parts.push(item.email);
   if (item.status) parts.push(String(item.status));
-  if (item.price !== undefined) parts.push(`$${Number(item.price).toFixed(2)}`);
-  if (item.amount !== undefined) parts.push(`$${Number(item.amount).toFixed(2)}`);
+  const money = (value) => {
+    const n = Number(String(value ?? "").replace(/[^0-9.]/g, ""));
+    return Number.isFinite(n) ? `$${n.toFixed(2)}` : String(value);
+  };
+  if (item.price !== undefined) parts.push(money(item.price));
+  if (item.amount !== undefined) parts.push(money(item.amount));
   if (item.date || item.createdAt) parts.push(String(item.date || item.createdAt).slice(0, 10));
   return parts.join(" · ") || "No additional details";
 };
@@ -38,7 +48,7 @@ export default function AdminListScreen({ navigation, route }) {
     setLoading(true);
     setError("");
     try {
-      setItems(await fetchAdminList(endpoint));
+      setItems(resolveItems(await fetchAdminList(endpoint), endpoint));
     } catch (err) {
       setError(err.message || "Could not load data");
     } finally {
@@ -51,7 +61,7 @@ export default function AdminListScreen({ navigation, route }) {
     fetchAdminList(endpoint)
       .then((data) => {
         if (!active) return;
-        setItems(data);
+        setItems(resolveItems(data, endpoint));
         setLoading(false);
       })
       .catch((err) => {

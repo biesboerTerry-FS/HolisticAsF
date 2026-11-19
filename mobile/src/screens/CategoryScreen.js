@@ -9,7 +9,7 @@ import { useCart } from "../context/CartContext";
 
 export default function CategoryScreen({ navigation, route }) {
   const { dark, theme } = useTheme();
-  const { addItem } = useCart();
+  const { addItem, count: cartCount } = useCart();
   const themed = styles(theme);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const categoryName = route.params?.category || "Category";
@@ -26,7 +26,21 @@ export default function CategoryScreen({ navigation, route }) {
         <Text style={themed.title} numberOfLines={1}>
           {categoryName}
         </Text>
-        <ThemeToggle />
+        <View style={themed.headerActions}>
+          <TouchableOpacity
+            accessibilityLabel={`Cart, ${cartCount} items`}
+            onPress={() => navigation.navigate("Cart")}
+            style={themed.headerCart}
+          >
+            <Text style={themed.headerCartText}>cart</Text>
+            {cartCount > 0 && (
+              <View style={themed.headerCartCount}>
+                <Text style={themed.headerCartCountText}>{cartCount}</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+          <ThemeToggle />
+        </View>
       </View>
 
       <FlatList
@@ -96,6 +110,15 @@ const styles = (theme) =>
     },
     backText: { color: theme.primaryForestGreen, fontSize: 14, fontWeight: "600" },
     title: { fontSize: 16, fontWeight: "700", color: theme.primaryForestGreen, maxWidth: 180 },
+    headerActions: { flexDirection: "row", alignItems: "center", gap: 12 },
+    headerCart: { position: "relative", paddingHorizontal: 4 },
+    headerCartText: { color: theme.primaryForestGreen, fontWeight: "700", fontSize: 13 },
+    headerCartCount: {
+      position: "absolute", right: -2, top: -4, minWidth: 15, height: 15,
+      borderRadius: 8, backgroundColor: theme.primaryForestGreen,
+      alignItems: "center", justifyContent: "center",
+    },
+    headerCartCountText: { color: theme.primaryWarmWhite, fontSize: 9, fontWeight: "700" },
     hero: {
       height: 180,
       borderRadius: 16,

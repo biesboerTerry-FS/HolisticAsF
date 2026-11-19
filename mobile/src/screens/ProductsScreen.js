@@ -41,7 +41,21 @@ export default function ProductsScreen({ navigation }) {
           <Text style={themed.backText}>← back</Text>
         </TouchableOpacity>
         <Text style={themed.title}>products</Text>
-        <ThemeToggle />
+        <View style={themed.headerActions}>
+          <TouchableOpacity
+            accessibilityLabel={`Cart, ${cartCount} items`}
+            onPress={() => navigation.navigate("Cart")}
+            style={themed.headerCart}
+          >
+            <Text style={themed.headerCartText}>cart</Text>
+            {cartCount > 0 && (
+              <View style={themed.headerCartCount}>
+                <Text style={themed.headerCartCountText}>{cartCount}</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+          <ThemeToggle />
+        </View>
       </View>
 
       <View style={themed.searchRow}>
@@ -112,6 +126,15 @@ const styles = (theme, dark) =>
     },
     backText: { color: theme.primaryForestGreen, fontSize: 14, fontWeight: "600" },
     title: { fontSize: 18, fontWeight: "700", color: theme.primaryForestGreen },
+    headerActions: { flexDirection: "row", alignItems: "center", gap: 12 },
+    headerCart: { position: "relative", paddingHorizontal: 4 },
+    headerCartText: { color: theme.primaryForestGreen, fontWeight: "700", fontSize: 13 },
+    headerCartCount: {
+      position: "absolute", right: -2, top: -4, minWidth: 15, height: 15,
+      borderRadius: 8, backgroundColor: theme.primaryForestGreen,
+      alignItems: "center", justifyContent: "center",
+    },
+    headerCartCountText: { color: theme.primaryWarmWhite, fontSize: 9, fontWeight: "700" },
     searchRow: {
       flexDirection: "row",
       alignItems: "center",
