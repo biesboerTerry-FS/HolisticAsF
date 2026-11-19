@@ -72,6 +72,7 @@ export const catalogProducts = products.map((product) => {
   const regular = Number(String(product.price).replace(/[^0-9.]/g, "")) || 0;
   return {
     ...product,
+    description: product.name,
     _id: `catalog-${product.id}`,
     productId: `catalog-${product.id}`,
     externalId: `catalog-${product.id}`,
