@@ -4,36 +4,37 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-	--color-primary-forest-green: #1e4d43;
-	--color-primary-sage-green: #9dbfaf;
+	--color-primary-forest-green: #172033;
+	--color-primary-sage-green: #9aa8bd;
 	--color-primary-warm-white: #ffffff;
-	--color-primary-cream: #f5f3ee;
-	--color-secondary-earthy-brown: #a8552a;
-	--color-secondary-golden-honey: #e0a030;
-	--color-secondary-soft-beige: #faf8f4;
-	--color-secondary-deep-forest: #0f2b26;
-	--color-semantic-success: #4caf50;
-	--color-semantic-warning: #ff9800;
-	--color-semantic-error: #f44336;
-	--color-semantic-info: #2196f3;
-	--color-neutral-charcoal: #333333;
-	--color-neutral-medium-gray: #666666;
-	--color-neutral-light-gray: #cccccc;
-	--color-neutral-off-white: #f9f9f9;
+	--color-primary-cream: #f5f7fb;
+	--color-secondary-earthy-brown: #6d5ef8;
+	--color-secondary-golden-honey: #0fb9a4;
+	--color-secondary-soft-beige: #fbfcff;
+	--color-secondary-deep-forest: #101a2c;
+	--color-semantic-success: #10b981;
+	--color-semantic-warning: #f59e0b;
+	--color-semantic-error: #ef4444;
+	--color-semantic-info: #3b82f6;
+	--color-neutral-charcoal: #1f2937;
+	--color-neutral-medium-gray: #7c8aa0;
+	--color-neutral-light-gray: #cbd5e1;
+	--color-neutral-off-white: #f8fafc;
 }
 
 .dark {
-	--color-primary-forest-green: #6cc3aa;
-	--color-primary-sage-green: #2b4a43;
-	--color-primary-warm-white: #162622;
-	--color-primary-cream: #1d322d;
-	--color-secondary-earthy-brown: #d08a5a;
-	--color-secondary-golden-honey: #e9b04a;
-	--color-secondary-soft-beige: #0e1816;
-	--color-secondary-deep-forest: #e3f1ec;
-	--color-neutral-medium-gray: #9ca3a1;
-	--color-neutral-light-gray: #3a4a46;
-	--color-neutral-off-white: #121e1b;
+	--color-primary-forest-green: #e8eef9;
+	--color-primary-sage-green: #a3b1c6;
+	--color-primary-warm-white: #111b2e;
+	--color-primary-cream: #0a1120;
+	--color-secondary-earthy-brown: #a78bfa;
+	--color-secondary-golden-honey: #2dd4bf;
+	--color-secondary-soft-beige: #131f33;
+	--color-secondary-deep-forest: #eef3fb;
+	--color-neutral-charcoal: #e2e8f0;
+	--color-neutral-medium-gray: #94a3b8;
+	--color-neutral-light-gray: #334155;
+	--color-neutral-off-white: #0f172a;
 	color-scheme: dark;
 }
 
