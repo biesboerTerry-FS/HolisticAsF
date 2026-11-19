@@ -3,6 +3,7 @@ import authUser from "../middleware/authUser.js";
 // import authAdmin from "../middleware/authAdmin.js";
 import {
 	placeOrderCOD,
+	placeOrderStripe,
 	getUserOrders,
 	getAllOrders,
 	updateOrderStatus,
@@ -11,6 +12,7 @@ import {
 const orderRouter = express.Router();
 
 orderRouter.post("/cod", authUser, placeOrderCOD);
+orderRouter.post("/payment", authUser, placeOrderStripe);
 orderRouter.get("/user", authUser, getUserOrders);
 // auth disabled for now
 orderRouter.get("/admin", /* authAdmin, */ getAllOrders);

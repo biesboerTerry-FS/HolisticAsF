@@ -129,7 +129,7 @@ const Cart = () => {
 				} else {
 					toast.error(data.message || "Failed to place order");
 				}
-			} else if (paymentOption === "Credit/Debit") {
+			} else if (paymentOption === "stripe") {
 				const { data } = await axios.post(
 					"/api/order/payment",
 					orderData,
@@ -376,7 +376,7 @@ const Cart = () => {
 						className="w-full border border-primary-forest-green bg-primary-cream px-3 py-2 mt-2 outline-none"
 					>
 						<option value="cash">cash</option>
-						{/* <option value="Credit/Debit">credit/debit</option> */}
+						<option value="stripe">credit/debit (Stripe test)</option>
 					</select>
 				</div>
 

@@ -2,6 +2,15 @@ import Product from "../models/Product.js";
 import KrogerProduct from "../models/KrogerProduct.js";
 import Order from "../models/Order.js";
 import User from "../models/User.js";
+import Stripe from "stripe";
+
+let stripeClient;
+const getStripe = () => {
+	if (!stripeClient) {
+		stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY);
+	}
+	return stripeClient;
+};
 
 // ^ place order cod: /api/order/cod
 export const placeOrderCOD = async (request, response) => {
@@ -203,6 +212,94 @@ export const getAllOrders = async (request, response) => {
 			success: false,
 			message: error.message,
 		});
+	}
+};
+
+// ^ place order with Stripe Checkout (test mode): /api/order/payment
+export const placeOrderStripe = async (request, response) => {
+	try {
+		const userId = request.user.id;
+		const { items, address } = request.body;
+
+		if (!address || !Array.isArray(items) || items.length === 0) {
+			return response.json({
+				success: false,
+				message: "Invalid data: missing address or items",
+			});
+		}
+
+		const lineItems = [];
+		const processedItems = [];
+		let amount = 0;
+
+		for (const item of items) {
+			let price = Number(item.price) || 0;
+			let name = item.name || "Holistic product";
+
+			if (item.productSource === "kroger") {
+				const product = await KrogerProduct.findOne({ upc: item.productId });
+				price = product?.offerPrice || product?.price || price;
+				name = product?.name || name;
+			} else if (String(item.productId).match(/^[a-f\d]{24}$/i)) {
+				const product = await Product.findById(item.productId);
+				price = product?.offerPrice || product?.price || price;
+				name = product?.name || name;
+			}
+
+			const unitAmount = Math.max(0, Math.round(price * 100));
+			if (!unitAmount) continue;
+
+			amount += unitAmount * item.quantity;
+			lineItems.push({
+				price_data: {
+					currency: "usd",
+					product_data: { name },
+					unit_amount: unitAmount,
+				},
+				quantity: item.quantity,
+			});
+			processedItems.push({
+				product: item.productId,
+				productSource: item.productSource,
+				quantity: item.quantity,
+				price,
+				name,
+			});
+		}
+
+		if (!lineItems.length) {
+			return response.json({
+				success: false,
+				message: "No payable items in the cart",
+			});
+		}
+
+		const order = await Order.create({
+			userId,
+			items: processedItems,
+			amount: Math.round((amount / 100) * 100) / 100,
+			address,
+			paymentType: "stripe",
+			status: "pending",
+		});
+
+		const origin =
+			process.env.CORS_ORIGIN?.split(",")[0]?.trim() ||
+			request.headers.origin ||
+			"http://localhost:5173";
+
+		const session = await getStripe().checkout.sessions.create({
+			mode: "payment",
+			line_items: lineItems,
+			success_url: `${origin}/my-orders?payment=success`,
+			cancel_url: `${origin}/cart?payment=cancelled`,
+			metadata: { orderId: String(order._id) },
+		});
+
+		return response.json({ success: true, url: session.url });
+	} catch (error) {
+		console.error("Stripe checkout error:", error.message);
+		return response.json({ success: false, message: error.message });
 	}
 };
 
