@@ -20,7 +20,7 @@ const HERO_IMAGE =
 
 export default function HomeScreen({ navigation }) {
   const { dark, theme } = useTheme();
-  const themed = styles(theme);
+  const themed = styles(theme, dark);
   const [email, setEmail] = useState("");
 
   const subscribe = () => {
@@ -145,7 +145,7 @@ export default function HomeScreen({ navigation }) {
   );
 }
 
-const styles = (theme) =>
+const styles = (theme, dark) =>
   StyleSheet.create({
     container: { flex: 1, backgroundColor: theme.secondarySoftBeige },
     scroll: { padding: 16, paddingBottom: 40 },
@@ -166,7 +166,7 @@ const styles = (theme) =>
       paddingVertical: 8,
       borderRadius: 20,
     },
-    loginText: { color: theme.neutralCharcoal, fontWeight: "600", fontSize: 13 },
+    loginText: { color: dark ? "#111827" : "#FFFFFF", fontWeight: "600", fontSize: 13 },
     hero: {
       height: 230,
       borderRadius: 20,
@@ -196,7 +196,7 @@ const styles = (theme) =>
       paddingVertical: 10,
       borderRadius: 6,
     },
-    ctaText: { color: theme.neutralCharcoal, fontWeight: "600" },
+    ctaText: { color: dark ? "#111827" : "#FFFFFF", fontWeight: "600" },
     sectionLabel: {
       fontSize: 11,
       fontWeight: "700",

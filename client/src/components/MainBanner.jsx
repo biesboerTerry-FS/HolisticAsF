@@ -27,7 +27,7 @@ const MainBanner = () => {
 				<div className="flex items-center mt-6 font-medium">
 					<Link
 						to={"/products"}
-						className="group flex items-center gap-2 px-7 md:px-9 py-3 bg-secondary-golden-honey hover:opacity-90 transition rounded text-neutral-charcoal cursor-pointer "
+						className="group flex items-center gap-2 px-7 md:px-9 py-3 bg-secondary-golden-honey hover:opacity-90 transition rounded text-white dark:text-[#111827] cursor-pointer "
 					>
 						shop now
 						<img

@@ -17,7 +17,7 @@ import { products } from "../data/catalog";
 
 export default function ProductsScreen({ navigation }) {
   const { dark, theme } = useTheme();
-  const themed = styles(theme);
+  const themed = styles(theme, dark);
   const [query, setQuery] = useState("");
   const [cart, setCart] = useState([]);
 
@@ -86,7 +86,7 @@ export default function ProductsScreen({ navigation }) {
   );
 }
 
-const styles = (theme) =>
+const styles = (theme, dark) =>
   StyleSheet.create({
     container: { flex: 1, backgroundColor: theme.secondarySoftBeige },
     header: {
@@ -125,7 +125,7 @@ const styles = (theme) =>
       alignItems: "center",
       justifyContent: "center",
     },
-    cartText: { color: theme.neutralCharcoal, fontWeight: "700" },
+    cartText: { color: dark ? "#111827" : "#FFFFFF", fontWeight: "700" },
     list: { paddingHorizontal: 16, paddingBottom: 32 },
     card: {
       borderRadius: 16,
