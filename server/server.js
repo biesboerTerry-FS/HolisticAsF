@@ -44,16 +44,17 @@ const ensureCloudinary = async () => {
 	}
 };
 
-const allowedOrigin = process.env.CORS_ORIGIN || [
-	"http://localhost:5173",
-	"http://localhost:5176",
-	"http://127.0.0.1:5173",
-	"http://127.0.0.1:5176",
-];
+const allowedOrigins = (
+	process.env.CORS_ORIGIN ||
+	"http://localhost:5173,http://localhost:19006"
+)
+	.split(",")
+	.map((origin) => origin.trim())
+	.filter(Boolean);
 
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({ origin: allowedOrigin, credentials: true }));
+app.use(cors({ origin: allowedOrigins, credentials: true }));
 
 app.get("/", (request, response) => response.send("API connected"));
 app.use("/api/user", userRouter);
