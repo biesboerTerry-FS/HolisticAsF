@@ -13,16 +13,26 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "../theme/ThemeContext";
 import ThemeToggle from "../components/ThemeToggle";
 
+const SECTIONS = [
+  { title: "Inventory", endpoint: "/api/inventory/inventory", hint: "Products and stock" },
+  { title: "Orders", endpoint: "/api/order/admin", hint: "Customer orders" },
+  { title: "Schedule", endpoint: "/api/employees", hint: "Team and shifts" },
+  { title: "Messages", endpoint: "/api/contact/admin", hint: "Contact inbox" },
+];
+
 export default function AdminScreen({ navigation }) {
   const { dark, theme } = useTheme();
-  const themed = styles(theme);
+  const themed = styles(theme, dark);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loggedIn, setLoggedIn] = useState(false);
 
   const login = () => {
     if (!email.includes("@") || password.length < 4) {
-      Alert.alert("Invalid credentials", "Enter a valid email and a password of at least 4 characters.");
+      Alert.alert(
+        "Invalid credentials",
+        "Enter a valid email and a password of at least 4 characters.",
+      );
       return;
     }
     setLoggedIn(true);
@@ -40,11 +50,26 @@ export default function AdminScreen({ navigation }) {
       </View>
       <ScrollView contentContainerStyle={themed.content}>
         {loggedIn ? (
-          <View style={themed.dashboard}>
+          <>
             <Text style={themed.heading}>admin dashboard</Text>
-            <Text style={themed.hint}>
-              You are signed in. Inventory, orders, and customer tools will appear here.
-            </Text>
+            <Text style={themed.hint}>Demo sign-in — manage the holisticAF back office.</Text>
+
+            {SECTIONS.map((section) => (
+              <TouchableOpacity
+                key={section.title}
+                style={themed.card}
+                onPress={() =>
+                  navigation.navigate("AdminList", {
+                    title: section.title,
+                    endpoint: section.endpoint,
+                  })
+                }
+              >
+                <Text style={themed.cardTitle}>{section.title}</Text>
+                <Text style={themed.cardHint}>{section.hint}</Text>
+              </TouchableOpacity>
+            ))}
+
             <TouchableOpacity
               style={themed.button}
               onPress={() => {
@@ -53,9 +78,11 @@ export default function AdminScreen({ navigation }) {
                 setPassword("");
               }}
             >
-              <Text style={themed.buttonText}>sign out</Text>
+              <Text style={[themed.buttonText, { color: dark ? "#111827" : "#FFFFFF" }]}>
+                sign out
+              </Text>
             </TouchableOpacity>
-          </View>
+          </>
         ) : (
           <>
             <Text style={themed.heading}>admin portal</Text>
@@ -78,7 +105,9 @@ export default function AdminScreen({ navigation }) {
               onChangeText={setPassword}
             />
             <TouchableOpacity style={themed.button} onPress={login}>
-              <Text style={themed.buttonText}>login</Text>
+              <Text style={[themed.buttonText, { color: dark ? "#111827" : "#FFFFFF" }]}>
+                login
+              </Text>
             </TouchableOpacity>
           </>
         )}
@@ -87,7 +116,7 @@ export default function AdminScreen({ navigation }) {
   );
 }
 
-const styles = (theme) =>
+const styles = (theme, dark) =>
   StyleSheet.create({
     container: { flex: 1, backgroundColor: theme.secondarySoftBeige },
     header: {
@@ -102,7 +131,6 @@ const styles = (theme) =>
     backText: { color: theme.primaryForestGreen, fontSize: 14, fontWeight: "600" },
     title: { fontSize: 18, fontWeight: "700", color: theme.primaryForestGreen },
     content: { padding: 24 },
-    dashboard: { alignItems: "center" },
     heading: {
       fontSize: 24,
       fontWeight: "700",
@@ -110,7 +138,22 @@ const styles = (theme) =>
       marginBottom: 8,
       textAlign: "center",
     },
-    hint: { fontSize: 14, color: theme.neutralMediumGray, textAlign: "center", marginBottom: 24 },
+    hint: {
+      fontSize: 14,
+      color: theme.neutralMediumGray,
+      textAlign: "center",
+      marginBottom: 24,
+    },
+    card: {
+      backgroundColor: theme.primaryWarmWhite,
+      borderWidth: 1,
+      borderColor: theme.primaryForestGreen,
+      borderRadius: 10,
+      padding: 16,
+      marginBottom: 12,
+    },
+    cardTitle: { fontSize: 16, fontWeight: "700", color: theme.primaryForestGreen },
+    cardHint: { fontSize: 12, color: theme.neutralMediumGray, marginTop: 4 },
     input: {
       borderWidth: 1,
       borderColor: theme.primaryForestGreen,
@@ -122,11 +165,11 @@ const styles = (theme) =>
       color: theme.primaryForestGreen,
     },
     button: {
-      backgroundColor: theme.primaryForestGreen,
+      backgroundColor: theme.secondaryGoldenHoney,
       paddingVertical: 14,
       borderRadius: 8,
       alignItems: "center",
       marginTop: 8,
     },
-    buttonText: { color: theme.primaryWarmWhite, fontWeight: "600", fontSize: 15 },
+    buttonText: { fontWeight: "700", fontSize: 15 },
   });

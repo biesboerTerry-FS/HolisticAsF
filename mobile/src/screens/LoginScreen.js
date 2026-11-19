@@ -76,6 +76,10 @@ export default function LoginScreen({ navigation }) {
         <TouchableOpacity onPress={() => navigation.navigate("Home")}>
           <Text style={themed.guest}>Continue as guest</Text>
         </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => navigation.navigate("Admin")}>
+          <Text style={themed.guest}>Admin portal →</Text>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
