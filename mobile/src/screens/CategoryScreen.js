@@ -90,10 +90,10 @@ const styles = (theme) =>
       flex: 1,
       justifyContent: "flex-end",
       padding: 16,
-      backgroundColor: "rgba(15,43,38,0.45)",
+      backgroundColor: "rgba(16,26,44,0.45)",
     },
-    heroTitle: { fontSize: 22, fontWeight: "700", color: "#f5f3ee" },
-    heroSubtitle: { fontSize: 13, color: "#d9f2e8", marginTop: 4 },
+    heroTitle: { fontSize: 22, fontWeight: "700", color: "#F5F7FB" },
+    heroSubtitle: { fontSize: 13, color: "#B9E4DC", marginTop: 4 },
     list: { paddingHorizontal: 16, paddingBottom: 32 },
     item: {
       flexDirection: "row",

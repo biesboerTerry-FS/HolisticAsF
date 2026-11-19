@@ -1,25 +1,28 @@
+// Modern, calm palette: cool off-white canvas, deep navy ink, teal primary
+// accent and a violet secondary. Keys are kept stable so all screens update
+// together when the theme changes.
 export const colors = {
-	primaryForestGreen: "#1e4d43",
-	primarySageGreen: "#9dbfaf",
-	primaryWarmWhite: "#ffffff",
-	primaryCream: "#f5f3ee",
-	secondaryEarthyBrown: "#a8552a",
-	secondaryGoldenHoney: "#e0a030",
-	secondarySoftBeige: "#faf8f4",
-	secondaryDeepForest: "#0f2b26",
-	neutralCharcoal: "#333333",
-	neutralMediumGray: "#666666",
+	primaryForestGreen: "#172033", // primary ink / buttons
+	primarySageGreen: "#9AA8BD", // muted secondary text
+	primaryWarmWhite: "#FFFFFF", // surfaces
+	primaryCream: "#F5F7FB", // app background
+	secondaryEarthyBrown: "#6D5EF8", // violet accent
+	secondaryGoldenHoney: "#0FB9A4", // teal accent / logo / CTA
+	secondarySoftBeige: "#FBFCFF", // alternate surface
+	secondaryDeepForest: "#101A2C", // dark hero / footer
+	neutralCharcoal: "#1F2937",
+	neutralMediumGray: "#7C8AA0",
 };
 
 export const darkColors = {
-	primaryForestGreen: "#6cc3aa",
-	primarySageGreen: "#2b4a43",
-	primaryWarmWhite: "#162622",
-	primaryCream: "#1d322d",
-	secondaryEarthyBrown: "#d08a5a",
-	secondaryGoldenHoney: "#e9b04a",
-	secondarySoftBeige: "#0e1816",
-	secondaryDeepForest: "#e3f1ec",
-	neutralCharcoal: "#333333",
-	neutralMediumGray: "#9ca3a1",
+	primaryForestGreen: "#E8EEF9",
+	primarySageGreen: "#A3B1C6",
+	primaryWarmWhite: "#111B2E",
+	primaryCream: "#0A1120",
+	secondaryEarthyBrown: "#A78BFA",
+	secondaryGoldenHoney: "#2DD4BF",
+	secondarySoftBeige: "#131F33",
+	secondaryDeepForest: "#EEF3FB",
+	neutralCharcoal: "#E2E8F0",
+	neutralMediumGray: "#94A3B8",
 };
