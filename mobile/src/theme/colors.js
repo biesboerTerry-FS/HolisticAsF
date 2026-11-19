@@ -7,7 +7,7 @@ export const colors = {
 	primaryWarmWhite: "#FFFFFF", // surfaces
 	primaryCream: "#F5F7FB", // app background
 	secondaryEarthyBrown: "#6D5EF8", // violet accent
-	secondaryGoldenHoney: "#0FB9A4", // teal accent / logo / CTA
+	secondaryGoldenHoney: "#0A7C6D", // teal accent / logo / CTA (dark enough for white text)
 	secondarySoftBeige: "#FBFCFF", // alternate surface
 	secondaryDeepForest: "#101A2C", // dark hero / footer
 	neutralCharcoal: "#1F2937",
