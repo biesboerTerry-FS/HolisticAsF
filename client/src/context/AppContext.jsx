@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { catalogProducts, catalogCategories } from "../data/catalog";
 
 axios.defaults.withCredentials = true;
 axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
@@ -21,67 +22,43 @@ const useAppState = () => {
 	const [searchQuery, setSearchQuery] = useState({});
 	const [loading, setLoading] = useState(false);
 
-	const fetchProducts = async (initialQuery = "healthy") => {
-		try {
-			if (!initialQuery?.trim()) return;
-			setLoading(true);
-			const { data } = await axios.get("/api/products/search", {
-				params: { query: initialQuery, limit: 50 },
-			});
-			if (data.success) {
-				setProducts(data.products);
-			} else {
-				toast.error(data.message);
-			}
-		} catch (error) {
-			console.error(error);
-			toast.error("Failed to load products");
-		} finally {
-			setLoading(false);
+	// The web storefront and the mobile app share the same product catalog.
+	const filterCatalog = (term = "") => {
+		const query = String(term || "").trim().toLowerCase();
+		const genericTerms = ["healthy", "clean", "organic", "holistic", "natural", "wellness", "fresh", "all"];
+		if (!query || genericTerms.some((term) => query.includes(term))) {
+			return catalogProducts;
 		}
+		return catalogProducts.filter((product) =>
+			`${product.name} ${product.category}`.toLowerCase().includes(query),
+		);
+	};
+
+	const fetchProducts = async (initialQuery = "healthy") => {
+		setLoading(true);
+		setProducts(filterCatalog(initialQuery));
+		setLoading(false);
 	};
 
 	const searchProducts = async (query) => {
-		try {
-			setLoading(true);
-			const { data } = await axios.get("/api/products/search", {
-				params: { query, limit: 50 },
-			});
-			if (data.success) {
-				setProducts(data.products);
-				if (data.products.length === 0) {
-					toast.error("No products found. Try a different search.");
-				}
-			} else {
-				toast.error(data.message || "Search failed");
-				setProducts([]);
-			}
-		} catch (error) {
-			console.error("Search error:", error);
-			toast.error("Search failed");
-			setProducts([]);
-		} finally {
-			setLoading(false);
+		setLoading(true);
+		const results = filterCatalog(query);
+		setProducts(results);
+		if (results.length === 0) {
+			toast.error("No products found. Try a different search.");
 		}
+		setLoading(false);
 	};
 
 	const getProductsByCategory = async (category) => {
-		try {
-			setLoading(true);
-			const { data } = await axios.get(`/api/products/category/${category}`, {
-				params: { limit: 50 },
-			});
-			if (data.success) {
-				setProducts(data.products);
-			} else {
-				toast.error("Failed to load category products");
-			}
-		} catch (error) {
-			console.error("Category error:", error);
-			toast.error("Failed to load products");
-		} finally {
-			setLoading(false);
-		}
+		setLoading(true);
+		const match = catalogCategories.find(
+			(item) =>
+				item.path === category ||
+				item.text.toLowerCase() === String(category || "").toLowerCase(),
+		);
+		setProducts(match ? catalogProducts.filter((product) => product.category === match.text) : catalogProducts);
+		setLoading(false);
 	};
 
 	const addToCart = (itemId) => {

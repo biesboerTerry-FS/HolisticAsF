@@ -1,4 +1,5 @@
 import addAddressImage from "./addAddressImage.svg";
+import { catalogCategories } from "../data/catalog";
 import addIcon from "./addIcon.svg";
 import blackArrowIcon from "./blackArrowIcon.svg";
 import bottomBanner from "./bottomBanner.png";
@@ -147,59 +148,8 @@ export const assets = {
 	star_dull_icon,
 };
 
-export const categories = [
-	{
-		text: "Fresh",
-		subCategories: {
-			text: "Fruit & Vegetables",
-			text: "Meat",
-			text: "Seafood",
-			text: "Deli",
-			text: "Bakery",
-			text: "Floral",
-		},
-	},
-	{
-		text: "Grocery",
-		subCategories: {
-			text: "Pantry",
-			text: "Dairy & Eggs",
-			text: "Frozen",
-			text: "Natural & Organic",
-			text: "Beverages",
-			text: "Breakfast",
-			text: "Coffee",
-			text: "Candy",
-		},
-	},
-	{
-		text: "Beer, Wine, & Liquor",
-		subCategories: {
-			text: "Beer & Seltzers",
-			text: "Wine",
-			text: "Liquor",
-			text: "Non-Alcoholic",
-		},
-	},
-	{
-		text: "Health, Beauty, & Baby",
-		subCategories: {
-			text: "Health & Wellness",
-			text: "Personal Care",
-			text: "Beauty",
-			text: "Baby",
-		},
-	},
-	{
-		text: "Cleaning & Household",
-		subCategories: {
-			text: "Laundry",
-			text: "Paper Products",
-			text: "Kitchen",
-			text: "Cleaning Supplies",
-		},
-	},
-];
+
+export const categories = catalogCategories;
 
 export const footerLinks = [
 	{

@@ -54,7 +54,7 @@ const categoryList = [
 	},
 	{
 		text: "Body & Wellness",
-		path: "body-care-wellness",
+		path: "body-and-wellness",
 		searchTerm: "body care wellness",
 		subcategories: [
 			{ text: "Aromatherapy", path: "aromatherapy" },

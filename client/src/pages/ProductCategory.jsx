@@ -13,7 +13,7 @@ const ProductCategory = () => {
 	});
 
 	const filteredProducts = products.filter((product) => {
-		return product.category === category;
+		return product.category === searchCategory?.text;
 	});
 	console.log("Filtered Products:", filteredProducts);
 

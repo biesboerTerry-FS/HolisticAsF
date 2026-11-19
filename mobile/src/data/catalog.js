@@ -31,53 +31,38 @@ export const categories = [
   },
 ];
 
+const img = (id) =>
+  `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=600&q=80`;
+
 export const products = [
-  {
-    id: "1",
-    name: "Ashwagandha Root Powder",
-    category: "Herbs & Botanicals",
-    price: "$18.00",
-    image:
-      "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=600&q=80",
-  },
-  {
-    id: "2",
-    name: "Peppermint Herbal Tea",
-    category: "Teas & Tonics",
-    price: "$12.50",
-    image:
-      "https://images.unsplash.com/photo-1597318181409-cf64d0b5d8a2?auto=format&fit=crop&w=600&q=80",
-  },
-  {
-    id: "3",
-    name: "Organic Turmeric Blend",
-    category: "Superfoods",
-    price: "$22.00",
-    image:
-      "https://images.unsplash.com/photo-1615485500704-8e990f9900f7?auto=format&fit=crop&w=600&q=80",
-  },
-  {
-    id: "4",
-    name: "Daily Multivitamin",
-    category: "Supplements",
-    price: "$29.99",
-    image:
-      "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=600&q=80",
-  },
-  {
-    id: "5",
-    name: "Raw Wildflower Honey",
-    category: "Pantry & Whole Foods",
-    price: "$16.00",
-    image:
-      "https://images.unsplash.com/photo-1587049352851-8d4e89133924?auto=format&fit=crop&w=600&q=80",
-  },
-  {
-    id: "6",
-    name: "Lavender Body Oil",
-    category: "Body & Wellness",
-    price: "$24.00",
-    image:
-      "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?auto=format&fit=crop&w=600&q=80",
-  },
+  // Herbs & Botanicals
+  { id: "1", name: "Ashwagandha Root Powder", category: "Herbs & Botanicals", price: "$18.00", image: img("1608571423902-eed4a5ad8108") },
+  { id: "2", name: "Organic Turmeric Blend", category: "Herbs & Botanicals", price: "$22.00", image: img("1615485500704-8e990f9900f7") },
+  { id: "3", name: "Dried Lemongrass Leaves", category: "Herbs & Botanicals", price: "$11.50", image: img("1501004318641-b39e6451bec6") },
+  { id: "4", name: "Wildcrafted Sage Bundle", category: "Herbs & Botanicals", price: "$9.00", image: img("1466692476868-aef1dfb1e735") },
+  // Teas & Tonics
+  { id: "5", name: "Peppermint Herbal Tea", category: "Teas & Tonics", price: "$12.50", image: img("1597318181409-cf64d0b5d8a2") },
+  { id: "6", name: "Chamomile Calm Tea", category: "Teas & Tonics", price: "$13.00", image: img("1544787219-7f47ccb76574") },
+  { id: "7", name: "Green Tea Matcha", category: "Teas & Tonics", price: "$19.50", image: img("1515823064-d6e0c04616a7") },
+  { id: "8", name: "Ginger Tonic Elixir", category: "Teas & Tonics", price: "$15.00", image: img("1587049352851-8d4e89133924") },
+  // Superfoods
+  { id: "9", name: "Organic Chia Seeds", category: "Superfoods", price: "$14.00", image: img("1490645935967-10de6ba17061") },
+  { id: "10", name: "Acai Berry Powder", category: "Superfoods", price: "$24.00", image: img("1512621776951-a57141f2eefd") },
+  { id: "11", name: "Raw Cacao Nibs", category: "Superfoods", price: "$17.50", image: img("1546069901-ba9599a7e63c") },
+  { id: "12", name: "Spirulina Powder", category: "Superfoods", price: "$21.00", image: img("1498837167922-ddd27525d352") },
+  // Supplements
+  { id: "13", name: "Daily Multivitamin", category: "Supplements", price: "$29.99", image: img("1556228720-195a672e8a03") },
+  { id: "14", name: "Magnesium Glycinate", category: "Supplements", price: "$26.00", image: img("1584308666744-24d5c474f2ae") },
+  { id: "15", name: "Vitamin D3 Drops", category: "Supplements", price: "$18.50", image: img("1476224203421-9ac39bcb3327") },
+  { id: "16", name: "Probiotic Complex", category: "Supplements", price: "$32.00", image: img("1608248543803-ba4f8c70ae0b") },
+  // Pantry & Whole Foods
+  { id: "17", name: "Raw Wildflower Honey", category: "Pantry & Whole Foods", price: "$16.00", image: img("1587049352851-8d4e89133924") },
+  { id: "18", name: "Cold-Pressed Olive Oil", category: "Pantry & Whole Foods", price: "$27.00", image: img("1542838132-92c53300491e") },
+  { id: "19", name: "Organic Brown Rice", category: "Pantry & Whole Foods", price: "$12.00", image: img("1586201375761-83865001e31c") },
+  { id: "20", name: "Almond Butter", category: "Pantry & Whole Foods", price: "$19.00", image: img("1512621776951-a57141f2eefd") },
+  // Body & Wellness
+  { id: "21", name: "Lavender Body Oil", category: "Body & Wellness", price: "$24.00", image: img("1608248543803-ba4f8c70ae0b") },
+  { id: "22", name: "Eucalyptus Shower Steamers", category: "Body & Wellness", price: "$15.50", image: img("1540555700478-4be289fbecef") },
+  { id: "23", name: "Rosehip Face Serum", category: "Body & Wellness", price: "$28.00", image: img("1556228720-195a672e8a03") },
+  { id: "24", name: "Mineral Bath Soak", category: "Body & Wellness", price: "$20.00", image: img("1608571423902-eed4a5ad8108") },
 ];
