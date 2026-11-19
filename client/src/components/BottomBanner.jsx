@@ -29,7 +29,7 @@ const BottomBanner = () => {
 	];
 
 	return (
-		<div className="relative mt-24 rounded-3xl overflow-hidden border border-primary-forest-green/30 shadow-lg bg-gradient-to-b from-[#1e4d43] to-[#9dbfaf]">
+		<div className="relative mt-24 rounded-3xl overflow-hidden border border-primary-forest-green/30 shadow-lg bg-gradient-to-b from-[#172033] to-[#9AA8BD]">
 			<img
 				src={assets.bottomBanner}
 				alt="banner"
@@ -42,7 +42,7 @@ const BottomBanner = () => {
 				className="absolute inset-0 w-full h-full hidden md:block lg:hidden object-cover object-bottom"
 			/>
 
-			<div className="absolute inset-0 hidden md:block bg-gradient-to-r from-[#1e4d43] via-[#1e4d43]/70 to-transparent" />
+			<div className="absolute inset-0 hidden md:block bg-gradient-to-r from-[#172033] via-[#172033]/70 to-transparent" />
 
 			<div className="relative px-4 md:px-8 lg:px-16 py-10 md:py-16 lg:py-20">
 				<div className="flex flex-col gap-3 sm:gap-4 md:gap-6 lg:gap-8 w-full md:max-w-[40%]">

@@ -19,7 +19,7 @@ const addDays = (date, days) => {
 	return d;
 };
 
-const emptyEmployee = { name: "", email: "", phone: "", position: "Staff", color: "#1e4d43", notes: "" };
+const emptyEmployee = { name: "", email: "", phone: "", position: "Staff", color: "#0FB9A4", notes: "" };
 const emptyShift = (date = toYMD(new Date())) => ({
 	employee: "",
 	date,
@@ -260,7 +260,7 @@ const Schedule = () => {
 											<div className="flex items-start justify-between gap-2">
 												<div className="min-w-0">
 													<div className="flex items-center gap-2">
-														<span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: emp.color || "#1e4d43" }} />
+														<span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: emp.color || "#0FB9A4" }} />
 														<p className="truncate font-medium">{emp.name}</p>
 														{!emp.active ? <span className="rounded-full bg-primary-forest-green/10 px-2 py-0.5 text-[10px] uppercase tracking-wide">inactive</span> : null}
 													</div>
@@ -347,7 +347,7 @@ const Schedule = () => {
 																<div className="flex items-start justify-between gap-2">
 																	<div className="min-w-0">
 																		<div className="flex items-center gap-2">
-																			<span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: emp.color || "#1e4d43" }} />
+																			<span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: emp.color || "#0FB9A4" }} />
 																			<p className="truncate text-sm font-medium">{emp.name || "Employee"}</p>
 																		</div>
 																		<p className="text-xs text-primary-forest-green/70">{shift.startTime} - {shift.endTime}</p>

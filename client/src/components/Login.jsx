@@ -34,9 +34,9 @@ const Login = () => {
 							routing="hash"
 							appearance={{
 								variables: {
-									colorPrimary: "#1E4D43",
-									colorText: "#1E4D43",
-									colorBackground: "#F5F3EE",
+									colorPrimary: "#172033",
+									colorText: "#172033",
+									colorBackground: "#F5F7FB",
 									colorInputBackground: "#ffffff",
 									borderRadius: "0.5rem",
 								},
@@ -64,9 +64,9 @@ const Login = () => {
 							signInUrl="#"
 							appearance={{
 								variables: {
-									colorPrimary: "#1E4D43",
-									colorText: "#1E4D43",
-									colorBackground: "#F5F3EE",
+									colorPrimary: "#172033",
+									colorText: "#172033",
+									colorBackground: "#F5F7FB",
 									colorInputBackground: "#ffffff",
 									borderRadius: "0.5rem",
 								},

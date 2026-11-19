@@ -11,12 +11,12 @@ const MainBanner = () => {
 			<img
 				src={assets.mainBannerBg}
 				alt="banner"
-				className="w-full h-auto hidden md:block bg-gradient-to-r from-[#1e4d43] to-[#9dbfaf]"
+				className="w-full h-auto hidden md:block bg-gradient-to-r from-[#172033] to-[#9AA8BD]"
 			/>
 			<img
 				src={assets.mainBannerBgSmall}
 				alt="banner"
-				className="w-full h-auto md:hidden bg-gradient-to-t from-[#1e4d43] to-[#9dbfaf] "
+				className="w-full h-auto md:hidden bg-gradient-to-t from-[#172033] to-[#9AA8BD] "
 			/>
 
 			<div className="absolute inset-0 flex flex-col items-center md:items-start justify-end md:justify-center pb-24 md:pb-0 px-4 md:pl-18 lg:pl-24">
