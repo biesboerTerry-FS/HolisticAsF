@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
-import { useClerk, UserButton } from "@clerk/clerk-react";
+import { useClerk } from "@clerk/clerk-react";
 import { assets } from "../assets/assets";
 import toast from "react-hot-toast";
 import { useAppContext } from "../context/AppContext";
@@ -95,9 +95,12 @@ const Navbar = () => {
 					</button>
 				) : (
 					<div className="flex items-center gap-3">
-						<UserButton afterSignOutUrl="/" />
 						<div className="relative group">
-							<img src={assets.profile} className="w-10 cursor-pointer outline-secondary-soft-beige" alt="profile" />
+							<img
+								src={clerk?.user?.imageUrl || assets.profile}
+								className="w-10 h-10 rounded-full object-cover cursor-pointer outline-secondary-soft-beige"
+								alt="profile"
+							/>
 							<ul className="hidden group-hover:block absolute top-10 right-0 bg-secondary-soft-beige shadow border border-primary-forest-green py-2.5 w-36 rounded-md text-sm z-40">
 								<li onClick={() => navigate("/my-orders")} className="p-1.5 pl-3 hover:bg-primary-sage-green/20 cursor-pointer">
 									my orders
