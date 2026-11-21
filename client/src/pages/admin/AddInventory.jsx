@@ -1,8 +1,35 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { assets, categories } from "../../assets/assets";
 import toast from "react-hot-toast";
 import { useAppContext } from "../../context/AppContext";
 import { getHttpErrorMessage } from "../../utils/http";
+
+const MAX_IMAGES = 4;
+
+function ImageThumbnail({ file, index, onRemove }) {
+	const [preview] = useState(() => URL.createObjectURL(file));
+
+	useEffect(() => () => URL.revokeObjectURL(preview), [preview]);
+
+	return (
+		<div className="relative aspect-square w-24 shrink-0 overflow-hidden rounded-2xl border border-primary-forest-green/10 bg-secondary-soft-beige/70 shadow-sm">
+			<img
+				className="h-full w-full object-cover"
+				src={preview}
+				alt={`Attached product image ${index + 1}`}
+			/>
+			<button
+				type="button"
+				onClick={() => onRemove(index)}
+				aria-label={`Remove image ${index + 1}`}
+				title="Remove image"
+				className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-primary-forest-green/80 text-sm leading-none text-primary-cream shadow transition hover:bg-semantic-error hover:scale-105 focus:outline-none focus:ring-2 focus:ring-secondary-golden-honey"
+			>
+				×
+			</button>
+		</div>
+	);
+}
 
 const AddInventory = () => {
 	const [files, setFiles] = useState([]);
@@ -13,8 +40,30 @@ const AddInventory = () => {
 	const [offerPrice, setOfferPrice] = useState("");
 	const [submitting, setSubmitting] = useState(false);
 	const [error, setError] = useState("");
+	const nextFileId = useRef(0);
 
 	const { axios } = useAppContext();
+
+	const onFilesSelected = (event) => {
+		const selected = Array.from(event.target.files || []);
+		if (selected.length) {
+			setFiles((previous) => {
+				const remaining = MAX_IMAGES - previous.length;
+				if (remaining <= 0) return previous;
+				return [
+					...previous,
+					...selected.slice(0, remaining).map((file) => ({ id: ++nextFileId.current, file })),
+				];
+			});
+		}
+		// Reset the input so the same file can be selected again and the zone
+		// immediately returns to its plain "upload" state.
+		event.target.value = "";
+	};
+
+	const removeFile = (index) => {
+		setFiles((previous) => previous.filter((_, fileIndex) => fileIndex !== index));
+	};
 
 	const onSubmitHandler = async (event) => {
 		event.preventDefault();
@@ -32,7 +81,7 @@ const AddInventory = () => {
 			const formData = new FormData();
 			formData.append("productData", JSON.stringify(productData));
 			for (let index = 0; index < files.length; index++) {
-				if (files[index]) formData.append("images", files[index]);
+				if (files[index]?.file) formData.append("images", files[index].file);
 			}
 
 			const { data } = await axios.post("/api/inventory/add-inventory", formData, {
@@ -91,32 +140,38 @@ const AddInventory = () => {
 								<p className="mt-1 text-xs text-primary-forest-green/55">Upload up to 4 images. First image is typically used as the primary thumbnail.</p>
 							</div>
 						</div>
-						<div className="mt-4 grid max-w-md grid-cols-4 gap-2 sm:gap-3">
-							{Array(4)
-								.fill("")
-								.map((_, index) => (
-									<label key={index} htmlFor={`image${index}`} className="group relative block">
-										<input
-											onChange={(event) => {
-												const updatedFiles = [...files];
-												updatedFiles[index] = event.target.files?.[0];
-												setFiles(updatedFiles);
-											}}
-											accept="image/*"
-											type="file"
-											id={`image${index}`}
-											hidden
+						<div className="mt-4 flex max-w-md flex-wrap items-start gap-2 sm:gap-3">
+							{files.map((entry, index) => (
+								<ImageThumbnail
+									key={entry.id}
+									file={entry.file}
+									index={index}
+									onRemove={removeFile}
+								/>
+							))}
+							{files.length < MAX_IMAGES ? (
+								<label htmlFor="product-images" className="group relative block w-24 shrink-0">
+									<input
+										onChange={onFilesSelected}
+										accept="image/*"
+										type="file"
+										id="product-images"
+										multiple
+										hidden
+									/>
+									<div className="aspect-square overflow-hidden rounded-2xl border border-dashed border-primary-forest-green/20 bg-secondary-soft-beige/70 p-2 transition group-hover:border-secondary-golden-honey/50 group-hover:bg-primary-sage-green/5">
+										<img
+											className="h-full w-full cursor-pointer rounded-xl object-cover"
+											src={assets.fileUpload}
+											alt="Upload product"
 										/>
-										<div className="aspect-square overflow-hidden rounded-2xl border border-dashed border-primary-forest-green/20 bg-secondary-soft-beige/70 p-2 transition group-hover:border-secondary-golden-honey/50 group-hover:bg-primary-sage-green/5">
-											<img
-												className="h-full w-full cursor-pointer rounded-xl object-cover"
-												src={files[index] ? URL.createObjectURL(files[index]) : assets.fileUpload}
-												alt="Upload product"
-											/>
-										</div>
-									</label>
-								))}
+									</div>
+								</label>
+							) : null}
 						</div>
+						<p className="mt-2 text-xs text-primary-forest-green/55">
+							{files.length} of {MAX_IMAGES} images attached
+						</p>
 					</section>
 
 					<section className="grid gap-4 md:grid-cols-2">
