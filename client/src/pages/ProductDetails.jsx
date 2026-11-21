@@ -50,14 +50,16 @@ const ProductDetails = () => {
 
 	return (
 		<div className="mt-12">
-			<p>
-				<Link to={"/"}>home</Link> /
-				<Link to={"/products"}> products</Link> /
-				<Link to={`/products/${product.category?.toLowerCase()}`}>
+			<p className="text-primary-forest-green/50 dark:text-primary-cream/50">
+				<Link to={"/"} className="text-secondary-golden-honey hover:underline">home</Link>
+				<span className="mx-1.5">/</span>
+				<Link to={"/products"} className="text-secondary-golden-honey hover:underline">products</Link>
+				<span className="mx-1.5">/</span>
+				<Link to={`/products/${product.category?.toLowerCase()}`} className="text-secondary-golden-honey hover:underline">
 					{product.category?.toLowerCase()}
-				</Link>{" "}
-				/
-				<span className="text-primary-forest-green">
+				</Link>
+				<span className="mx-1.5">/</span>
+				<span className="text-primary-forest-green dark:text-primary-cream font-medium">
 					{product.name?.toLowerCase()}
 				</span>
 			</p>
