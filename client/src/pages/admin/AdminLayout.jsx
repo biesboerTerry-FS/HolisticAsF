@@ -141,7 +141,7 @@ const AdminLayout = () => {
 												<NavLink
 													to={item.path}
 													key={item.name}
-													end={item.path === "/admin"}
+													end
 													className={({ isActive }) =>
 														`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all ${
 															isActive
@@ -183,7 +183,7 @@ const AdminLayout = () => {
 								<NavLink
 									to={item.path}
 									key={item.name}
-									end={item.path === "/admin"}
+									end
 									className={({ isActive }) =>
 										`whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium capitalize transition ${
 											isActive
