@@ -1,4 +1,4 @@
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, DefaultTheme, DarkTheme } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { ThemeProvider, useTheme } from "./src/theme/ThemeContext";
 import GradientBackground from "./src/components/GradientBackground";
@@ -20,8 +20,16 @@ function AppNavigator() {
   const { dark } = useTheme();
   return (
     <GradientBackground dark={dark}>
-      <NavigationContainer>
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <NavigationContainer
+        theme={
+          dark
+            ? { ...DarkTheme, colors: { ...DarkTheme.colors, background: "transparent", card: "transparent" } }
+            : { ...DefaultTheme, colors: { ...DefaultTheme.colors, background: "transparent", card: "transparent" } }
+        }
+      >
+        <Stack.Navigator
+          screenOptions={{ headerShown: false, cardStyle: { backgroundColor: "transparent" } }}
+        >
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="Products" component={ProductsScreen} />
           <Stack.Screen name="Category" component={CategoryScreen} />
