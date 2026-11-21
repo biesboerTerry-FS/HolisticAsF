@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { useAppContext } from "../../../context/AppContext";
 import { ensureDemoAdminToken } from "../../../utils/demoAuth";
@@ -13,10 +13,18 @@ const tabs = [
 
 const HrShell = () => {
 	const { axios } = useAppContext();
+	const [ready, setReady] = useState(false);
 
 	useEffect(() => {
-		// Ensure the admin JWT cookie exists even on a hard navigation to /admin/hr.
-		ensureDemoAdminToken(axios);
+		// Mount HR pages only after the admin JWT cookie exists, so their first
+		// request is authenticated even on a hard navigation to /admin/hr.
+		let active = true;
+		ensureDemoAdminToken(axios).finally(() => {
+			if (active) setReady(true);
+		});
+		return () => {
+			active = false;
+		};
 	}, [axios]);
 
 	return (
@@ -57,7 +65,13 @@ const HrShell = () => {
 					))}
 				</nav>
 
-				<Outlet />
+				{ready ? (
+					<Outlet />
+				) : (
+					<div className="rounded-3xl border border-primary-forest-green/10 bg-primary-warm-white/70 p-10 text-center text-sm text-primary-forest-green/60">
+						Preparing HR workspace…
+					</div>
+				)}
 			</div>
 		</div>
 	);
