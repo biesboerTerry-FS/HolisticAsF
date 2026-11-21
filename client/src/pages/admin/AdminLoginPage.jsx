@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { assets } from "../../assets/assets";
 import { useAppContext } from "../../context/AppContext";
+import { ensureDemoAdminToken } from "../../utils/demoAuth";
 import toast from "react-hot-toast";
 
 /**
@@ -33,7 +34,8 @@ export default function AdminLoginPage() {
     }
   };
 
-  const handleDemo = () => {
+  const handleDemo = async () => {
+    await ensureDemoAdminToken(axios);
     setIsAdmin(true);
     navigate("/admin");
   };

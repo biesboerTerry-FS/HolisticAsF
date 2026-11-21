@@ -1,5 +1,41 @@
+import jwt from "jsonwebtoken";
 import Employee from "../models/Employee.js";
 import Shift from "../models/Shift.js";
+import { getJwtSecret } from "../middleware/jwt.js";
+
+const employeeCookieOptions = () => ({
+	httpOnly: true,
+	secure: process.env.NODE_ENV === "production",
+	sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+});
+
+// ^ demo employee session: /api/employees/demo-login
+// Issues a short-lived, self-service-only token for the demo employee portal.
+export const employeeDemoLogin = async (request, response) => {
+	try {
+		const employeeId =
+			String(request.body?.employeeId || DEMO_EMPLOYEE.employeeId).slice(0, 100) ||
+			DEMO_EMPLOYEE.employeeId;
+		const token = jwt.sign(
+			{ employeeId, scope: "employee-demo", demo: true },
+			getJwtSecret(),
+			{ expiresIn: "12h" },
+		);
+		response.cookie("employeeToken", token, {
+			...employeeCookieOptions(),
+			maxAge: 12 * 60 * 60 * 1000,
+		});
+		return response.json({
+			success: true,
+			message: "Demo employee session started.",
+		});
+	} catch (error) {
+		console.error("Demo employee login failed:", error.message);
+		return response
+			.status(500)
+			.json({ success: false, message: "Unable to start demo session." });
+	}
+};
 
 // Demo employee used when the database is empty (local seeding is optional).
 const DEMO_EMPLOYEE = {

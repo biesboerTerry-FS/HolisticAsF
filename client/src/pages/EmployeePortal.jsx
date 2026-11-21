@@ -7,6 +7,7 @@ import {
 	EMPLOYEE_STORAGE_KEY,
 	demoShifts,
 } from "../data/employee";
+import { ensureDemoEmployeeToken } from "../utils/demoAuth";
 
 const EMPTY_FORM = { name: "", email: "", phone: "", address: "" };
 
@@ -49,6 +50,7 @@ const EmployeePortal = () => {
 		setLoading(true);
 		try {
 			const employeeId = DEMO_EMPLOYEE.employeeId;
+			await ensureDemoEmployeeToken(axios, employeeId);
 			const [profileRes, shiftsRes] = await Promise.all([
 				axios.get("/api/employees/me", {
 					params: { employeeId },

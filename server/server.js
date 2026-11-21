@@ -16,6 +16,7 @@ import contactRouter from "./routes/contactRoutes.js";
 import employeeRouter from "./routes/employeeRoutes.js";
 import announcementRouter from "./routes/announcementRoutes.js";
 import fetch from "node-fetch";
+import helmet from "helmet";
 import * as Sentry from "@sentry/node";
 
 if (process.env.SENTRY_DSN) {
@@ -53,7 +54,17 @@ const allowedOrigins = (
 	.map((origin) => origin.trim())
 	.filter(Boolean);
 
-app.use(express.json());
+app.disable("x-powered-by");
+// Standard security headers. CSP/cross-origin policies are relaxed because
+// this is a JSON API consumed by a separate storefront origin.
+app.use(
+	helmet({
+		contentSecurityPolicy: false,
+		crossOriginEmbedderPolicy: false,
+		crossOriginResourcePolicy: false,
+	}),
+);
+app.use(express.json({ limit: "1mb" }));
 app.use(cookieParser());
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 
@@ -109,7 +120,10 @@ app.use((error, request, response, next) => {
 	console.error("Server error:", error);
 	response.status(500).json({
 		success: false,
-		message: error.message,
+		message:
+			process.env.NODE_ENV === "production"
+				? "Internal server error."
+				: error.message,
 	});
 });
 

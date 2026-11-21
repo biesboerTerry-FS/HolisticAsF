@@ -1,6 +1,11 @@
 import express from "express";
 import authUser from "../middleware/authUser.js";
-// import authAdmin from "../middleware/authAdmin.js";
+import authAdmin from "../middleware/authAdmin.js";
+import { demoLimiter, submitLimiter } from "../middleware/rateLimit.js";
+import {
+	validateOrderPlacement,
+	validateOrderStatus,
+} from "../middleware/validate.js";
 import {
 	placeOrderCOD,
 	placeOrderStripe,
@@ -8,13 +13,12 @@ import {
 	getAllOrders,
 	updateOrderStatus,
 } from "../controllers/orderController.js";
+import Address from "../models/Address.js";
 
 const orderRouter = express.Router();
 
 // Demo checkout for the mobile app: no real sign-in. Create a demo address so
 // the Order.address ObjectId ref is valid, then hand off to the real Stripe flow.
-import Address from "../models/Address.js";
-
 const demoUser = async (request, response, next) => {
 	try {
 		const userId = "demo-mobile-user";
@@ -37,12 +41,30 @@ const demoUser = async (request, response, next) => {
 	}
 };
 
-orderRouter.post("/cod", authUser, placeOrderCOD);
-orderRouter.post("/payment", authUser, placeOrderStripe);
-orderRouter.post("/demo-payment", demoUser, placeOrderStripe);
+orderRouter.post(
+	"/cod",
+	authUser,
+	submitLimiter,
+	validateOrderPlacement,
+	placeOrderCOD,
+);
+orderRouter.post(
+	"/payment",
+	authUser,
+	submitLimiter,
+	validateOrderPlacement,
+	placeOrderStripe,
+);
+// Public demo checkout (mobile). Deliberately rate-limited and validated.
+orderRouter.post(
+	"/demo-payment",
+	demoLimiter,
+	demoUser,
+	validateOrderPlacement,
+	placeOrderStripe,
+);
 orderRouter.get("/user", authUser, getUserOrders);
-// auth disabled for now
-orderRouter.get("/admin", /* authAdmin, */ getAllOrders);
-orderRouter.post("/status", /* authAdmin, */ updateOrderStatus);
+orderRouter.get("/admin", authAdmin, getAllOrders);
+orderRouter.post("/status", authAdmin, validateOrderStatus, updateOrderStatus);
 
 export default orderRouter;

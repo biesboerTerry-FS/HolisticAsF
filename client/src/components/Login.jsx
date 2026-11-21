@@ -2,14 +2,16 @@ import React, { useState } from "react";
 import { SignIn, SignUp } from "@clerk/clerk-react";
 import { useAppContext } from "../context/AppContext";
 import { DEMO_EMPLOYEE, EMPLOYEE_STORAGE_KEY } from "../data/employee";
+import { ensureDemoAdminToken } from "../utils/demoAuth";
 
 const clerkEnabled = Boolean(import.meta.env.VITE_CLERK_PUBLISHABLE_KEY);
 
 const Login = () => {
-	const { setShowUserLogin, setIsAdmin, setEmployee, navigate } = useAppContext();
+	const { setShowUserLogin, setIsAdmin, setEmployee, navigate, axios } = useAppContext();
 	const [state, setState] = useState("login");
 
-	const handleDemoAdmin = () => {
+	const handleDemoAdmin = async () => {
+		await ensureDemoAdminToken(axios);
 		setIsAdmin(true);
 		setShowUserLogin(false);
 		navigate("/admin");

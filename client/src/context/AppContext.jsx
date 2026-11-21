@@ -4,6 +4,7 @@ import { useUser } from "@clerk/clerk-react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { catalogProducts, catalogCategories } from "../data/catalog";
+import { ensureDemoAdminToken } from "../utils/demoAuth";
 
 axios.defaults.withCredentials = true;
 axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
@@ -225,10 +226,14 @@ export const LocalAppContextProvider = ({ children }) => {
 	const state = useAppState();
 
 	useEffect(() => {
-		// No Clerk configured: keep app usable in local/dev mode
-		state.setUser(null);
-		state.setIsAdmin(true);
-		state.setIsAuthLoading(false);
+		// No Clerk configured: keep app usable in local/dev mode.
+		// Obtain a short-lived demo admin token so the now-protected admin
+		// routes keep working in this mode too.
+		ensureDemoAdminToken(state.axios).finally(() => {
+			state.setUser(null);
+			state.setIsAdmin(true);
+			state.setIsAuthLoading(false);
+		});
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 

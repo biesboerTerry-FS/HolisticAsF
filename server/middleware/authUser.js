@@ -1,33 +1,18 @@
-import jwt from "jsonwebtoken";
+import { readToken, unauthorized, verifyToken } from "./jwt.js";
 
-const authUser = async (request, response, next) => {
-	try {
-		const token = request.cookies.token;
-
-		console.log("------------ authUser Middleware ------------");
-		console.log("token:", token ? "exists" : "missing");
-
-		if (!token) {
-			return response.json({
-				success: false,
-				message: "Not Authenticated",
-			});
-		}
-
-		const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-		console.log("decodedToken:", decodedToken);
-
-		request.user = decodedToken;
-		console.log("request.user set:", request.user);
-
-		next();
-	} catch (error) {
-		console.error("Authentication error:", error.message);
-		return response.json({
-			success: false,
-			message: error.message,
-		});
+/**
+ * Guards customer-owned data (cart, addresses, orders). Accepts the httpOnly
+ * `token` cookie issued on login/register (or a Bearer token), verifies the
+ * signature and expiry, and exposes the decoded identity as `request.user`.
+ */
+const authUser = (request, response, next) => {
+	const payload = verifyToken(readToken(request, "token"));
+	if (!payload || (!payload.id && !payload.clerkId)) {
+		return unauthorized(response, "Authentication required.");
 	}
+
+	request.user = payload;
+	return next();
 };
 
 export default authUser;

@@ -1,6 +1,7 @@
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { getJwtSecret } from "../middleware/jwt.js";
 
 // ^ register user: /api/user/register
 export const registerUser = async (request, response) => {
@@ -28,7 +29,7 @@ export const registerUser = async (request, response) => {
 			password: hashedPassword,
 		});
 
-		const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+		const token = jwt.sign({ id: user._id }, getJwtSecret(), {
 			expiresIn: "1d",
 		});
 		response.cookie("token", token, {
@@ -82,7 +83,7 @@ export const loginUser = async (request, response) => {
 			});
 		}
 
-		const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+		const token = jwt.sign({ id: user._id }, getJwtSecret(), {
 			expiresIn: "7d",
 		});
 
@@ -169,7 +170,19 @@ export const syncClerkUser = async (request, response) => {
 			});
 		}
 
-		response.json({ success: true, user });
+		// Never return the stored password hash to the client.
+		response.json({
+			success: true,
+			user: {
+				id: user._id,
+				clerkId: user.clerkId,
+				name: user.name,
+				email: user.email,
+				role: user.role,
+				cartItems: user.cartItems || {},
+				orders: user.orders || [],
+			},
+		});
 	} catch (error) {
 		response.json({ success: false, message: error.message });
 	}

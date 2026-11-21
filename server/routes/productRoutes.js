@@ -5,14 +5,15 @@ import {
 	inventoryList,
 	productById,
 } from "../controllers/productController.js";
-// import authAdmin from "../middleware/authAdmin.js";
+import authAdmin from "../middleware/authAdmin.js";
 
 const productRouter = express.Router();
 
+// Inventory changes are privileged; browsing the inventory stays public.
 productRouter.post(
 	"/add-inventory",
+	authAdmin,
 	upload.array(["images"]),
-	// authAdmin,
 	addProduct,
 );
 productRouter.get("/inventory", inventoryList);

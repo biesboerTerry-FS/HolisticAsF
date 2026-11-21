@@ -1,6 +1,8 @@
 import express from "express";
 import mongoose from "mongoose";
 import Announcement from "../models/Announcement.js";
+import authAdmin from "../middleware/authAdmin.js";
+import { validateAnnouncement } from "../middleware/validate.js";
 
 const announcementRouter = express.Router();
 
@@ -30,7 +32,7 @@ announcementRouter.get("/", async (_request, response) => {
 	}
 });
 
-announcementRouter.post("/", async (request, response) => {
+announcementRouter.post("/", authAdmin, validateAnnouncement, async (request, response) => {
 	try {
 		const { title, body, type = "info", active = true } = request.body || {};
 
@@ -62,7 +64,7 @@ announcementRouter.post("/", async (request, response) => {
 	}
 });
 
-announcementRouter.patch("/:id", async (request, response) => {
+announcementRouter.patch("/:id", authAdmin, validateAnnouncement, async (request, response) => {
 	try {
 		const { id } = request.params;
 		if (!isValidId(id)) {
@@ -104,7 +106,7 @@ announcementRouter.patch("/:id", async (request, response) => {
 	}
 });
 
-announcementRouter.delete("/:id", async (request, response) => {
+announcementRouter.delete("/:id", authAdmin, async (request, response) => {
 	try {
 		const { id } = request.params;
 		if (!isValidId(id)) {

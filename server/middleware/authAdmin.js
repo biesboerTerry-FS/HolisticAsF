@@ -1,32 +1,26 @@
-import jwt from "jsonwebtoken";
+import { readToken, unauthorized, verifyToken } from "./jwt.js";
 
-const authAdmin = async (request, response, next) => {
-	const { adminToken } = request.cookies;
-
-	if (!adminToken) {
-		return response.json({
-			success: false,
-			message: "Not authorized.",
-		});
+/**
+ * Guards privileged admin operations. Accepts the httpOnly `adminToken` cookie
+ * set by /api/admin/login (or /api/admin/demo-login), or a Bearer token.
+ */
+const authAdmin = (request, response, next) => {
+	const payload = verifyToken(readToken(request, "adminToken"));
+	if (!payload) {
+		return unauthorized(response, "Admin authentication required.");
 	}
 
-	try {
-		const tokenDecode = jwt.verify(adminToken, process.env.JWT_SECRET);
+	const configuredAdmin = process.env.ADMIN_EMAIL;
+	const isAdmin =
+		(payload.scope === "admin-demo" ||
+			(Boolean(configuredAdmin) && payload.email === configuredAdmin));
 
-		if (tokenDecode.email === process.env.ADMIN_EMAIL) {
-			next();
-		} else {
-			return response.json({
-				success: false,
-				message: "Not authorized.",
-			});
-		}
-	} catch (error) {
-		response.json({
-			success: false,
-			message: error.message,
-		});
+	if (!isAdmin) {
+		return unauthorized(response, "Admin authentication required.");
 	}
+
+	request.admin = payload;
+	return next();
 };
 
 export default authAdmin;
