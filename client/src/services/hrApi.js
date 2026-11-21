@@ -17,20 +17,41 @@ import {
 	replaceTimeOffRequests,
 	setTimeOffRequestStatus,
 } from "../data/portalData";
+import { ensureDemoAdminToken } from "../utils/demoAuth";
 
-const call = async (axios, method, url, data) => {
-	const response = await axios({
-		method,
-		url,
-		data,
-		suppressGlobalErrorToast: true,
-	});
-	if (response.data?.success === false) {
-		const error = new Error(response.data?.message || "HR request failed.");
-		error.httpStatus = response.status;
+// Child pages can mount before the demo admin cookie is issued. Refresh once
+// and retry a 401 instead of leaving the HR suite empty on first load.
+let tokenRefresh = null;
+const refreshAdminToken = (axios) => {
+	if (!tokenRefresh) {
+		tokenRefresh = Promise.resolve(ensureDemoAdminToken(axios)).finally(() => {
+			tokenRefresh = null;
+		});
+	}
+	return tokenRefresh;
+};
+
+const call = async (axios, method, url, data, retried = false) => {
+	try {
+		const response = await axios({
+			method,
+			url,
+			data,
+			suppressGlobalErrorToast: true,
+		});
+		if (response.data?.success === false) {
+			const error = new Error(response.data?.message || "HR request failed.");
+			error.httpStatus = response.status;
+			throw error;
+		}
+		return response.data;
+	} catch (error) {
+		if (!retried && error?.response?.status === 401) {
+			await refreshAdminToken(axios);
+			return call(axios, method, url, data, true);
+		}
 		throw error;
 	}
-	return response.data;
 };
 
 // Only a network failure (server unreachable) uses local demo storage. A real
