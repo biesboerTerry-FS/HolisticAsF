@@ -11,8 +11,15 @@ const clerkEnabled = Boolean(import.meta.env.VITE_CLERK_PUBLISHABLE_KEY);
 const AdminLayout = () => {
 	const clerk = clerkEnabled ? useClerk() : null;
 	const { navigate, isAdmin, isAuthLoading, setUser, setIsAdmin } = useAppContext();
-	// Category groups that are collapsed. Default: all open.
-	const [collapsed, setCollapsed] = useState({});
+	// Category groups start collapsed; staff opt in to each group.
+	const [collapsed, setCollapsed] = useState({
+		Overview: true,
+		Inventory: true,
+		Operations: true,
+		HR: true,
+		Communication: true,
+		Employee: true,
+	});
 
 	const toggleGroup = (label) =>
 		setCollapsed((current) => ({ ...current, [label]: !current[label] }));

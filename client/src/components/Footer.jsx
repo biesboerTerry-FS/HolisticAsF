@@ -1,5 +1,6 @@
 import React from "react";
 import { footerLinks } from "../assets/assets";
+import { openConsentSettings } from "../lib/cookieConsent";
 
 const Footer = () => {
 	return (
@@ -38,9 +39,16 @@ const Footer = () => {
 					))}
 				</div>
 			</div>
-			<p className="py-4 text-center text-sm md:text-base text-secondary-deep-forest  hover:text-secondary-earthy-brown transition">
+			<p className="py-4 text-center text-sm md:text-base text-secondary-deep-forest">
 				copyright {new Date().getFullYear()} © holisticAF.com | all
-				rights reserved | one love
+				rights reserved | one love |{" "}
+				<button
+					type="button"
+					onClick={openConsentSettings}
+					className="underline transition hover:text-secondary-golden-honey"
+				>
+					cookie settings
+				</button>
 			</p>
 		</div>
 	);

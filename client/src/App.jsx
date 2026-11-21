@@ -6,6 +6,7 @@ import Navbar from "./components/Navbar";
 import Login from "./components/Login";
 import Home from "./pages/Home";
 import Footer from "./components/Footer";
+import CookieConsent from "./components/CookieConsent";
 import Products from "./pages/Products";
 import ProductDetails from "./pages/ProductDetails";
 import ProductCategory from "./pages/ProductCategory";
@@ -105,6 +106,7 @@ const App = () => {
 				</Routes>
 			</div>
 			{!hideStorefrontChrome && <Footer />}
+			{!hideStorefrontChrome && <CookieConsent />}
 		</div>
 	);
 };
