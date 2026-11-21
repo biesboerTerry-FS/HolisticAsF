@@ -2,6 +2,7 @@ import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { getJwtSecret } from "../middleware/jwt.js";
+import { resolveUserId } from "../utils/resolveUser.js";
 
 // ^ register user: /api/user/register
 export const registerUser = async (request, response) => {
@@ -147,6 +148,156 @@ export const logoutUser = async (request, response) => {
 			success: false,
 			message: error.message,
 		});
+	}
+};
+
+// ^ get profile for the storefront account page
+export const getProfile = async (request, response) => {
+	try {
+		const userId = await resolveUserId(request);
+		if (!userId) {
+			return response.status(401).json({
+				success: false,
+				message: "Authentication required.",
+			});
+		}
+
+		const user = await User.findById(userId).select("-password");
+		if (!user) {
+			return response.status(404).json({
+				success: false,
+				message: "Profile not found.",
+			});
+		}
+
+		return response.json({
+			success: true,
+			user: {
+				id: user._id,
+				clerkId: user.clerkId,
+				name: user.name || "",
+				email: user.email || "",
+				phone: user.phone || "",
+			},
+		});
+	} catch (error) {
+		console.log(error.message, "get profile");
+		return response.json({ success: false, message: error.message });
+	}
+};
+
+// ^ patch name / email / phone from the storefront account page
+export const updateProfile = async (request, response) => {
+	try {
+		const userId = await resolveUserId(request);
+		if (!userId) {
+			return response.status(401).json({
+				success: false,
+				message: "Authentication required.",
+			});
+		}
+
+		const updates = {};
+		if (request.body?.name !== undefined) {
+			const name = String(request.body.name).trim();
+			if (!name) {
+				return response.json({
+					success: false,
+					message: "Name cannot be empty.",
+				});
+			}
+			updates.name = name;
+		}
+		if (request.body?.email !== undefined) {
+			const email = String(request.body.email).trim().toLowerCase();
+			if (!/^\S+@\S+\.\S+$/.test(email)) {
+				return response.json({
+					success: false,
+					message: "Please provide a valid email address.",
+				});
+			}
+			const duplicate = await User.findOne({ email, _id: { $ne: userId } });
+			if (duplicate) {
+				return response.json({
+					success: false,
+					message: "That email address is already in use.",
+				});
+			}
+			updates.email = email;
+		}
+		if (request.body?.phone !== undefined) {
+			updates.phone = String(request.body.phone).trim();
+		}
+
+		if (Object.keys(updates).length === 0) {
+			return response.json({
+				success: false,
+				message: "No profile changes were provided.",
+			});
+		}
+
+		const user = await User.findByIdAndUpdate(
+			userId,
+			{ $set: updates },
+			{ new: true, runValidators: true },
+		).select("-password");
+
+		return response.json({
+			success: true,
+			message: "Profile updated.",
+			user: {
+				id: user._id,
+				clerkId: user.clerkId,
+				name: user.name,
+				email: user.email,
+				phone: user.phone || "",
+			},
+		});
+	} catch (error) {
+		console.log(error.message, "update profile");
+		return response.json({ success: false, message: error.message });
+	}
+};
+
+// ^ storefront demo session: POST /api/user/demo-login
+// Gives the no-Clerk storefront a real, short-lived JWT so profile, address and
+// demo-payment routes stay fully JWT-protected even in demo mode.
+export const demoUserLogin = async (_request, response) => {
+	try {
+		const user = await User.findOneAndUpdate(
+			{ clerkId: "demo-storefront-user" },
+			{
+				$setOnInsert: {
+					clerkId: "demo-storefront-user",
+					name: "Demo Shopper",
+					email: "storefront-demo@holisticaf.local",
+					phone: "",
+					cartItems: {},
+				},
+			},
+			{ upsert: true, new: true, setDefaultsOnInsert: true },
+		);
+
+		const token = jwt.sign({ id: user._id }, getJwtSecret(), {
+			expiresIn: "12h",
+		});
+		response.cookie("token", token, {
+			httpOnly: true,
+			secure: process.env.NODE_ENV === "production",
+			sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+			maxAge: 12 * 60 * 60 * 1000,
+		});
+
+		return response.json({
+			success: true,
+			message: "Demo storefront session started.",
+			user: { id: user._id, name: user.name, email: user.email },
+		});
+	} catch (error) {
+		console.log(error.message, "demo user login");
+		return response
+			.status(500)
+			.json({ success: false, message: "Unable to start demo session." });
 	}
 };
 

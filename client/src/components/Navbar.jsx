@@ -193,6 +193,7 @@ const Navbar = () => {
 
 				<NavLink to={"/"}>home</NavLink>
 				<NavLink to={"/products"}>products</NavLink>
+				<NavLink to={"/profile"}>my profile</NavLink>
 				<NavLink to={"/contact"}>contact</NavLink>
 
 				<ThemeToggle />
@@ -226,6 +227,9 @@ const Navbar = () => {
 								alt="profile"
 							/>
 							<ul className="hidden group-hover:block absolute top-10 right-0 bg-secondary-soft-beige shadow border border-primary-forest-green py-2.5 w-36 rounded-md text-sm z-40">
+								<li onClick={() => navigate("/profile")} className="p-1.5 pl-3 hover:bg-primary-sage-green/20 cursor-pointer">
+									my profile
+								</li>
 								<li onClick={() => navigate("/my-orders")} className="p-1.5 pl-3 hover:bg-primary-sage-green/20 cursor-pointer">
 									my orders
 								</li>
@@ -262,6 +266,7 @@ const Navbar = () => {
 				<div className="flex sm:hidden fixed inset-0 top-[60px] bg-secondary-soft-beige shadow-md py-8 flex-col items-center gap-3 px-5 text-2xl z-50 min-h-screen overflow-y-auto">
 					<NavLink to={"/"} onClick={() => setOpen(false)}>home</NavLink>
 					<NavLink to={"/products"} onClick={() => setOpen(false)}>products</NavLink>
+					<NavLink to={"/profile"} onClick={() => setOpen(false)}>my profile</NavLink>
 					<NavLink to={"/contact"} onClick={() => setOpen(false)}>contact</NavLink>
 					{user && <NavLink to={"/my-orders"} onClick={() => setOpen(false)}>my orders</NavLink>}
 

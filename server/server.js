@@ -8,6 +8,7 @@ import adminRouter from "./routes/adminRoutes.js";
 import productRouter from "./routes/productRoutes.js";
 import cartRouter from "./routes/cartRoutes.js";
 import addressRouter from "./routes/addressRoutes.js";
+import paymentMethodRouter from "./routes/paymentMethodRoutes.js";
 import orderRouter from "./routes/orderRoutes.js";
 import connectCloudinary from "./configs/cloudinary.js";
 import productsRouter from "./routes/productsRoutes.js";
@@ -75,6 +76,7 @@ app.use("/api/admin", adminRouter);
 app.use("/api/inventory", productRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/address", addressRouter);
+app.use("/api/payment-methods", paymentMethodRouter);
 app.use("/api/order", orderRouter);
 app.use("/api/products", productsRouter);
 // Legacy alias — the product source is TheMealDB only.

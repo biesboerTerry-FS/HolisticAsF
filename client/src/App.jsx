@@ -11,6 +11,7 @@ import ProductDetails from "./pages/ProductDetails";
 import ProductCategory from "./pages/ProductCategory";
 import Cart from "./pages/Cart";
 import AddAddress from "./pages/AddAddress";
+import Profile from "./pages/Profile";
 import AddInventory from "./pages/admin/AddInventory";
 import MyOrders from "./pages/MyOrders";
 import AdminLayout from "./pages/admin/AdminLayout";
@@ -71,6 +72,7 @@ const App = () => {
 					<Route path="/top-sellers" element={<Featured />} />
 					<Route path="/cart" element={<Cart />} />
 					<Route path="/add-address" element={<AddAddress />} />
+					<Route path="/profile" element={<Profile />} />
 					<Route path="/my-orders" element={<MyOrders />} />
 					<Route path="/contact" element={<Contact />} />
 					<Route path="/login" element={isAdminLogin ? <AdminLoginPage /> : <Login />} />
