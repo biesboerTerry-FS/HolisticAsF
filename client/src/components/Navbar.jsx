@@ -46,7 +46,7 @@ const Navbar = () => {
 	return (
 		<nav className="flex items-center justify-between px-4 sm:px-8 lg:px-16 xl:px-24 py-4 border-b border-primary-forest-green bg-secondary-soft-beige text-primary-forest-green transition-all">
 			<NavLink onClick={() => setOpen(false)} to={"/"}>
-				<img className="h-10 [filter:hue-rotate(130deg)_saturate(1.15)]" src={assets.holisticAfLogoNoBg} alt="holisticAF logo" />
+				<img className="h-10" src={assets.holisticAfLogoNoBg} alt="holisticAF logo" />
 			</NavLink>
 
 			<div className="hidden sm:flex items-center gap-6 lg:gap-8">
