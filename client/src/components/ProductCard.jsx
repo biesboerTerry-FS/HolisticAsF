@@ -45,7 +45,7 @@ const ProductCard = ({ product }) => {
 	return (
 		<div
 			onClick={handleNavigation}
-			className="border border-primary-forest-green bg-primary-sage-green/40 rounded-md md:px-4 px-3 py-2 min-w-28 max-w-52 w-full cursor-pointer"
+			className="border border-primary-forest-green bg-primary-forest-green dark:bg-primary-sage-green/40 rounded-md md:px-4 px-3 py-2 min-w-28 max-w-52 w-full cursor-pointer"
 		>
 			<div className="group w-full h-32 md:h-40 overflow-hidden rounded-md bg-primary-warm-white">
 				<img
@@ -58,23 +58,23 @@ const ProductCard = ({ product }) => {
 				/>
 			</div>
 
-			<div className="text-primary-forest-green/60 text-sm mt-2">
+			<div className="text-primary-cream/70 dark:text-primary-forest-green/60 text-sm mt-2">
 				{product.category && <p className="truncate">{product.category}</p>}
 
-				<p className="text-primary-forest-green font-medium text-lg truncate w-full">
+				<p className="text-primary-cream dark:text-primary-forest-green font-medium text-lg truncate w-full">
 					{product.brand?.toLowerCase() || "Brand"}
 				</p>
 
-				<p className="text-primary-forest-green font-medium text-lg truncate w-full">
+				<p className="text-primary-cream dark:text-primary-forest-green font-medium text-lg truncate w-full">
 					{product.description?.toLowerCase() || "Description"}
 				</p>
 
 				<div className="flex items-end justify-between mt-3">
-					<p className="md:text-xl text-base font-medium text-primary-forest-green">
+					<p className="md:text-xl text-base font-medium text-primary-cream dark:text-primary-forest-green">
 						{currency}
 						{offerPrice.toFixed(2)}
 						{offerPrice !== regularPrice && (
-							<span className="text-primary-forest-green/60 md:text-sm text-xs line-through ml-1">
+							<span className="text-primary-cream/60 dark:text-primary-forest-green/60 md:text-sm text-xs line-through ml-1">
 								{currency}
 								{regularPrice.toFixed(2)}
 							</span>
@@ -83,11 +83,11 @@ const ProductCard = ({ product }) => {
 
 					<div
 						onClick={(event) => event.stopPropagation()}
-						className="text-primary-sage-green"
+						className="text-secondary-golden-honey dark:text-primary-sage-green"
 					>
 						{!cartItems[product._id || product.upc] ? (
 							<button
-								className="flex items-center justify-center gap-1 border border-primary-forest-green/70 md:w-[80px] w-[64px] h-[34px] rounded text-primary-forest-green cursor-pointer bg-primary-cream/50"
+								className="flex items-center justify-center gap-1 border border-primary-cream/50 dark:border-primary-forest-green/70 md:w-[80px] w-[64px] h-[34px] rounded text-primary-cream dark:text-primary-forest-green cursor-pointer bg-primary-forest-green/40 dark:bg-primary-cream/50"
 								onClick={() =>
 									addToCart(product._id || product.upc)
 								}
@@ -96,25 +96,25 @@ const ProductCard = ({ product }) => {
 								add
 							</button>
 						) : (
-							<div className="flex items-center justify-center gap-2 md:w-20 w-16 h-[34px] rounded select-none bg-primary-cream/50">
+							<div className="flex items-center justify-center gap-2 md:w-20 w-16 h-[34px] rounded select-none bg-primary-forest-green/40 dark:bg-primary-cream/50">
 								<button
 									onClick={() =>
 										removeFromCart(
 											product._id || product.upc,
 										)
 									}
-									className="cursor-pointer text-md px-2 h-full text-primary-forest-green"
+									className="cursor-pointer text-md px-2 h-full text-primary-cream dark:text-primary-forest-green"
 								>
 									-
 								</button>
-								<span className="w-5 text-center text-primary-forest-green">
+								<span className="w-5 text-center text-primary-cream dark:text-primary-forest-green">
 									{cartItems[product._id || product.upc]}
 								</span>
 								<button
 									onClick={() =>
 										addToCart(product._id || product.upc)
 									}
-									className="cursor-pointer text-md px-2 h-full text-primary-forest-green"
+									className="cursor-pointer text-md px-2 h-full text-primary-cream dark:text-primary-forest-green"
 								>
 									+
 								</button>
