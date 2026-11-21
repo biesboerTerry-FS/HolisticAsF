@@ -79,7 +79,7 @@ export default function CartScreen({ navigation }) {
 
 const styles = (theme, dark) =>
   StyleSheet.create({
-    container: { flex: 1, backgroundColor: theme.secondarySoftBeige },
+    container: { flex: 1, backgroundColor: "transparent" },
     header: {
       flexDirection: "row",
       alignItems: "center",

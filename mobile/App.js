@@ -1,6 +1,7 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { ThemeProvider } from "./src/theme/ThemeContext";
+import { ThemeProvider, useTheme } from "./src/theme/ThemeContext";
+import GradientBackground from "./src/components/GradientBackground";
 import { CartProvider } from "./src/context/CartContext";
 import HomeScreen from "./src/screens/HomeScreen";
 import ProductsScreen from "./src/screens/ProductsScreen";
@@ -15,24 +16,33 @@ import EmployeeScreen from "./src/screens/EmployeeScreen";
 
 const Stack = createNativeStackNavigator();
 
+function AppNavigator() {
+  const { dark } = useTheme();
+  return (
+    <GradientBackground dark={dark}>
+      <NavigationContainer>
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="Home" component={HomeScreen} />
+          <Stack.Screen name="Products" component={ProductsScreen} />
+          <Stack.Screen name="Category" component={CategoryScreen} />
+          <Stack.Screen name="Contact" component={ContactScreen} />
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="Cart" component={CartScreen} />
+          <Stack.Screen name="Checkout" component={CheckoutScreen} />
+          <Stack.Screen name="Admin" component={AdminScreen} />
+          <Stack.Screen name="AdminList" component={AdminListScreen} />
+          <Stack.Screen name="Employee" component={EmployeeScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </GradientBackground>
+  );
+}
+
 export default function App() {
   return (
     <ThemeProvider>
       <CartProvider>
-        <NavigationContainer>
-          <Stack.Navigator screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="Home" component={HomeScreen} />
-            <Stack.Screen name="Products" component={ProductsScreen} />
-            <Stack.Screen name="Category" component={CategoryScreen} />
-            <Stack.Screen name="Contact" component={ContactScreen} />
-            <Stack.Screen name="Login" component={LoginScreen} />
-            <Stack.Screen name="Cart" component={CartScreen} />
-            <Stack.Screen name="Checkout" component={CheckoutScreen} />
-            <Stack.Screen name="Admin" component={AdminScreen} />
-            <Stack.Screen name="AdminList" component={AdminListScreen} />
-            <Stack.Screen name="Employee" component={EmployeeScreen} />
-          </Stack.Navigator>
-        </NavigationContainer>
+        <AppNavigator />
       </CartProvider>
     </ThemeProvider>
   );

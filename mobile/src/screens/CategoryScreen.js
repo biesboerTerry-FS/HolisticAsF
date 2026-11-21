@@ -99,7 +99,7 @@ export default function CategoryScreen({ navigation, route }) {
 
 const styles = (theme) =>
   StyleSheet.create({
-    container: { flex: 1, backgroundColor: theme.secondarySoftBeige },
+    container: { flex: 1, backgroundColor: "transparent" },
     header: {
       flexDirection: "row",
       alignItems: "center",

@@ -152,10 +152,7 @@ const Navbar = () => {
 		searchQuery,
 		getCartCount,
 		isAdmin,
-		employee,
 	} = useAppContext();
-
-	const isEmployeePath = useLocation().pathname.startsWith("/employee");
 
 	const logout = async () => {
 		try {
@@ -198,34 +195,15 @@ const Navbar = () => {
 				<NavLink to={"/products"}>products</NavLink>
 				<NavLink to={"/contact"}>contact</NavLink>
 
-				{(employee || isEmployeePath) ? (
-					<div className="items-center gap-2 border-l border-primary-forest-green/15 pl-4 hidden lg:flex">
-						<span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary-forest-green/50">Employee</span>
-						<NavLink
-							to="/employee"
-							className="text-xs border border-primary-forest-green px-2 py-1 hover:bg-primary-forest-green hover:text-primary-warm-white rounded-full transition"
-						>
-							my portal
-						</NavLink>
-					</div>
-				) : null}
-
-				{(isAdmin || !clerkEnabled) && !employee && !isEmployeePath && (
-					<button
-						onClick={() => navigate("/admin")}
-						className="text-xs border border-primary-forest-green px-2 py-1 hover:bg-primary-forest-green hover:text-primary-warm-white rounded-full transition"
-					>
-						admin
-					</button>
-				)}
-
 				<ThemeToggle />
 
 				<div onClick={() => navigate("/cart")} className="relative cursor-pointer">
 					<img src={assets.cart} alt="cart" className="w-6 opacity-80 text-primary-sage-green" />
-					<button className="absolute -top-2 -right-3 text-xs text-primary-cream bg-primary-sage-green w-[18px] h-[18px] rounded-full">
-						{getCartCount()}
-					</button>
+					{getCartCount() > 0 && (
+						<button className="absolute -top-2 -right-3 flex items-center justify-center w-5 h-5 text-[10px] font-bold text-primary-warm-white bg-secondary-golden-honey rounded-full ring-2 ring-primary-warm-white">
+							{getCartCount()}
+						</button>
+					)}
 				</div>
 
 				{!clerkEnabled ? (
@@ -269,9 +247,11 @@ const Navbar = () => {
 				<ThemeToggle />
 				<div onClick={() => navigate("/cart")} className="relative cursor-pointer">
 					<img src={assets.cart} alt="cart" className="w-6 opacity-80" />
-					<button className="absolute -top-2 -right-3 text-xs text-secondary-deep-forest bg-primary-sage-green w-[18px] h-[18px] rounded-full">
-						{getCartCount()}
-					</button>
+					{getCartCount() > 0 && (
+						<button className="absolute -top-2 -right-3 flex items-center justify-center w-5 h-5 text-[10px] font-bold text-primary-warm-white bg-secondary-golden-honey rounded-full ring-2 ring-primary-warm-white">
+							{getCartCount()}
+						</button>
+					)}
 				</div>
 				<button onClick={() => setOpen((v) => !v)} aria-label="Menu" className="bg-transparent border-none cursor-pointer p-0">
 					<img src={assets.menuGreen} alt="menu" />
@@ -284,8 +264,6 @@ const Navbar = () => {
 					<NavLink to={"/products"} onClick={() => setOpen(false)}>products</NavLink>
 					<NavLink to={"/contact"} onClick={() => setOpen(false)}>contact</NavLink>
 					{user && <NavLink to={"/my-orders"} onClick={() => setOpen(false)}>my orders</NavLink>}
-					{(employee || isEmployeePath) && <NavLink to={"/employee"} onClick={() => setOpen(false)}>employee portal</NavLink>}
-					{(isAdmin || !clerkEnabled) && !employee && !isEmployeePath && <NavLink to={"/admin"} onClick={() => setOpen(false)}>admin</NavLink>}
 
 					{!clerkEnabled ? (
 						<p className="mt-6 text-sm text-center text-primary-forest-green/70 px-6">

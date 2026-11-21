@@ -253,7 +253,7 @@ export default function HomeScreen({ navigation }) {
 
 const styles = (theme, dark) =>
   StyleSheet.create({
-    container: { flex: 1, backgroundColor: theme.secondarySoftBeige },
+    container: { flex: 1, backgroundColor: "transparent" },
     scroll: { padding: 16, paddingBottom: 40 },
     nav: {
       flexDirection: "row",

@@ -159,6 +159,8 @@ export const footerLinks = [
 			// { text: "top sellers", url: "/top-sellers" },
 			{ text: "products", url: "/products" },
 			{ text: "contact us", url: "/contact" },
+			{ text: "admin portal", url: "/admin" },
+			{ text: "employee portal", url: "/employee" },
 		],
 	},
 	{

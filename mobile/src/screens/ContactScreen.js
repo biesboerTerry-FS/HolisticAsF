@@ -80,7 +80,7 @@ export default function ContactScreen({ navigation }) {
 
 const styles = (theme) =>
   StyleSheet.create({
-    container: { flex: 1, backgroundColor: theme.secondarySoftBeige },
+    container: { flex: 1, backgroundColor: "transparent" },
     header: {
       flexDirection: "row",
       alignItems: "center",
