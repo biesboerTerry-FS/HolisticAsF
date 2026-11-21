@@ -68,6 +68,16 @@ const DEMO_REQUESTS = [
 		status: "pending",
 		createdAt: daysFromNow(-1),
 	},
+	{
+		id: "req-2",
+		employeeId: "emp-marcus-thompson",
+		employeeName: "Marcus Thompson",
+		type: "shift",
+		date: daysFromNow(6),
+		detail: "Swap Thursday evening for Friday morning",
+		status: "pending",
+		createdAt: daysFromNow(-2),
+	},
 ];
 
 const DEMO_TIMEOFF = [
@@ -77,9 +87,49 @@ const DEMO_TIMEOFF = [
 		employeeName: "Jordan Rivera",
 		startDate: daysFromNow(10),
 		endDate: daysFromNow(12),
-		reason: "Family event",
+		reason: "Family event out of town",
 		status: "pending",
 		createdAt: daysFromNow(-2),
+	},
+	{
+		id: "timeoff-2",
+		employeeId: "emp-marcus-thompson",
+		employeeName: "Marcus Thompson",
+		startDate: daysFromNow(5),
+		endDate: daysFromNow(6),
+		reason: "Scheduled medical appointment",
+		status: "pending",
+		createdAt: daysFromNow(-3),
+	},
+	{
+		id: "timeoff-3",
+		employeeId: "emp-priya-nair",
+		employeeName: "Priya Nair",
+		startDate: daysFromNow(14),
+		endDate: daysFromNow(17),
+		reason: "Vendor conference in Seattle",
+		status: "pending",
+		createdAt: daysFromNow(-4),
+	},
+	{
+		id: "timeoff-4",
+		employeeId: "emp-aisha-brooks",
+		employeeName: "Aisha Brooks",
+		startDate: daysFromNow(2),
+		endDate: daysFromNow(2),
+		reason: "Personal day",
+		status: "approved",
+		createdAt: daysFromNow(-5),
+	},
+	{
+		id: "timeoff-5",
+		employeeId: "emp-diego-alvarez",
+		employeeName: "Diego Alvarez",
+		startDate: daysFromNow(8),
+		endDate: daysFromNow(9),
+		reason: "Moving help for a family member",
+		status: "pending",
+		createdAt: daysFromNow(-1),
 	},
 ];
 
@@ -177,9 +227,22 @@ export const sendMessage = ({ fromRole, toRole, sender, subject, body }) => {
 
 // ---- Schedule requests / time off / availability -------------------------
 
+// Keep decisions already made in a browser, but add newer seed requests that
+// were introduced after that browser first stored the demo data.
+const withSeededRequests = (key, seed) => {
+	const stored = read(key, null);
+	if (!Array.isArray(stored)) {
+		write(key, seed);
+		return seed;
+	}
+	const known = new Set(stored.map((item) => item.id));
+	const merged = [...stored, ...seed.filter((item) => !known.has(item.id))];
+	if (merged.length !== stored.length) write(key, merged);
+	return merged;
+};
+
 export const getScheduleRequests = (employeeId) => {
-	const requests = read(REQUESTS_KEY, null) || DEMO_REQUESTS;
-	if (!read(REQUESTS_KEY, null)) write(REQUESTS_KEY, requests);
+	const requests = withSeededRequests(REQUESTS_KEY, DEMO_REQUESTS);
 	return employeeId
 		? requests.filter((request) => request.employeeId === employeeId)
 		: requests;
@@ -201,11 +264,40 @@ export const addScheduleRequest = (request) => {
 };
 
 export const getTimeOffRequests = (employeeId) => {
-	const requests = read(TIMEOFF_KEY, null) || DEMO_TIMEOFF;
-	if (!read(TIMEOFF_KEY, null)) write(TIMEOFF_KEY, requests);
+	const requests = withSeededRequests(TIMEOFF_KEY, DEMO_TIMEOFF);
 	return employeeId
 		? requests.filter((request) => request.employeeId === employeeId)
 		: requests;
+};
+
+// Used by the HR approval queue. The employee portal reads the same store, so
+// an approve/deny decision is reflected there on the next render.
+export const setTimeOffRequestStatus = (id, status, decisionNote = "") => {
+	const requests = getTimeOffRequests().map((request) =>
+		request.id === id
+			? {
+					...request,
+					status,
+					decisionNote,
+					decidedAt: new Date().toISOString(),
+				}
+			: request,
+	);
+	write(TIMEOFF_KEY, requests);
+	return requests;
+};
+
+export const replaceTimeOffRequests = (requests) => {
+	write(TIMEOFF_KEY, requests);
+	return requests;
+};
+
+export const setScheduleRequestStatus = (id, status) => {
+	const requests = getScheduleRequests().map((request) =>
+		request.id === id ? { ...request, status } : request,
+	);
+	write(REQUESTS_KEY, requests);
+	return requests;
 };
 
 export const addTimeOffRequest = (request) => {

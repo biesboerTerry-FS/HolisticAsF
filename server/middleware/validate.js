@@ -152,3 +152,107 @@ export const validateOrderStatus = (request, response, next) => {
 	}
 	return next();
 };
+
+// ---- HR suite -------------------------------------------------------------
+
+const HR_EMPLOYEE_FIELDS = {
+	name: 120,
+	employeeId: 100,
+	email: 254,
+	phone: 40,
+	address: 200,
+	position: 120,
+	department: 120,
+	payType: 20,
+	color: 20,
+	notes: 1000,
+};
+
+/** Shared validation for HR employee create/update payloads. */
+export const validateHrEmployee = (request, response, next) => {
+	const body = request.body;
+	if (!isObject(body) || Object.keys(body).length === 0) {
+		return bad(response, "A valid employee payload is required.");
+	}
+	for (const [field, max] of Object.entries(HR_EMPLOYEE_FIELDS)) {
+		if (body[field] === undefined) continue;
+		if (typeof body[field] !== "string") return bad(response, `Invalid ${field}.`);
+		if (body[field].length > max) return bad(response, `${field} is too long.`);
+	}
+	if (body.name !== undefined && !text(body.name)) {
+		return bad(response, "Employee name is required.");
+	}
+	if (text(body.email) && !/^[^\s@]+@[^\s@]+$/.test(text(body.email))) {
+		return bad(response, "Invalid email address.");
+	}
+	if (body.rate !== undefined) {
+		const rate = Number(body.rate);
+		if (!Number.isFinite(rate) || rate < 0 || rate > 10_000_000) {
+			return bad(response, "Invalid pay rate.");
+		}
+	}
+	if (body.payType !== undefined && !["hourly", "salary"].includes(text(body.payType))) {
+		return bad(response, "payType must be hourly or salary.");
+	}
+	if (body.active !== undefined && typeof body.active !== "boolean") {
+		return bad(response, "Invalid active status.");
+	}
+	return next();
+};
+
+export const validatePayRun = (request, response, next) => {
+	const body = request.body;
+	if (!isObject(body)) return bad(response, "A valid payroll payload is required.");
+	const amount = Number(body.amount);
+	if (!Number.isFinite(amount) || amount < 0 || amount > 10_000_000) {
+		return bad(response, "A valid pay amount is required.");
+	}
+	if (!text(body.period) || text(body.period).length > 60) {
+		return bad(response, "A pay period is required.");
+	}
+	if (!text(body.employeeId) || text(body.employeeId).length > 100) {
+		return bad(response, "Select an employee.");
+	}
+	if (text(body.note).length > 500) {
+		return bad(response, "Payroll note is too long.");
+	}
+	return next();
+};
+
+export const validatePerformanceNote = (request, response, next) => {
+	const body = request.body;
+	if (!isObject(body)) return bad(response, "A valid note payload is required.");
+	if (!text(body.employeeId) || text(body.employeeId).length > 100) {
+		return bad(response, "Select an employee.");
+	}
+	if (!text(body.text) || text(body.text).length > 2000) {
+		return bad(response, "A note between 1 and 2000 characters is required.");
+	}
+	if (text(body.author).length > 120 || text(body.date).length > 30) {
+		return bad(response, "Invalid note metadata.");
+	}
+	return next();
+};
+
+export const validateHrSettings = (request, response, next) => {
+	const body = request.body;
+	const validList = (value) =>
+		Array.isArray(value) &&
+		value.length <= 100 &&
+		value.every((item) => typeof item === "string" && item.trim() && item.length <= 120);
+	if (!isObject(body) || !validList(body.departments) || !validList(body.roles)) {
+		return bad(response, "departments and roles must be lists of labels.");
+	}
+	return next();
+};
+
+export const validateTimeOffDecision = (request, response, next) => {
+	const status = text(request.body?.status);
+	if (!["approved", "denied"].includes(status)) {
+		return bad(response, "Status must be approved or denied.");
+	}
+	if (text(request.body?.decisionNote).length > 500) {
+		return bad(response, "Decision note is too long.");
+	}
+	return next();
+};

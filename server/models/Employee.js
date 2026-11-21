@@ -9,6 +9,10 @@ const employeeSchema = new mongoose.Schema(
 		phone: { type: String, trim: true, default: "" },
 		address: { type: String, trim: true, default: "" },
 		position: { type: String, trim: true, default: "Staff" },
+		// HR directory fields. Defaults preserve the existing employee portal.
+		department: { type: String, trim: true, default: "Sales floor" },
+		rate: { type: Number, default: 0 },
+		payType: { type: String, enum: ["hourly", "salary"], default: "hourly" },
 		color: { type: String, trim: true, default: "#1e4d43" },
 		active: { type: Boolean, default: true },
 		notes: { type: String, trim: true, default: "" },

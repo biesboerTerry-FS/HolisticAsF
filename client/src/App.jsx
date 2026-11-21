@@ -25,6 +25,12 @@ import Contact from "./pages/Contact";
 import Featured from "./pages/Featured";
 import EmployeePortal from "./pages/EmployeePortal";
 import AdminLoginPage from "./pages/admin/AdminLoginPage";
+import HrShell from "./pages/admin/hr/HrShell";
+import EmployeeDirectory from "./pages/admin/hr/EmployeeDirectory";
+import Payroll from "./pages/admin/hr/Payroll";
+import TimeOff from "./pages/admin/hr/TimeOff";
+import Performance from "./pages/admin/hr/Performance";
+import HrSettings from "./pages/admin/hr/Settings";
 
 // The admin deployment shares this source with the client. Detect it by host
 // so /login renders the admin-styled sign-in without storefront nav/cart.
@@ -85,6 +91,14 @@ const App = () => {
 						<Route path="orders" element={<Orders />} />
 						<Route path="announcements" element={<Announcements />} />
 						<Route path="messages" element={<Messages />} />
+						{/* //^ HR suite (admin only, JWT-protected backend routes) */}
+						<Route path="hr" element={<HrShell />}>
+							<Route index element={<EmployeeDirectory />} />
+							<Route path="payroll" element={<Payroll />} />
+							<Route path="time-off" element={<TimeOff />} />
+							<Route path="performance" element={<Performance />} />
+							<Route path="settings" element={<HrSettings />} />
+						</Route>
 					</Route>
 				</Routes>
 			</div>

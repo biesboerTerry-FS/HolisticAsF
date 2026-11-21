@@ -32,6 +32,16 @@ const AdminLayout = () => {
 			links: [{ name: "schedule", path: "/admin/schedule", icon: assets.list }],
 		},
 		{
+			label: "HR",
+			links: [
+				{ name: "directory", path: "/admin/hr", icon: assets.profile },
+				{ name: "payroll", path: "/admin/hr/payroll", icon: assets.coinIcon },
+				{ name: "time off", path: "/admin/hr/time-off", icon: assets.list },
+				{ name: "performance", path: "/admin/hr/performance", icon: assets.list },
+				{ name: "hr settings", path: "/admin/hr/settings", icon: assets.list },
+			],
+		},
+		{
 			label: "Communication",
 			links: [
 				{ name: "messages", path: "/admin/messages", icon: assets.list },
