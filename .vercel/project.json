@@ -1,0 +1,16 @@
+{
+  "projectId": "prj_jZqY8gxuljAEcTf7qJSmnjjbQy3w",
+  "orgId": "team_JXyoxqeWxzYYOL578oA2cK1E",
+  "projectName": "holisticasf-admin",
+  "settings": {
+    "createdAt": 1794907677891,
+    "framework": null,
+    "devCommand": null,
+    "installCommand": null,
+    "buildCommand": null,
+    "outputDirectory": null,
+    "rootDirectory": "client",
+    "directoryListing": false,
+    "nodeVersion": "26.x"
+  }
+}

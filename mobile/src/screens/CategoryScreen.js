@@ -3,6 +3,7 @@ import { Alert, FlatList, Image, StatusBar, StyleSheet, Text, TouchableOpacity, 
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "../theme/ThemeContext";
 import ThemeToggle from "../components/ThemeToggle";
+import CartIcon from "../components/CartIcon";
 import { categories, products } from "../data/catalog";
 import ProductModal from "../components/ProductModal";
 import { useCart } from "../context/CartContext";
@@ -32,7 +33,7 @@ export default function CategoryScreen({ navigation, route }) {
             onPress={() => navigation.navigate("Cart")}
             style={themed.headerCart}
           >
-            <Text style={themed.headerCartText}>cart</Text>
+            <CartIcon color={theme.primaryForestGreen} size={22} />
             {cartCount > 0 && (
               <View style={themed.headerCartCount}>
                 <Text style={themed.headerCartCountText}>{cartCount}</Text>

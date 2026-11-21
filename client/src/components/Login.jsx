@@ -5,8 +5,14 @@ import { useAppContext } from "../context/AppContext";
 const clerkEnabled = Boolean(import.meta.env.VITE_CLERK_PUBLISHABLE_KEY);
 
 const Login = () => {
-	const { setShowUserLogin } = useAppContext();
+	const { setShowUserLogin, setIsAdmin, navigate } = useAppContext();
 	const [state, setState] = useState("login");
+
+	const handleDemoAdmin = () => {
+		setIsAdmin(true);
+		setShowUserLogin(false);
+		navigate("/admin");
+	};
 
 	return (
 		<div
@@ -22,14 +28,26 @@ const Login = () => {
 							<code className="rounded bg-secondary-soft-beige px-1.5 py-0.5">client/.env</code> and restart the client to enable Clerk sign-in.
 						</p>
 						<button
+							onClick={handleDemoAdmin}
+							className="mt-4 w-full rounded-full bg-secondary-golden-honey px-4 py-2 text-sm font-semibold text-primary-forest-green transition hover:opacity-90"
+						>
+							Try demo admin
+						</button>
+						<button
 							onClick={() => setShowUserLogin(false)}
-							className="mt-4 rounded-full bg-primary-forest-green px-4 py-2 text-sm text-primary-warm-white"
+							className="mt-2 rounded-full bg-primary-forest-green px-4 py-2 text-sm text-primary-warm-white"
 						>
 							Close
 						</button>
 					</div>
 				) : state === "login" ? (
 					<div className="flex flex-col items-center gap-4">
+						<button
+							onClick={handleDemoAdmin}
+							className="rounded-full border border-primary-forest-green/30 bg-secondary-soft-beige px-4 py-2 text-xs font-semibold text-primary-forest-green transition hover:bg-primary-forest-green hover:text-primary-warm-white"
+						>
+							Try demo admin
+						</button>
 						<SignIn
 							routing="hash"
 							appearance={{

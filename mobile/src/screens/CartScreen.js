@@ -59,13 +59,16 @@ export default function CartScreen({ navigation }) {
           />
           <View style={themed.footer}>
             <Text style={themed.total}>Total: ${total.toFixed(2)}</Text>
-            <TouchableOpacity style={themed.button} onPress={clear}>
+            <TouchableOpacity style={themed.button} onPress={() => navigation.navigate("Checkout")}>
               <Text style={[themed.buttonText, { color: dark ? "#111827" : "#FFFFFF" }]}>
-                clear cart
+                checkout
               </Text>
             </TouchableOpacity>
+            <TouchableOpacity style={themed.secondaryButton} onPress={clear}>
+              <Text style={themed.secondaryButtonText}>clear cart</Text>
+            </TouchableOpacity>
             <Text style={themed.hint}>
-              Checkout is available on the web storefront with Stripe test mode.
+              Demo checkout uses Stripe test mode — no real payment is taken.
             </Text>
           </View>
         </>
@@ -99,6 +102,8 @@ const styles = (theme, dark) =>
     total: { fontSize: 18, fontWeight: "700", color: theme.primaryForestGreen },
     button: { backgroundColor: theme.secondaryGoldenHoney, borderRadius: 8, paddingVertical: 12, alignItems: "center" },
     buttonText: { fontWeight: "700", fontSize: 15 },
+    secondaryButton: { borderWidth: 1, borderColor: theme.primaryForestGreen, borderRadius: 8, paddingVertical: 12, alignItems: "center" },
+    secondaryButtonText: { fontWeight: "700", fontSize: 15, color: theme.primaryForestGreen },
     empty: { flex: 1, alignItems: "center", justifyContent: "center", padding: 32, gap: 12 },
     emptyTitle: { fontSize: 20, fontWeight: "700", color: theme.primaryForestGreen },
     hint: { fontSize: 13, color: theme.neutralMediumGray, textAlign: "center", lineHeight: 19 },

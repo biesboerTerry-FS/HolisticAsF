@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "../theme/ThemeContext";
 import ThemeToggle from "../components/ThemeToggle";
+import CartIcon from "../components/CartIcon";
 import { categories, products } from "../data/catalog";
 import { useCart } from "../context/CartContext";
 
@@ -49,7 +50,7 @@ export default function HomeScreen({ navigation }) {
             accessibilityLabel={`Cart, ${cartCount} items`}
             onPress={() => navigation.navigate("Cart")}
           >
-            <Text style={themed.cartIcon}>cart</Text>
+            <CartIcon color={theme.primaryForestGreen} size={22} />
             {cartCount > 0 && (
               <View style={themed.cartCount}>
                 <Text style={themed.cartCountText}>{cartCount}</Text>
