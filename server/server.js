@@ -14,6 +14,7 @@ import productsRouter from "./routes/productsRoutes.js";
 import newsletterRouter from "./routes/newsletterRoute.js";
 import contactRouter from "./routes/contactRoutes.js";
 import employeeRouter from "./routes/employeeRoutes.js";
+import announcementRouter from "./routes/announcementRoutes.js";
 import fetch from "node-fetch";
 import * as Sentry from "@sentry/node";
 
@@ -69,6 +70,7 @@ app.use("/api/kroger", productsRouter);
 app.use("/api/newsletter", newsletterRouter);
 app.use("/api/contact", contactRouter);
 app.use("/api/employees", employeeRouter);
+app.use("/api/announcements", announcementRouter);
 
 app.get("/api/media/image", async (req, res) => {
 	try {

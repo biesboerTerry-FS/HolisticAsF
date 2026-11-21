@@ -1,17 +1,30 @@
 import React, { useState } from "react";
 import { SignIn, SignUp } from "@clerk/clerk-react";
 import { useAppContext } from "../context/AppContext";
+import { DEMO_EMPLOYEE, EMPLOYEE_STORAGE_KEY } from "../data/employee";
 
 const clerkEnabled = Boolean(import.meta.env.VITE_CLERK_PUBLISHABLE_KEY);
 
 const Login = () => {
-	const { setShowUserLogin, setIsAdmin, navigate } = useAppContext();
+	const { setShowUserLogin, setIsAdmin, setEmployee, navigate } = useAppContext();
 	const [state, setState] = useState("login");
 
 	const handleDemoAdmin = () => {
 		setIsAdmin(true);
 		setShowUserLogin(false);
 		navigate("/admin");
+	};
+
+	const handleDemoEmployee = () => {
+		try {
+			localStorage.setItem(EMPLOYEE_STORAGE_KEY, JSON.stringify(DEMO_EMPLOYEE));
+		} catch {
+			// ignore storage restrictions
+		}
+		setEmployee(DEMO_EMPLOYEE);
+		setIsAdmin(false);
+		setShowUserLogin(false);
+		navigate("/employee");
 	};
 
 	return (
@@ -34,6 +47,12 @@ const Login = () => {
 							Try demo admin
 						</button>
 						<button
+							onClick={handleDemoEmployee}
+							className="mt-2 w-full rounded-full border border-primary-forest-green/30 px-4 py-2 text-sm font-semibold text-primary-forest-green transition hover:bg-primary-forest-green hover:text-primary-warm-white"
+						>
+							Try demo employee
+						</button>
+						<button
 							onClick={() => setShowUserLogin(false)}
 							className="mt-2 rounded-full bg-primary-forest-green px-4 py-2 text-sm text-primary-warm-white"
 						>
@@ -47,6 +66,12 @@ const Login = () => {
 							className="rounded-full border border-primary-forest-green/30 bg-secondary-soft-beige px-4 py-2 text-xs font-semibold text-primary-forest-green transition hover:bg-primary-forest-green hover:text-primary-warm-white"
 						>
 							Try demo admin
+						</button>
+						<button
+							onClick={handleDemoEmployee}
+							className="rounded-full border border-primary-forest-green/30 bg-secondary-soft-beige px-4 py-2 text-xs font-semibold text-primary-forest-green transition hover:bg-primary-forest-green hover:text-primary-warm-white"
+						>
+							Try demo employee
 						</button>
 						<SignIn
 							routing="hash"

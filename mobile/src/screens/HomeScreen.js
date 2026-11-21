@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Alert,
   Image,
@@ -16,15 +16,51 @@ import ThemeToggle from "../components/ThemeToggle";
 import CartIcon from "../components/CartIcon";
 import { categories, products } from "../data/catalog";
 import { useCart } from "../context/CartContext";
+import { fetchActiveAnnouncements } from "../api/admin";
+import { getCachedEmployee } from "../api/employee";
 
 const HERO_IMAGE =
   "https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=1400&q=80";
+
+const ANNOUNCEMENT_COLORS = {
+  info: "#3B82F6",
+  warning: "#F59E0B",
+};
+
+// Dismissing is session-only: the banner stays hidden while the app is running.
+let announcementDismissed = false;
+
+// Safe default shown when the API is unreachable or has no active bulletin.
+const DEFAULT_ANNOUNCEMENT = {
+  title: "Welcome to holisticAF",
+  body: "Explore fresh, holistic groceries and everyday wellness essentials — new arrivals are added every week.",
+  type: "info",
+};
 
 export default function HomeScreen({ navigation }) {
   const { dark, theme } = useTheme();
   const { count: cartCount } = useCart();
   const themed = styles(theme, dark);
   const [email, setEmail] = useState("");
+  const [announcement, setAnnouncement] = useState(null);
+
+  useEffect(() => {
+    let active = true;
+    if (announcementDismissed) return undefined;
+
+    fetchActiveAnnouncements()
+      .then((list) => {
+        if (active) setAnnouncement(list[0] || DEFAULT_ANNOUNCEMENT);
+      })
+      .catch(() => {
+        // Silent by design — a missing bulletin must not break the home screen.
+        if (active) setAnnouncement(DEFAULT_ANNOUNCEMENT);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const subscribe = () => {
     if (!email.includes("@") || !email.includes(".")) {
@@ -80,6 +116,52 @@ export default function HomeScreen({ navigation }) {
             </TouchableOpacity>
           </View>
         </View>
+
+        {announcement ? (
+          <View
+            style={[
+              themed.announcementBanner,
+              {
+                borderLeftColor:
+                  ANNOUNCEMENT_COLORS[announcement.type] ||
+                  theme.secondaryGoldenHoney,
+              },
+            ]}
+          >
+            <View style={themed.announcementHeader}>
+              <Text
+                style={[
+                  themed.announcementType,
+                  {
+                    color:
+                      ANNOUNCEMENT_COLORS[announcement.type] ||
+                      theme.secondaryGoldenHoney,
+                  },
+                ]}
+              >
+                {(announcement.type || "info").toUpperCase()}
+              </Text>
+              <TouchableOpacity
+                accessibilityLabel="Dismiss announcement"
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                onPress={() => {
+                  announcementDismissed = true;
+                  setAnnouncement(null);
+                }}
+              >
+                <Text style={themed.announcementClose}>×</Text>
+              </TouchableOpacity>
+            </View>
+            <Text style={themed.announcementTitle} numberOfLines={2}>
+              {announcement.title}
+            </Text>
+            {announcement.body ? (
+              <Text style={themed.announcementBody} numberOfLines={3}>
+                {announcement.body}
+              </Text>
+            ) : null}
+          </View>
+        ) : null}
 
         <Text style={themed.sectionLabel}>EXPLORE</Text>
         <Text style={themed.sectionTitle}>
@@ -155,6 +237,15 @@ export default function HomeScreen({ navigation }) {
         >
           <Text style={themed.contactLinkText}>Need help? Contact us →</Text>
         </TouchableOpacity>
+
+        {getCachedEmployee() ? (
+          <TouchableOpacity
+            style={themed.contactLink}
+            onPress={() => navigation.navigate("Employee")}
+          >
+            <Text style={themed.contactLinkText}>Employee portal →</Text>
+          </TouchableOpacity>
+        ) : null}
       </ScrollView>
     </SafeAreaView>
   );
@@ -230,6 +321,40 @@ const styles = (theme, dark) =>
       borderRadius: 6,
     },
     ctaText: { color: dark ? "#111827" : "#FFFFFF", fontWeight: "600" },
+    announcementBanner: {
+      backgroundColor: theme.primaryWarmWhite,
+      borderWidth: 1,
+      borderLeftWidth: 4,
+      borderColor: `${theme.primaryForestGreen}1a`,
+      borderRadius: 14,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      marginBottom: 28,
+    },
+    announcementHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginBottom: 6,
+    },
+    announcementType: { fontSize: 10, fontWeight: "700", letterSpacing: 1.5 },
+    announcementClose: {
+      fontSize: 20,
+      lineHeight: 20,
+      color: theme.neutralMediumGray,
+      paddingHorizontal: 4,
+    },
+    announcementTitle: {
+      fontSize: 15,
+      fontWeight: "700",
+      color: theme.primaryForestGreen,
+    },
+    announcementBody: {
+      fontSize: 13,
+      lineHeight: 18,
+      color: theme.neutralMediumGray,
+      marginTop: 4,
+    },
     sectionLabel: {
       fontSize: 11,
       fontWeight: "700",

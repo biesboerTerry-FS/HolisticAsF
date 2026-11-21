@@ -14,6 +14,14 @@ const useAppState = () => {
 	const currency = import.meta.env.VITE_CURRENCY || "$";
 	const navigate = useNavigate();
 	const [user, setUser] = useState(null);
+	const [employee, setEmployee] = useState(() => {
+		try {
+			const stored = JSON.parse(localStorage.getItem("holisticaf-demo-employee") || "null");
+			return stored?.employeeId ? stored : null;
+		} catch {
+			return null;
+		}
+	});
 	const [isAdmin, setIsAdmin] = useState(false);
 	const [isAuthLoading, setIsAuthLoading] = useState(true);
 	const [showUserLogin, setShowUserLogin] = useState(false);
@@ -147,6 +155,8 @@ const useAppState = () => {
 		navigate,
 		user,
 		setUser,
+		employee,
+		setEmployee,
 		isAdmin,
 		setIsAdmin,
 		isAuthLoading,

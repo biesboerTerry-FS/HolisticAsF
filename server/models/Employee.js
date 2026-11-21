@@ -3,8 +3,11 @@ import mongoose from "mongoose";
 const employeeSchema = new mongoose.Schema(
 	{
 		name: { type: String, required: true, trim: true },
+		// Stable identifier for the self-service demo employee.
+		employeeId: { type: String, trim: true, default: "" },
 		email: { type: String, trim: true, lowercase: true, default: "" },
 		phone: { type: String, trim: true, default: "" },
+		address: { type: String, trim: true, default: "" },
 		position: { type: String, trim: true, default: "Staff" },
 		color: { type: String, trim: true, default: "#1e4d43" },
 		active: { type: Boolean, default: true },

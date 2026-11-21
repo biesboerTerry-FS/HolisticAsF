@@ -12,6 +12,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "../theme/ThemeContext";
 import ThemeToggle from "../components/ThemeToggle";
+import { DEMO_EMPLOYEE, setCachedEmployee } from "../api/employee";
 
 export default function LoginScreen({ navigation }) {
   const { dark, theme } = useTheme();
@@ -79,6 +80,15 @@ export default function LoginScreen({ navigation }) {
 
         <TouchableOpacity onPress={() => navigation.navigate("Admin")}>
           <Text style={themed.guest}>Admin portal →</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => {
+            setCachedEmployee(DEMO_EMPLOYEE);
+            navigation.navigate("Employee");
+          }}
+        >
+          <Text style={themed.guest}>Try demo employee →</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>

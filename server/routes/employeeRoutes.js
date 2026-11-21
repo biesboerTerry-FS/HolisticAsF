@@ -8,9 +8,17 @@ import {
 	listShifts,
 	updateShift,
 	deleteShift,
+	getMyProfile,
+	updateMyProfile,
+	getMyShifts,
 } from "../controllers/employeeController.js";
 
 const employeeRouter = express.Router();
+
+// Self-service routes (demo, no auth): only the employee's own basic info.
+employeeRouter.get("/me", getMyProfile);
+employeeRouter.patch("/me", updateMyProfile);
+employeeRouter.get("/me/shifts", getMyShifts);
 
 employeeRouter.get("/", listEmployees);
 employeeRouter.post("/", createEmployee);

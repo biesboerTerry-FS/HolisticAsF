@@ -12,13 +12,40 @@ const AdminLayout = () => {
 	const clerk = clerkEnabled ? useClerk() : null;
 	const { navigate, isAdmin, isAuthLoading, setUser, setIsAdmin } = useAppContext();
 
-	const sidebarLinks = [
-		{ name: "dashboard", path: "/admin", icon: assets.list },
-		{ name: "schedule", path: "/admin/schedule", icon: assets.list },
-		{ name: "add inventory", path: "/admin/add-inventory", icon: assets.addIcon },
-		{ name: "inventory", path: "/admin/inventory", icon: assets.list },
-		{ name: "orders", path: "/admin/orders", icon: assets.search },
+	const sidebarGroups = [
+		{
+			label: "Overview",
+			links: [
+				{ name: "dashboard", path: "/admin", icon: assets.list },
+				{ name: "orders", path: "/admin/orders", icon: assets.search },
+			],
+		},
+		{
+			label: "Inventory",
+			links: [
+				{ name: "inventory", path: "/admin/inventory", icon: assets.list },
+				{ name: "add inventory", path: "/admin/add-inventory", icon: assets.addIcon },
+			],
+		},
+		{
+			label: "Operations",
+			links: [{ name: "schedule", path: "/admin/schedule", icon: assets.list }],
+		},
+		{
+			label: "Communication",
+			links: [
+				{ name: "announcements", path: "/admin/announcements", icon: assets.list },
+			],
+		},
+		{
+			label: "Employee",
+			links: [
+				{ name: "my portal", path: "/employee", icon: assets.profile },
+			],
+		},
 	];
+
+	const sidebarLinks = sidebarGroups.flatMap((group) => group.links);
 
 	const logout = async () => {
 		try {
@@ -77,29 +104,36 @@ const AdminLayout = () => {
 
 			<div className="mx-auto flex min-h-[calc(100vh-65px)] max-w-7xl">
 				<aside className="sticky top-[65px] hidden h-[calc(100vh-65px)] w-64 shrink-0 border-r border-primary-forest-green/10 bg-primary-warm-white/45 p-4 backdrop-blur md:block">
-					<nav className="flex flex-col gap-1.5">
-						{sidebarLinks.map((item) => (
-							<NavLink
-								to={item.path}
-								key={item.name}
-								end={item.path === "/admin"}
-								className={({ isActive }) =>
-									`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all ${
-										isActive
-											? "bg-primary-forest-green text-primary-cream shadow-sm"
-											: "text-primary-forest-green/75 hover:bg-primary-sage-green/15 hover:text-primary-forest-green"
-									}`
-								}
-							>
-								{({ isActive }) => (
-									<>
-										<span className={`flex h-8 w-8 items-center justify-center rounded-lg border ${isActive ? "border-primary-cream/20 bg-primary-cream/10" : "border-primary-forest-green/10 bg-secondary-soft-beige/70"}`}>
-											<img className={`h-4 w-4 ${isActive ? "brightness-0 invert" : "opacity-75"}`} src={item.icon} alt="" />
-										</span>
-										<span className="capitalize font-medium">{item.name}</span>
-									</>
-								)}
-							</NavLink>
+					<nav className="flex flex-col gap-4">
+						{sidebarGroups.map((group) => (
+							<div key={group.label} className="flex flex-col gap-1.5">
+								<p className="px-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-primary-forest-green/45">
+									{group.label}
+								</p>
+								{group.links.map((item) => (
+									<NavLink
+										to={item.path}
+										key={item.name}
+										end={item.path === "/admin"}
+										className={({ isActive }) =>
+											`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all ${
+												isActive
+													? "bg-primary-forest-green text-primary-cream shadow-sm"
+													: "text-primary-forest-green/75 hover:bg-primary-sage-green/15 hover:text-primary-forest-green"
+											}`
+										}
+									>
+										{({ isActive }) => (
+											<>
+												<span className={`flex h-8 w-8 items-center justify-center rounded-lg border ${isActive ? "border-primary-cream/20 bg-primary-cream/10" : "border-primary-forest-green/10 bg-secondary-soft-beige/70"}`}>
+													<img className={`h-4 w-4 ${isActive ? "brightness-0 invert" : "opacity-75"}`} src={item.icon} alt="" />
+												</span>
+												<span className="capitalize font-medium">{item.name}</span>
+											</>
+										)}
+									</NavLink>
+								))}
+							</div>
 						))}
 					</nav>
 					<div className="mt-6 rounded-2xl border border-primary-forest-green/10 bg-gradient-to-br from-primary-sage-green/15 to-secondary-golden-honey/10 p-4 text-xs text-primary-forest-green/70 shadow-sm">

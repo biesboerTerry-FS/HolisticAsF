@@ -6,6 +6,9 @@ import User from "../models/User.js";
 import Address from "../models/Address.js";
 import Newsletter from "../models/Newsletter.js";
 import Contact from "../models/Contact.js";
+import Announcement from "../models/Announcement.js";
+import Employee from "../models/Employee.js";
+import Shift from "../models/Shift.js";
 import products from "./data/products.js";
 
 const SEED_PASSWORD = process.env.SEED_PASSWORD || "password123";
@@ -116,6 +119,74 @@ const seedContacts = async () => {
 	console.log(`contacts: ${messages.length} ensured`);
 };
 
+const seedAnnouncements = async () => {
+	const announcements = [
+		{
+			title: "Fresh harvest just landed",
+			body: "New seasonal produce is in stock now — shop the latest arrivals and taste the difference.",
+			type: "info",
+			active: true,
+		},
+		{
+			title: "20% off your first organic box",
+			body: "Use code HOLISTIC20 at checkout to save on your first organic produce box. Limited time only!",
+			type: "promotion",
+			active: true,
+		},
+		{
+			title: "Delivery delays this week",
+			body: "We're experiencing minor delivery delays due to weather. Thanks for your patience — we're working to get orders out on time.",
+			type: "warning",
+			active: true,
+		},
+	];
+	for (const announcement of announcements) {
+		await Announcement.updateOne(
+			{ title: announcement.title },
+			{ $set: announcement },
+			{ upsert: true, setDefaultsOnInsert: true },
+		);
+	}
+	console.log(`announcements: ${announcements.length} ensured`);
+};
+
+const seedDemoEmployee = async () => {
+	const demo = {
+		employeeId: "demo-employee-1",
+		name: "Jordan Rivera",
+		email: "jordan@holisticaf.com",
+		phone: "(555) 010-2044",
+		address: "100 Holistic Way, Portland, OR 97203",
+		position: "Store Associate",
+		active: true,
+	};
+	const employee = await Employee.findOneAndUpdate(
+		{ employeeId: demo.employeeId },
+		{ $set: demo },
+		{ upsert: true, new: true, setDefaultsOnInsert: true },
+	);
+
+	const pad = (n) => String(n).padStart(2, "0");
+	const dateFromNow = (days) => {
+		const date = new Date();
+		date.setDate(date.getDate() + days);
+		return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+	};
+	const shifts = [
+		{ date: dateFromNow(1), startTime: "09:00", endTime: "17:00", role: "Floor support", location: "HolisticAF Store" },
+		{ date: dateFromNow(3), startTime: "10:00", endTime: "18:00", role: "Inventory restock", location: "HolisticAF Store" },
+	].map((shift) => ({ ...shift, employee: employee._id, status: "scheduled" }));
+
+	for (const shift of shifts) {
+		await Shift.updateOne(
+			{ employee: employee._id, date: shift.date, startTime: shift.startTime },
+			{ $set: shift },
+			{ upsert: true },
+		);
+	}
+	console.log("demo employee: ensured (1 employee, 2 shifts)");
+};
+
 const run = async () => {
 	if (!process.env.MONGODB_URI) {
 		throw new Error("MONGODB_URI is not set in server/.env");
@@ -129,6 +200,8 @@ const run = async () => {
 	await seedAddresses(users);
 	await seedNewsletter();
 	await seedContacts();
+	await seedAnnouncements();
+	await seedDemoEmployee();
 
 	console.log("seed complete");
 };

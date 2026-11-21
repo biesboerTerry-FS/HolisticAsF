@@ -18,9 +18,11 @@ import AdminLogin from "./components/admin/AdminLogin";
 import Inventory from "./pages/admin/Inventory";
 import Orders from "./pages/admin/Orders";
 import Dashboard from "./pages/admin/Dashboard";
+import Announcements from "./pages/admin/Announcements";
 import Schedule from "./pages/admin/Schedule";
 import Contact from "./pages/Contact";
 import Featured from "./pages/Featured";
+import EmployeePortal from "./pages/EmployeePortal";
 
 const App = () => {
 	const isAdminPath = useLocation().pathname.includes("admin");
@@ -54,6 +56,7 @@ const App = () => {
 					<Route path="/my-orders" element={<MyOrders />} />
 					<Route path="/contact" element={<Contact />} />
 					<Route path="/login" element={<Login />} />
+					<Route path="/employee" element={<EmployeePortal />} />
 
 					{/* //^ Admin routes (auth disabled for now) */}
 					<Route
@@ -68,6 +71,7 @@ const App = () => {
 						/>
 						<Route path="inventory" element={<Inventory />} />
 						<Route path="orders" element={<Orders />} />
+						<Route path="announcements" element={<Announcements />} />
 					</Route>
 				</Routes>
 			</div>

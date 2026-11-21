@@ -1,17 +1,150 @@
 import Employee from "../models/Employee.js";
 import Shift from "../models/Shift.js";
 
+// Demo employee used when the database is empty (local seeding is optional).
+const DEMO_EMPLOYEE = {
+	employeeId: "demo-employee-1",
+	name: "Jordan Rivera",
+	email: "jordan@holisticaf.com",
+	phone: "(555) 010-2044",
+	address: "100 Holistic Way, Portland, OR 97203",
+	position: "Store Associate",
+};
+
+const pad = (n) => String(n).padStart(2, "0");
+const dateFromNow = (days) => {
+	const date = new Date();
+	date.setDate(date.getDate() + days);
+	return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+};
+
+const DEMO_SHIFTS = [
+	{ date: dateFromNow(1), startTime: "09:00", endTime: "17:00", role: "Floor support", location: "HolisticAF Store" },
+	{ date: dateFromNow(3), startTime: "10:00", endTime: "18:00", role: "Inventory restock", location: "HolisticAF Store" },
+	{ date: dateFromNow(6), startTime: "08:00", endTime: "15:00", role: "Morning prep", location: "HolisticAF Store" },
+].map((shift, index) => ({
+	_id: `demo-shift-${index + 1}`,
+	employeeId: DEMO_EMPLOYEE.employeeId,
+	status: "scheduled",
+	...shift,
+}));
+
+// Only the fields an employee is allowed to see about themselves.
+const publicEmployee = (employee) => ({
+	employeeId: employee.employeeId || DEMO_EMPLOYEE.employeeId,
+	name: employee.name,
+	email: employee.email || "",
+	phone: employee.phone || "",
+	address: employee.address || "",
+	position: employee.position || "Staff",
+});
+
+const myEmployeeQuery = (source = {}) => {
+	const employeeId = String(source.employeeId || source.id || DEMO_EMPLOYEE.employeeId);
+	const email = String(source.email || "").trim().toLowerCase();
+	return { employeeId, email };
+};
+
+const findMyEmployee = async (source) => {
+	const { employeeId, email } = myEmployeeQuery(source);
+	let employee = await Employee.findOne({ employeeId });
+	if (!employee && email) employee = await Employee.findOne({ email });
+	return employee;
+};
+
+// GET /api/employees/me
+export const getMyProfile = async (req, res) => {
+	try {
+		const employee = await findMyEmployee({ ...req.query, ...req.body });
+		res.json({
+			success: true,
+			employee: employee ? publicEmployee(employee) : publicEmployee(DEMO_EMPLOYEE),
+			demo: !employee,
+		});
+	} catch (error) {
+		res.json({ success: false, message: error.message });
+	}
+};
+
+// PATCH /api/employees/me — whitelist only the employee's own basic info.
+export const updateMyProfile = async (req, res) => {
+	try {
+		const allowed = ["name", "email", "phone", "address"];
+		const updates = {};
+		for (const field of allowed) {
+			if (req.body?.[field] !== undefined) {
+				updates[field] = String(req.body[field]).trim();
+			}
+		}
+		if (Object.keys(updates).length === 0) {
+			return res.json({ success: false, message: "No allowed fields to update" });
+		}
+		if (updates.name === "") {
+			return res.json({ success: false, message: "Name is required" });
+		}
+
+		const { employeeId } = myEmployeeQuery({ ...req.query, ...req.body });
+		let employee = await findMyEmployee({ ...req.query, ...req.body });
+		if (employee) {
+			employee.set(updates);
+			await employee.save();
+		} else {
+			employee = await Employee.create({
+				...DEMO_EMPLOYEE,
+				employeeId: employeeId || DEMO_EMPLOYEE.employeeId,
+				...updates,
+			});
+		}
+		res.json({ success: true, employee: publicEmployee(employee), message: "Profile updated" });
+	} catch (error) {
+		res.json({ success: false, message: error.message });
+	}
+};
+
+// GET /api/employees/me/shifts
+export const getMyShifts = async (req, res) => {
+	try {
+		const employee = await findMyEmployee(req.query);
+		let shifts = [];
+		if (employee) {
+			const today = dateFromNow(0);
+			const rows = await Shift.find({
+				employee: employee._id,
+				date: { $gte: today },
+				status: "scheduled",
+			})
+				.sort({ date: 1, startTime: 1 })
+				.lean();
+			shifts = rows.map((shift) => ({
+				_id: String(shift._id),
+				date: shift.date,
+				startTime: shift.startTime,
+				endTime: shift.endTime,
+				role: shift.role || "",
+				location: shift.location || "",
+				status: shift.status,
+			}));
+		}
+		if (shifts.length === 0) shifts = DEMO_SHIFTS;
+		res.json({ success: true, shifts });
+	} catch (error) {
+		res.json({ success: false, message: error.message });
+	}
+};
+
 // Employees
 export const createEmployee = async (req, res) => {
 	try {
-		const { name, email, phone, position, color, active, notes } = req.body;
+		const { name, employeeId, email, phone, address, position, color, active, notes } = req.body;
 		if (!name || !String(name).trim()) {
 			return res.json({ success: false, message: "Employee name is required" });
 		}
 		const employee = await Employee.create({
 			name: String(name).trim(),
+			employeeId: employeeId || "",
 			email: email || "",
 			phone: phone || "",
+			address: address || "",
 			position: position || "Staff",
 			color: color || "#1e4d43",
 			active: active !== undefined ? Boolean(active) : true,
@@ -35,10 +168,11 @@ export const listEmployees = async (req, res) => {
 export const updateEmployee = async (req, res) => {
 	try {
 		const { id } = req.params;
-		const updates = (({ name, email, phone, position, color, active, notes }) => ({
+		const updates = (({ name, email, phone, address, position, color, active, notes }) => ({
 			...(name !== undefined ? { name } : {}),
 			...(email !== undefined ? { email } : {}),
 			...(phone !== undefined ? { phone } : {}),
+			...(address !== undefined ? { address } : {}),
 			...(position !== undefined ? { position } : {}),
 			...(color !== undefined ? { color } : {}),
 			...(active !== undefined ? { active } : {}),

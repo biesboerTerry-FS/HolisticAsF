@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { useClerk } from "@clerk/clerk-react";
 import { assets } from "../assets/assets";
 import toast from "react-hot-toast";
@@ -7,6 +7,136 @@ import { useAppContext } from "../context/AppContext";
 import ThemeToggle from "./ThemeToggle";
 
 const clerkEnabled = Boolean(import.meta.env.VITE_CLERK_PUBLISHABLE_KEY);
+
+const DISMISSED_KEY = "holisticaf-announcement-dismissed";
+const CACHE_KEY = "holisticaf-announcement-cache";
+
+// Used only when the API is unreachable or has no active announcements, so the
+// storefront still has a friendly bulletin even without a database seed.
+const DEFAULT_ANNOUNCEMENT = {
+	title: "Welcome to holisticAF",
+	body: "Explore fresh, holistic groceries and everyday wellness essentials — new arrivals are added every week.",
+	type: "info",
+};
+
+const readCachedAnnouncement = () => {
+	try {
+		const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || "null");
+		if (cached?.title && cached?.body) return cached;
+	} catch {
+		// ignore malformed or unavailable storage
+	}
+	return DEFAULT_ANNOUNCEMENT;
+};
+
+const cacheAnnouncement = (announcement) => {
+	try {
+		localStorage.setItem(CACHE_KEY, JSON.stringify(announcement));
+	} catch {
+		// ignore
+	}
+};
+
+const BANNER_TONES = {
+	info: "border-semantic-info/25 bg-semantic-info/10",
+	warning: "border-semantic-warning/30 bg-semantic-warning/10",
+	promotion: "border-secondary-golden-honey/30 bg-secondary-golden-honey/10",
+};
+
+const BANNER_DOTS = {
+	info: "bg-semantic-info",
+	warning: "bg-semantic-warning",
+	promotion: "bg-secondary-golden-honey",
+};
+
+// Small storefront bulletin. Failures are intentionally silent — the storefront
+// should never break or show an error just because an announcement is missing.
+const AnnouncementBanner = () => {
+	const { axios } = useAppContext();
+	const [announcement, setAnnouncement] = useState(null);
+
+	useEffect(() => {
+		let active = true;
+		try {
+			if (sessionStorage.getItem(DISMISSED_KEY)) return undefined;
+		} catch {
+			// sessionStorage can be unavailable (private mode); ignore.
+		}
+
+		const showFallback = () => {
+			if (!active) return;
+			const fallback = readCachedAnnouncement();
+			cacheAnnouncement(fallback);
+			setAnnouncement(fallback);
+		};
+
+		axios
+			.get("/api/announcements/active", { suppressGlobalErrorToast: true })
+			.then(({ data }) => {
+				if (!active) return;
+				const list =
+					data?.success && Array.isArray(data.announcements)
+						? data.announcements
+						: [];
+				if (list.length === 0) {
+					showFallback();
+					return;
+				}
+				cacheAnnouncement(list[0]);
+				setAnnouncement(list[0]);
+			})
+			.catch(() => {
+				// Silent by design, but keep the bulletin visible offline.
+				showFallback();
+			});
+
+		return () => {
+			active = false;
+		};
+	}, [axios]);
+
+	if (!announcement) return null;
+
+	const type = BANNER_TONES[announcement.type] ? announcement.type : "info";
+
+	const dismiss = () => {
+		try {
+			sessionStorage.setItem(DISMISSED_KEY, "1");
+		} catch {
+			// ignore
+		}
+		setAnnouncement(null);
+	};
+
+	return (
+		<div
+			role="status"
+			aria-live="polite"
+			className={`relative border-b px-4 py-2.5 sm:px-8 lg:px-16 xl:px-24 ${BANNER_TONES[type]}`}
+		>
+			<div className="mx-auto flex max-w-[1600px] items-start gap-3 pr-8 text-primary-forest-green">
+				<span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${BANNER_DOTS[type]}`} aria-hidden="true" />
+				<div className="min-w-0">
+					<p className="text-sm font-semibold leading-snug">{announcement.title}</p>
+					{announcement.body ? (
+						<p className="mt-0.5 text-xs leading-relaxed text-primary-forest-green/75">{announcement.body}</p>
+					) : null}
+				</div>
+				<span className="ml-auto hidden shrink-0 rounded-full border border-primary-forest-green/15 bg-primary-warm-white/60 px-2.5 py-0.5 text-[11px] font-medium capitalize sm:inline-block">
+					{type}
+				</span>
+			</div>
+			<button
+				type="button"
+				onClick={dismiss}
+				aria-label="Dismiss announcement"
+				className="absolute right-3 top-2 rounded-full px-2 text-xl leading-none text-primary-forest-green/60 transition hover:bg-primary-forest-green/10 hover:text-primary-forest-green sm:right-6"
+			>
+				×
+			</button>
+		</div>
+	);
+};
 
 const Navbar = () => {
 	const clerk = clerkEnabled ? useClerk() : null;
@@ -22,7 +152,10 @@ const Navbar = () => {
 		searchQuery,
 		getCartCount,
 		isAdmin,
+		employee,
 	} = useAppContext();
+
+	const isEmployeePath = useLocation().pathname.startsWith("/employee");
 
 	const logout = async () => {
 		try {
@@ -44,6 +177,7 @@ const Navbar = () => {
 	}, [searchQuery, navigate]);
 
 	return (
+		<>
 		<nav className="flex items-center justify-between px-4 sm:px-8 lg:px-16 xl:px-24 py-4 border-b border-primary-forest-green bg-secondary-soft-beige text-primary-forest-green transition-all">
 			<NavLink onClick={() => setOpen(false)} to={"/"}>
 				<img className="h-10" src={assets.holisticAfLogoNoBg} alt="holisticAF logo" />
@@ -64,7 +198,19 @@ const Navbar = () => {
 				<NavLink to={"/products"}>products</NavLink>
 				<NavLink to={"/contact"}>contact</NavLink>
 
-				{(isAdmin || !clerkEnabled) && (
+				{(employee || isEmployeePath) ? (
+					<div className="items-center gap-2 border-l border-primary-forest-green/15 pl-4 hidden lg:flex">
+						<span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary-forest-green/50">Employee</span>
+						<NavLink
+							to="/employee"
+							className="text-xs border border-primary-forest-green px-2 py-1 hover:bg-primary-forest-green hover:text-primary-warm-white rounded-full transition"
+						>
+							my portal
+						</NavLink>
+					</div>
+				) : null}
+
+				{(isAdmin || !clerkEnabled) && !employee && !isEmployeePath && (
 					<button
 						onClick={() => navigate("/admin")}
 						className="text-xs border border-primary-forest-green px-2 py-1 hover:bg-primary-forest-green hover:text-primary-warm-white rounded-full transition"
@@ -138,7 +284,8 @@ const Navbar = () => {
 					<NavLink to={"/products"} onClick={() => setOpen(false)}>products</NavLink>
 					<NavLink to={"/contact"} onClick={() => setOpen(false)}>contact</NavLink>
 					{user && <NavLink to={"/my-orders"} onClick={() => setOpen(false)}>my orders</NavLink>}
-					{(isAdmin || !clerkEnabled) && <NavLink to={"/admin"} onClick={() => setOpen(false)}>admin</NavLink>}
+					{(employee || isEmployeePath) && <NavLink to={"/employee"} onClick={() => setOpen(false)}>employee portal</NavLink>}
+					{(isAdmin || !clerkEnabled) && !employee && !isEmployeePath && <NavLink to={"/admin"} onClick={() => setOpen(false)}>admin</NavLink>}
 
 					{!clerkEnabled ? (
 						<p className="mt-6 text-sm text-center text-primary-forest-green/70 px-6">
@@ -168,6 +315,8 @@ const Navbar = () => {
 				</div>
 			)}
 		</nav>
+		<AnnouncementBanner />
+		</>
 	);
 };
 

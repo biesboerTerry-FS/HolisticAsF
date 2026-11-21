@@ -83,6 +83,35 @@ const Dashboard = () => {
 
 	const recentOrders = useMemo(() => orders.slice(0, 5), [orders]);
 
+	// Best-effort ranking from the order line items we already have.
+	const topProducts = useMemo(() => {
+		const totals = new Map();
+		orders.forEach((order) => {
+			(order.items || []).forEach((item) => {
+				const name = (item.name || "Unknown product").toString().trim();
+				const quantity = Number(item.quantity) || 0;
+				const revenue = quantity * (Number(item.price) || 0);
+				const previous = totals.get(name) || { name, quantity: 0, revenue: 0, orders: 0 };
+				totals.set(name, {
+					name,
+					quantity: previous.quantity + quantity,
+					revenue: previous.revenue + revenue,
+					orders: previous.orders + 1,
+				});
+			});
+		});
+		return [...totals.values()]
+			.sort((a, b) => b.quantity - a.quantity || b.revenue - a.revenue)
+			.slice(0, 5);
+	}, [orders]);
+
+	const quickActions = [
+		{ label: "Orders", hint: "Review and fulfill", path: "/admin/orders" },
+		{ label: "Inventory", hint: "Browse the catalog", path: "/admin/inventory" },
+		{ label: "Announcements", hint: "Post store updates", path: "/admin/announcements" },
+		{ label: "Add product", hint: "List something new", path: "/admin/add-inventory" },
+	];
+
 	return (
 		<div className="p-4 md:p-6 lg:p-8 text-primary-forest-green">
 			<div className="mx-auto max-w-6xl space-y-6">
@@ -118,14 +147,20 @@ const Dashboard = () => {
 					</div>
 				) : null}
 
-				<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+				<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
 					<StatCard label="Total orders" value={loading ? "—" : stats.totalOrders} hint="All time orders" />
 					<StatCard label="Pending orders" value={loading ? "—" : stats.pendingOrders} hint="Needs attention" tone="warn" />
 					<StatCard label="Paid orders" value={loading ? "—" : stats.paidOrders} hint="Completed payments" tone="success" />
 					<StatCard
 						label="Revenue"
 						value={loading ? "—" : `${currency}${stats.revenue.toFixed(2)}`}
-						hint={`Inventory items: ${loading ? "—" : inventoryCount}`}
+						hint="From all orders"
+					/>
+					<StatCard
+						label="Products in inventory"
+						value={loading ? "—" : inventoryCount}
+						hint="Items currently listed"
+						tone="success"
 					/>
 				</div>
 
@@ -192,26 +227,59 @@ const Dashboard = () => {
 					</section>
 
 					<section className="rounded-3xl border border-primary-forest-green/10 bg-primary-warm-white/75 p-4 shadow-sm backdrop-blur md:p-5">
-						<h3 className="text-lg font-semibold tracking-tight">Suggested tasks</h3>
-						<p className="mt-1 text-xs text-primary-forest-green/55">Quick priorities for today</p>
-						<ul className="mt-4 space-y-3 text-sm text-primary-forest-green/80">
-							<li className="rounded-2xl border border-primary-forest-green/8 bg-gradient-to-br from-primary-sage-green/10 to-transparent p-3.5">
-								<p className="font-medium text-primary-forest-green">Review pending orders</p>
-								<p className="mt-1 text-xs leading-relaxed text-primary-forest-green/65">Update fulfillment status to keep customers informed and operations smooth.</p>
-							</li>
-							<li className="rounded-2xl border border-primary-forest-green/8 bg-gradient-to-br from-secondary-golden-honey/10 to-transparent p-3.5">
-								<p className="font-medium text-primary-forest-green">Audit inventory listings</p>
-								<p className="mt-1 text-xs leading-relaxed text-primary-forest-green/65">Confirm images, names, categories, and pricing are accurate.</p>
-							</li>
-							<li className="rounded-2xl border border-primary-forest-green/8 bg-gradient-to-br from-primary-sage-green/10 to-transparent p-3.5">
-								<p className="font-medium text-primary-forest-green">Monitor failed requests</p>
-								<p className="mt-1 text-xs leading-relaxed text-primary-forest-green/65">HTTP/network issues now surface with toasts and inline feedback.</p>
-							</li>
-						</ul>
-						<div className="mt-4 rounded-2xl border border-primary-forest-green/10 bg-secondary-soft-beige/50 p-3.5 text-xs text-primary-forest-green/70">
-							<p className="font-semibold text-primary-forest-green">Next ideas</p>
-							<p className="mt-1 leading-relaxed">Contact inbox, low-stock alerts, product edit/delete, analytics, and role-based access.</p>
+						<h3 className="text-lg font-semibold tracking-tight">Quick actions</h3>
+						<p className="mt-1 text-xs text-primary-forest-green/55">Jump into daily tasks</p>
+						<div className="mt-4 space-y-2.5">
+							{quickActions.map((action) => (
+								<Link
+									key={action.path}
+									to={action.path}
+									className="flex items-center justify-between rounded-2xl border border-primary-forest-green/8 bg-gradient-to-br from-primary-sage-green/10 to-transparent p-3.5 transition hover:-translate-y-0.5 hover:border-secondary-golden-honey/30 hover:shadow-sm"
+								>
+									<span>
+										<span className="block font-medium text-primary-forest-green">{action.label}</span>
+										<span className="mt-0.5 block text-xs text-primary-forest-green/60">{action.hint}</span>
+									</span>
+									<span aria-hidden="true" className="text-secondary-golden-honey">→</span>
+								</Link>
+							))}
 						</div>
+					</section>
+
+					<section className="xl:col-span-2 rounded-3xl border border-primary-forest-green/10 bg-primary-warm-white/75 p-4 shadow-sm backdrop-blur md:p-5">
+						<h3 className="text-lg font-semibold tracking-tight">Top products</h3>
+						<p className="mt-1 text-xs text-primary-forest-green/55">Most ordered items, based on order history</p>
+						{loading ? (
+							<div className="mt-4 space-y-2">
+								<div className="h-10 animate-pulse rounded-xl bg-primary-sage-green/10" />
+								<div className="h-10 animate-pulse rounded-xl bg-primary-sage-green/10" />
+							</div>
+						) : topProducts.length === 0 ? (
+							<div className="mt-4 rounded-2xl border border-dashed border-primary-forest-green/15 bg-secondary-soft-beige/50 p-8 text-center text-sm text-primary-forest-green/60">
+								No product data in orders yet.
+							</div>
+						) : (
+							<div className="mt-4 space-y-2">
+								{topProducts.map((product, index) => (
+									<div key={product.name} className="flex items-center gap-3 rounded-2xl border border-primary-forest-green/8 bg-secondary-soft-beige/40 px-4 py-3">
+										<span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary-forest-green text-xs font-semibold text-primary-cream">
+											{index + 1}
+										</span>
+										<span className="min-w-0 flex-1 truncate text-sm font-medium">{product.name}</span>
+										<span className="whitespace-nowrap text-xs text-primary-forest-green/60">{product.quantity} sold</span>
+										<span className="whitespace-nowrap text-sm font-medium">{currency}{product.revenue.toFixed(2)}</span>
+									</div>
+								))}
+							</div>
+						)}
+					</section>
+
+					<section className="rounded-3xl border border-primary-forest-green/10 bg-primary-warm-white/75 p-4 shadow-sm backdrop-blur md:p-5">
+						<h3 className="text-lg font-semibold tracking-tight">Next ideas</h3>
+						<p className="mt-1 text-xs text-primary-forest-green/55">Planned improvements</p>
+						<p className="mt-4 text-sm leading-relaxed text-primary-forest-green/70">
+							Contact inbox, low-stock alerts, product edit/delete, analytics, and role-based access.
+						</p>
 					</section>
 				</div>
 			</div>

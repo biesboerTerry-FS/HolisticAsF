@@ -11,6 +11,7 @@ import LoginScreen from "./src/screens/LoginScreen";
 import CartScreen from "./src/screens/CartScreen";
 import CheckoutScreen from "./src/screens/CheckoutScreen";
 import AdminListScreen from "./src/screens/AdminListScreen";
+import EmployeeScreen from "./src/screens/EmployeeScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -29,6 +30,7 @@ export default function App() {
             <Stack.Screen name="Checkout" component={CheckoutScreen} />
             <Stack.Screen name="Admin" component={AdminScreen} />
             <Stack.Screen name="AdminList" component={AdminListScreen} />
+            <Stack.Screen name="Employee" component={EmployeeScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </CartProvider>
