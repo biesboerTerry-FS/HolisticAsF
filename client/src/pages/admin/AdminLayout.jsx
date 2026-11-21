@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, NavLink, Outlet, Navigate } from "react-router-dom";
 import { useClerk } from "@clerk/clerk-react";
 import { assets } from "../../assets/assets";
@@ -11,6 +11,11 @@ const clerkEnabled = Boolean(import.meta.env.VITE_CLERK_PUBLISHABLE_KEY);
 const AdminLayout = () => {
 	const clerk = clerkEnabled ? useClerk() : null;
 	const { navigate, isAdmin, isAuthLoading, setUser, setIsAdmin } = useAppContext();
+	// Category groups that are collapsed. Default: all open.
+	const [collapsed, setCollapsed] = useState({});
+
+	const toggleGroup = (label) =>
+		setCollapsed((current) => ({ ...current, [label]: !current[label] }));
 
 	const sidebarGroups = [
 		{
@@ -114,38 +119,52 @@ const AdminLayout = () => {
 			</header>
 
 			<div className="mx-auto flex min-h-[calc(100vh-65px)] max-w-7xl">
-				<aside className="sticky top-[65px] hidden h-[calc(100vh-65px)] w-64 shrink-0 border-r border-primary-forest-green/10 bg-primary-warm-white/45 p-4 backdrop-blur md:block">
-					<nav className="flex flex-col gap-4">
-						{sidebarGroups.map((group) => (
-							<div key={group.label} className="flex flex-col gap-1.5">
-								<p className="px-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-primary-forest-green/45">
-									{group.label}
-								</p>
-								{group.links.map((item) => (
-									<NavLink
-										to={item.path}
-										key={item.name}
-										end={item.path === "/admin"}
-										className={({ isActive }) =>
-											`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all ${
-												isActive
-													? "bg-primary-forest-green text-primary-cream shadow-sm"
-													: "text-primary-forest-green/75 hover:bg-primary-sage-green/15 hover:text-primary-forest-green"
-											}`
-										}
+				<aside className="fixed left-0 top-[65px] z-20 hidden h-[calc(100vh-65px)] w-64 shrink-0 overflow-y-auto border-r border-primary-forest-green/10 bg-primary-warm-white/45 p-4 backdrop-blur [scrollbar-width:thin] md:block lg:left-[max(0px,calc((100vw-80rem)/2))]">
+					<nav className="flex flex-col gap-2">
+						{sidebarGroups.map((group) => {
+							const isCollapsed = Boolean(collapsed[group.label]);
+							return (
+								<div key={group.label} className="flex flex-col gap-1.5">
+									<button
+										type="button"
+										onClick={() => toggleGroup(group.label)}
+										aria-expanded={!isCollapsed}
+										aria-label={`${isCollapsed ? "Expand" : "Collapse"} ${group.label} category`}
+										className="flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-left text-[10px] font-semibold uppercase tracking-[0.18em] text-primary-forest-green/45 transition hover:bg-primary-sage-green/15 hover:text-primary-forest-green/75"
 									>
-										{({ isActive }) => (
-											<>
-												<span className={`flex h-8 w-8 items-center justify-center rounded-lg border ${isActive ? "border-primary-cream/20 bg-primary-cream/10" : "border-primary-forest-green/10 bg-secondary-soft-beige/70"}`}>
-													<img className={`h-4 w-4 ${isActive ? "brightness-0 invert" : "opacity-75"}`} src={item.icon} alt="" />
-												</span>
-												<span className="capitalize font-medium">{item.name}</span>
-											</>
-										)}
-									</NavLink>
-								))}
-							</div>
-						))}
+										<span>{group.label}</span>
+										<span className={`text-xs transition-transform ${isCollapsed ? "-rotate-90" : ""}`}>▾</span>
+									</button>
+									{!isCollapsed && (
+										<div className="flex flex-col gap-1.5">
+											{group.links.map((item) => (
+												<NavLink
+													to={item.path}
+													key={item.name}
+													end={item.path === "/admin"}
+													className={({ isActive }) =>
+														`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all ${
+															isActive
+																? "bg-primary-forest-green text-primary-cream shadow-sm"
+																: "text-primary-forest-green/75 hover:bg-primary-sage-green/15 hover:text-primary-forest-green"
+														}`
+													}
+												>
+													{({ isActive }) => (
+														<>
+															<span className={`flex h-8 w-8 items-center justify-center rounded-lg border ${isActive ? "border-primary-cream/20 bg-primary-cream/10" : "border-primary-forest-green/10 bg-secondary-soft-beige/70"}`}>
+																<img className={`h-4 w-4 ${isActive ? "brightness-0 invert" : "opacity-75"}`} src={item.icon} alt="" />
+															</span>
+															<span className="capitalize font-medium">{item.name}</span>
+														</>
+													)}
+												</NavLink>
+											))}
+										</div>
+									)}
+								</div>
+							);
+						})}
 					</nav>
 					<div className="mt-6 rounded-2xl border border-primary-forest-green/10 bg-gradient-to-br from-primary-sage-green/15 to-secondary-golden-honey/10 p-4 text-xs text-primary-forest-green/70 shadow-sm">
 						<p className="font-semibold text-primary-forest-green">Admin tips</p>
@@ -157,7 +176,7 @@ const AdminLayout = () => {
 					</div>
 				</aside>
 
-				<div className="min-w-0 flex-1">
+				<div className="min-w-0 flex-1 md:ml-64">
 					<div className="border-b border-primary-forest-green/10 bg-primary-warm-white/40 px-2 py-2 backdrop-blur md:hidden">
 						<nav className="flex gap-2 overflow-x-auto px-2 pb-1">
 							{sidebarLinks.map((item) => (
