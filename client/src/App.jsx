@@ -23,20 +23,31 @@ import Schedule from "./pages/admin/Schedule";
 import Contact from "./pages/Contact";
 import Featured from "./pages/Featured";
 import EmployeePortal from "./pages/EmployeePortal";
+import AdminLoginPage from "./pages/admin/AdminLoginPage";
+
+// The admin deployment shares this source with the client. Detect it by host
+// so /login renders the admin-styled sign-in without storefront nav/cart.
+const isAdminDeployment = () => {
+	if (typeof window === "undefined") return false;
+	return /holisticasf-admin/.test(window.location.hostname);
+};
 
 const App = () => {
-	const isAdminPath = useLocation().pathname.includes("admin");
+	const { pathname } = useLocation();
+	const isAdminPath = pathname.includes("admin");
+	const isAdminLogin = pathname === "/login" && isAdminDeployment();
+	const hideStorefrontChrome = isAdminPath || isAdminLogin;
 	const { showUserLogin, isAdmin } = useAppContext();
 
 	return (
 		<div className="text-default flex flex-col min-h-screen bg-secondary-soft-beige">
-			{isAdminPath ? null : <Navbar />}
-			{showUserLogin ? <Login /> : null}
+			{hideStorefrontChrome ? null : <Navbar />}
+			{showUserLogin && !hideStorefrontChrome ? <Login /> : null}
 			<Toaster />
 
 			<div
 				className={`${
-					isAdminPath ? "" : "px-4 sm:px-8 lg:px-16 xl:px-24 flex-1"
+					hideStorefrontChrome ? "" : "px-4 sm:px-8 lg:px-16 xl:px-24 flex-1"
 				}`}
 			>
 				<Routes>
@@ -55,7 +66,7 @@ const App = () => {
 					<Route path="/add-address" element={<AddAddress />} />
 					<Route path="/my-orders" element={<MyOrders />} />
 					<Route path="/contact" element={<Contact />} />
-					<Route path="/login" element={<Login />} />
+					<Route path="/login" element={isAdminLogin ? <AdminLoginPage /> : <Login />} />
 					<Route path="/employee" element={<EmployeePortal />} />
 
 					{/* //^ Admin routes (auth disabled for now) */}
@@ -75,7 +86,7 @@ const App = () => {
 					</Route>
 				</Routes>
 			</div>
-			{!isAdminPath && <Footer />}
+			{!hideStorefrontChrome && <Footer />}
 		</div>
 	);
 };
