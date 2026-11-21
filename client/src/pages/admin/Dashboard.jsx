@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAppContext } from "../../context/AppContext";
 import { getHttpErrorMessage } from "../../utils/http";
+import PendingOrdersWidget from "../../components/portal/PendingOrdersWidget";
+import { ensureDemoAdminToken } from "../../utils/demoAuth";
 
 const StatCard = ({ label, value, hint, tone = "default" }) => {
 	const tones = {
@@ -19,7 +21,7 @@ const StatCard = ({ label, value, hint, tone = "default" }) => {
 };
 
 const Dashboard = () => {
-	const { axios, currency } = useAppContext();
+	const { axios, currency, isAdmin } = useAppContext();
 	const [orders, setOrders] = useState([]);
 	const [inventoryCount, setInventoryCount] = useState(0);
 	const [loading, setLoading] = useState(true);
@@ -31,6 +33,7 @@ const Dashboard = () => {
 		const load = async () => {
 			setLoading(true);
 			setError("");
+			if (isAdmin) await ensureDemoAdminToken(axios);
 			const results = await Promise.allSettled([
 				axios.get("/api/order/admin", { suppressGlobalErrorToast: true }),
 				axios.get("/api/inventory/inventory", { suppressGlobalErrorToast: true }),
@@ -163,6 +166,8 @@ const Dashboard = () => {
 						tone="success"
 					/>
 				</div>
+
+				<PendingOrdersWidget detailsPath="/admin/orders" />
 
 				<div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
 					<section className="xl:col-span-2 rounded-3xl border border-primary-forest-green/10 bg-primary-warm-white/75 p-4 shadow-sm backdrop-blur md:p-5">

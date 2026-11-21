@@ -1,24 +1,35 @@
 import React, { useEffect, useState } from "react";
 import { useAppContext } from "../../context/AppContext";
-import { assets, dummyOrders } from "../../assets/assets";
+import { assets } from "../../assets/assets";
 import toast from "react-hot-toast";
 import { getHttpErrorMessage } from "../../utils/http";
+import OrderStatusControl from "../../components/portal/OrderStatusControl";
+import { getDemoOrders, getOrderOverrides } from "../../data/portalData";
+import { ensureDemoAdminToken } from "../../utils/demoAuth";
 
 const Orders = () => {
-	const { currency, axios } = useAppContext();
+	const { currency, axios, isAdmin } = useAppContext();
 	const [orders, setOrders] = useState([]);
 	const [searchTerm, setSearchTerm] = useState("");
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState("");
-	const [updatingId, setUpdatingId] = useState(null);
+
+	const applyOverrides = (list) => {
+		const overrides = getOrderOverrides();
+		return list.map((order) => ({
+			...order,
+			status: overrides[order._id] || order.status,
+		}));
+	};
 
 	const fetchOrders = async () => {
 		setLoading(true);
 		setError("");
 		try {
+			if (isAdmin) await ensureDemoAdminToken(axios);
 			const { data } = await axios.get("/api/order/admin", { suppressGlobalErrorToast: true });
 			if (data.success) {
-				setOrders(Array.isArray(data.orders) ? data.orders : []);
+				setOrders(applyOverrides(Array.isArray(data.orders) ? data.orders : []));
 			} else {
 				const message = data.message || "Failed to load orders";
 				setError(message);
@@ -26,46 +37,26 @@ const Orders = () => {
 				setOrders([]);
 			}
 		} catch (err) {
-			console.error(err);
 			const message = getHttpErrorMessage(err, "Failed to load orders");
 			setError(`${message} Showing sample data if available.`);
 			toast.error(message);
-			setOrders(dummyOrders || []);
+			setOrders(applyOverrides(getDemoOrders()));
 		} finally {
 			setLoading(false);
 		}
 	};
 
-	const statusHandler = async (event, orderId) => {
-		const newStatus = event.target.value;
-		const prev = orders;
-		setUpdatingId(orderId);
-		setOrders((curr) => curr.map((o) => (o._id === orderId ? { ...o, status: newStatus } : o)));
-		try {
-			const { data } = await axios.post(
-				"/api/order/status",
-				{ orderId, status: newStatus },
-				{ suppressGlobalErrorToast: true },
-			);
-
-			if (data.success) {
-				toast.success("Order status updated");
-				await fetchOrders();
-			} else {
-				setOrders(prev);
-				toast.error(data.message || "Failed to update status");
-			}
-		} catch (err) {
-			console.error(err);
-			setOrders(prev);
-			toast.error(getHttpErrorMessage(err, "Failed to update status"));
-		} finally {
-			setUpdatingId(null);
-		}
+	const handleStatusUpdated = (orderId, status) => {
+		setOrders((current) =>
+			current.map((order) =>
+				order._id === orderId ? { ...order, status } : order,
+			),
+		);
 	};
 
 	useEffect(() => {
 		fetchOrders();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	const filteredOrders = orders.filter((order) => {
@@ -155,25 +146,17 @@ const Orders = () => {
 								</div>
 
 								<div className="space-y-1 text-sm text-primary-forest-green/70">
+									<p>Customer <span className="ml-1 font-medium text-primary-forest-green">{order.address?.firstName || order.customer || "Guest"}{order.address?.lastName ? ` ${order.address.lastName}` : ""}</span></p>
 									<p>Method <span className="ml-1 font-medium uppercase text-primary-forest-green">{order.paymentType || "—"}</span></p>
 									<p>Date <span className="ml-1 font-medium text-primary-forest-green">{order.createdAt ? new Date(order.createdAt).toLocaleDateString() : "—"}</span></p>
 								</div>
 
 								<div className="flex flex-col gap-1.5">
-									<label className="text-xs font-medium text-primary-forest-green/55" htmlFor={`status-${order._id}`}>Status</label>
-									<select
-										id={`status-${order._id}`}
-										onChange={(e) => statusHandler(e, order._id)}
-										value={order.status || "pending"}
-										disabled={updatingId === order._id}
-										className="rounded-xl border border-primary-forest-green/10 bg-secondary-soft-beige/80 px-3 py-2.5 text-sm font-medium outline-none transition focus:border-secondary-golden-honey/60 focus:ring-4 focus:ring-secondary-golden-honey/10 disabled:opacity-60"
-									>
-										<option value="pending">Pending</option>
-										<option value="processing">Processing</option>
-										<option value="shipped">Shipped</option>
-										<option value="delivered">Delivered</option>
-										<option value="cancelled">Cancelled</option>
-									</select>
+									<label className="text-xs font-medium text-primary-forest-green/55">Status</label>
+									<OrderStatusControl
+										order={order}
+										onUpdated={handleStatusUpdated}
+									/>
 								</div>
 							</div>
 						</div>

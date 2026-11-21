@@ -137,6 +137,14 @@ export const validateAnnouncement = (request, response, next) => {
 	return next();
 };
 
+export const validateStatusValue = (request, response, next) => {
+	const status = isObject(request.body) ? request.body.status : undefined;
+	if (!text(status) || text(status).length > 50) {
+		return bad(response, "A valid status is required.");
+	}
+	return next();
+};
+
 export const validateOrderStatus = (request, response, next) => {
 	const { orderId, status } = isObject(request.body) ? request.body : {};
 	if (!text(orderId) || !text(status) || status.length > 50) {

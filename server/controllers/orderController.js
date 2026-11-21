@@ -303,6 +303,48 @@ export const placeOrderStripe = async (request, response) => {
 	}
 };
 
+const FULFILLMENT_STATUSES = new Set([
+	"pending",
+	"preparing",
+	"ready",
+	"completed",
+	"delivered",
+	"processing",
+	"shipped",
+	"cancelled",
+]);
+
+// ^ update order status by id (admin or employee): PATCH /api/order/:id/status
+export const updateOrderStatusById = async (request, response) => {
+	try {
+		const { id } = request.params;
+		const { status } = request.body || {};
+		if (!FULFILLMENT_STATUSES.has(status)) {
+			return response
+				.status(400)
+				.json({ success: false, message: "Invalid order status." });
+		}
+
+		const order = await Order.findByIdAndUpdate(
+			id,
+			{ status },
+			{ new: true, runValidators: true },
+		);
+		if (!order) {
+			return response
+				.status(404)
+				.json({ success: false, message: "Order not found." });
+		}
+		return response.json({
+			success: true,
+			message: "Status updated",
+			order,
+		});
+	} catch (error) {
+		return response.json({ success: false, message: error.message });
+	}
+};
+
 // ^ update order status : /api/order/:orderId
 export const updateOrderStatus = async (request, response) => {
 	try {

@@ -1,10 +1,12 @@
 import express from "express";
 import authUser from "../middleware/authUser.js";
 import authAdmin from "../middleware/authAdmin.js";
+import authStaff from "../middleware/authStaff.js";
 import { demoLimiter, submitLimiter } from "../middleware/rateLimit.js";
 import {
 	validateOrderPlacement,
 	validateOrderStatus,
+	validateStatusValue,
 } from "../middleware/validate.js";
 import {
 	placeOrderCOD,
@@ -12,6 +14,7 @@ import {
 	getUserOrders,
 	getAllOrders,
 	updateOrderStatus,
+	updateOrderStatusById,
 } from "../controllers/orderController.js";
 import Address from "../models/Address.js";
 
@@ -65,6 +68,10 @@ orderRouter.post(
 );
 orderRouter.get("/user", authUser, getUserOrders);
 orderRouter.get("/admin", authAdmin, getAllOrders);
+// Shared staff feed used by both the admin and employee pending-order widgets.
+orderRouter.get("/staff", authStaff, getAllOrders);
 orderRouter.post("/status", authAdmin, validateOrderStatus, updateOrderStatus);
+// Both admins and employees can advance an order through fulfillment.
+orderRouter.patch("/:id/status", authStaff, validateStatusValue, updateOrderStatusById);
 
 export default orderRouter;

@@ -228,8 +228,12 @@ export const LocalAppContextProvider = ({ children }) => {
 	useEffect(() => {
 		// No Clerk configured: keep app usable in local/dev mode.
 		// Obtain a short-lived demo admin token so the now-protected admin
-		// routes keep working in this mode too.
+		// routes keep working in this mode too. Also seed it on hard navigations
+		// straight to an admin page (the token cookie may be absent there).
 		ensureDemoAdminToken(state.axios).finally(() => {
+			if (window.location.pathname.startsWith("/admin")) {
+				ensureDemoAdminToken(state.axios);
+			}
 			state.setUser(null);
 			state.setIsAdmin(true);
 			state.setIsAuthLoading(false);

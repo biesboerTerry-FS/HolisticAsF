@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { useAppContext } from "../../context/AppContext";
 import { getHttpErrorMessage } from "../../utils/http";
+import SchedulePanel from "../../components/portal/SchedulePanel";
+import { ensureDemoAdminToken } from "../../utils/demoAuth";
 
 const pad = (n) => String(n).padStart(2, "0");
 const toYMD = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -32,7 +34,7 @@ const emptyShift = (date = toYMD(new Date())) => ({
 });
 
 const Schedule = () => {
-	const { axios } = useAppContext();
+	const { axios, isAdmin } = useAppContext();
 	const [employees, setEmployees] = useState([]);
 	const [shifts, setShifts] = useState([]);
 	const [loading, setLoading] = useState(true);
@@ -49,6 +51,7 @@ const Schedule = () => {
 	const loadData = async () => {
 		setLoading(true);
 		setError("");
+		if (isAdmin) await ensureDemoAdminToken(axios);
 		try {
 			const [empRes, shiftRes] = await Promise.all([
 				axios.get("/api/employees", { suppressGlobalErrorToast: true }),
@@ -382,6 +385,8 @@ const Schedule = () => {
 						</section>
 					</div>
 				</div>
+
+				<SchedulePanel role="admin" />
 			</div>
 		</div>
 	);

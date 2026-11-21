@@ -20,6 +20,7 @@ import Orders from "./pages/admin/Orders";
 import Dashboard from "./pages/admin/Dashboard";
 import Announcements from "./pages/admin/Announcements";
 import Schedule from "./pages/admin/Schedule";
+import Messages from "./pages/admin/Messages";
 import Contact from "./pages/Contact";
 import Featured from "./pages/Featured";
 import EmployeePortal from "./pages/EmployeePortal";
@@ -40,7 +41,7 @@ const App = () => {
 	const { showUserLogin, isAdmin } = useAppContext();
 
 	return (
-		<div className="text-default flex flex-col min-h-screen bg-secondary-soft-beige">
+		<div className="text-default flex flex-col min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(157,191,175,0.18),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(224,160,48,0.10),transparent_30%)] bg-secondary-soft-beige">
 			{hideStorefrontChrome ? null : <Navbar />}
 			{showUserLogin && !hideStorefrontChrome ? <Login /> : null}
 			<Toaster />
@@ -83,6 +84,7 @@ const App = () => {
 						<Route path="inventory" element={<Inventory />} />
 						<Route path="orders" element={<Orders />} />
 						<Route path="announcements" element={<Announcements />} />
+						<Route path="messages" element={<Messages />} />
 					</Route>
 				</Routes>
 			</div>

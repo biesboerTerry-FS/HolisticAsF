@@ -34,6 +34,7 @@ const AdminLayout = () => {
 		{
 			label: "Communication",
 			links: [
+				{ name: "messages", path: "/admin/messages", icon: assets.list },
 				{ name: "announcements", path: "/admin/announcements", icon: assets.list },
 			],
 		},
